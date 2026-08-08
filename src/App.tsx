@@ -1,0 +1,60 @@
+import { useEffect } from 'react'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import Nav from '@/components/Nav'
+import Footer from '@/components/Footer'
+import NewsletterPopup from '@/components/NewsletterPopup'
+import Home from '@/pages/Home'
+import Work from '@/pages/Work'
+import CaseStudies from '@/pages/CaseStudies'
+import CaseStudy from '@/pages/CaseStudy'
+import Capabilities from '@/pages/Capabilities'
+import CapabilityDetail from '@/pages/CapabilityDetail'
+import About from '@/pages/About'
+import Blog from '@/pages/Blog'
+import BlogPost from '@/pages/BlogPost'
+import Trainings from '@/pages/Trainings'
+import Reports from '@/pages/Reports'
+import Contact from '@/pages/Contact'
+import Search from '@/pages/Search'
+import Privacy from '@/pages/Privacy'
+import Cookies from '@/pages/Cookies'
+import Admin from '@/pages/Admin'
+import NotFound from '@/pages/NotFound'
+
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+  return null
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <ScrollToTop />
+      <Nav />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/work" element={<Work />} />
+        <Route path="/case-studies" element={<CaseStudies />} />
+        <Route path="/case-studies/:slug" element={<CaseStudy />} />
+        <Route path="/capabilities" element={<Capabilities />} />
+        <Route path="/capabilities/:slug" element={<CapabilityDetail />} />
+        <Route path="/studio" element={<About />} />
+        <Route path="/notes" element={<Blog />} />
+        <Route path="/notes/:slug" element={<BlogPost />} />
+        <Route path="/trainings" element={<Trainings />} />
+        <Route path="/reports" element={<Reports />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/search" element={<Search />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/cookies" element={<Cookies />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      <Footer />
+      <NewsletterPopup />
+    </BrowserRouter>
+  )
+}
