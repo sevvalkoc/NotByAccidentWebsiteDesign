@@ -31,23 +31,27 @@ export default function Seo({
   const metaDescription = description ?? seo.description
   const ogImage = image ?? seo.ogImage
 
-  const organization = {
+  // Phone and postal address are optional until the real studio details are
+  // supplied — we never emit placeholder text as if it were structured data.
+  const organization: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: company.legalName,
     alternateName: company.name,
     url: base,
     email: company.email,
-    telephone: company.phone,
     slogan: company.tagline,
     description: company.proposition,
-    address: {
+  }
+  if (company.phone) organization.telephone = company.phone
+  if (company.address.line1 && company.address.city && company.address.country) {
+    organization.address = {
       '@type': 'PostalAddress',
       streetAddress: company.address.line1,
       addressLocality: company.address.city,
       postalCode: company.address.postcode,
-      addressCountry: 'NL',
-    },
+      addressCountry: company.address.country,
+    }
   }
 
   const schemas = [organization, ...(Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [])]

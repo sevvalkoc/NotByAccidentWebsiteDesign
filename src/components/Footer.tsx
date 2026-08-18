@@ -112,7 +112,13 @@ export default function Footer() {
                 <li><a href={`mailto:${company.newBusinessEmail}`} className="t-ui link-grow" style={{ color: `${dim}.7)` }}>New business</a></li>
                 <li><a href={`mailto:${company.email}`} className="t-ui link-grow" style={{ color: `${dim}.7)` }}>General</a></li>
                 <li><a href={`mailto:${company.pressEmail}`} className="t-ui link-grow" style={{ color: `${dim}.7)` }}>Press</a></li>
-                <li><a href={`tel:${company.phone.replace(/[^+\d]/g, '')}`} className="t-ui link-grow" style={{ color: `${dim}.7)` }}>{company.phone}</a></li>
+                <li>
+                  {company.phone ? (
+                    <a href={`tel:${company.phone.replace(/[^+\d]/g, '')}`} className="t-ui link-grow" style={{ color: `${dim}.7)` }}>{company.phone}</a>
+                  ) : (
+                    <span className="t-ui" style={{ color: `${dim}.4)`, fontStyle: 'italic' }}>{company.phonePlaceholder}</span>
+                  )}
+                </li>
               </ul>
               <p className="t-caption" style={{ color: `${dim}.35)`, marginTop: '1rem', textTransform: 'none', letterSpacing: '0.02em' }}>
                 {company.hours}
@@ -129,11 +135,17 @@ export default function Footer() {
                   </li>
                 ))}
               </ul>
-              <address className="not-italic t-caption" style={{ color: `${dim}.4)`, marginTop: '1.25rem', textTransform: 'none', letterSpacing: '0.02em', lineHeight: 1.7 }}>
-                {company.address.line1}<br />
-                {company.address.line2 && <>{company.address.line2}<br /></>}
-                {company.address.city} {company.address.postcode}<br />
-                {company.address.country}
+              <address className="not-italic t-caption" style={{ color: `${dim}.4)`, marginTop: '1.25rem', textTransform: 'none', letterSpacing: '0.02em', lineHeight: 1.7, fontStyle: company.address.line1 ? 'normal' : 'italic' }}>
+                {company.address.line1 ? (
+                  <>
+                    {company.address.line1}<br />
+                    {company.address.line2 && <>{company.address.line2}<br /></>}
+                    {company.address.city} {company.address.postcode}<br />
+                    {company.address.country}
+                  </>
+                ) : (
+                  company.addressPlaceholder
+                )}
               </address>
             </div>
           </div>
@@ -144,9 +156,10 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4" style={{ marginTop: '1.5rem' }}>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-1">
               <p className="t-caption m-0" style={{ color: `${dim}.35)` }}>© {year} {company.legalName}</p>
-              <span className="t-caption" style={{ color: `${dim}.3)`, textTransform: 'none', letterSpacing: '0.02em' }}>{company.registration}</span>
+              <span className="t-caption" style={{ color: `${dim}.3)`, textTransform: 'none', letterSpacing: '0.02em', fontStyle: 'italic' }}>{company.registrationNote}</span>
             </div>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-1">
+              <Link to="/trainings" className="t-caption link-grow" style={{ color: `${dim}.45)` }}>Trainings</Link>
               <Link to="/privacy" className="t-caption link-grow" style={{ color: `${dim}.45)` }}>Privacy</Link>
               <Link to="/cookies" className="t-caption link-grow" style={{ color: `${dim}.45)` }}>Cookies</Link>
               <Link to="/search" className="t-caption link-grow" style={{ color: `${dim}.45)` }}>Search</Link>

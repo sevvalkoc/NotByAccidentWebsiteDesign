@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { capabilities, pillars } from '@/data'
+import { capabilities, categories } from '@/data'
 import Seo from '@/components/Seo'
 
 export default function Capabilities() {
@@ -36,7 +36,7 @@ export default function Capabilities() {
     <main id="main" ref={ref} style={{ paddingTop: '56px', backgroundColor: '#F0EADA' }}>
       <Seo
         title="Capabilities"
-        description="Brand strategy, positioning, naming, visual identity, website design, UX/UI, digital products, SEO, performance and more — eighteen capabilities across Position, Identity, Product and Demand."
+        description={`${capabilities.length} capabilities across Brand & Identity, Digital & Product, Growth & Demand, Market & Expansion and Experiences — brand strategy, identity, website design, SEO, performance marketing, market research and more.`}
         path="/capabilities"
         jsonLd={schema}
       />
@@ -47,47 +47,49 @@ export default function Capabilities() {
           <p className="t-caption mb-6 reveal" style={{ color: 'rgba(240,234,218,.4)' }}>Capabilities</p>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }} className="md:grid-cols-[56%_40%]">
             <h1 className="t-headline-lg reveal reveal-delay-1" style={{ color: '#F0EADA', margin: 0, maxWidth: '18ch' }}>
-              Eighteen capabilities, in the order a company actually needs them.
+              {capabilities.length} capabilities, in the order a company actually needs them.
             </h1>
             <p className="t-body reveal reveal-delay-2" style={{ color: 'rgba(240,234,218,.6)', maxWidth: '44ch', alignSelf: 'end' }}>
-              We move a company through four movements — Position, Identity, Product and Demand.
+              Five groups — Brand & Identity, Digital & Product, Growth & Demand, Market & Expansion, and Experiences.
               Take one, or the whole sequence. Each has its own team, method and page.
             </p>
           </div>
 
-          {/* Pillar jump-nav */}
+          {/* Category jump-nav — colour-coded */}
           <div className="flex flex-wrap gap-2 reveal reveal-delay-3" style={{ marginTop: '2.5rem' }}>
-            {pillars.map(p => (
+            {categories.map(cat => (
               <a
-                key={p.key}
-                href={`#${p.key.toLowerCase()}`}
+                key={cat.key}
+                href={`#${cat.key.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}
                 className="pill"
                 style={{ borderColor: 'rgba(240,234,218,.25)', color: 'rgba(240,234,218,.85)' }}
               >
-                {p.label}
+                <span aria-hidden="true" style={{ width: '7px', height: '7px', borderRadius: '100px', backgroundColor: cat.accent, display: 'inline-block', marginRight: '7px' }} />
+                {cat.label}
               </a>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Pillar blocks */}
+      {/* Category blocks */}
       <div className="page-grid" style={{ paddingTop: 'clamp(56px, 7vw, 112px)', paddingBottom: 'clamp(64px, 8vw, 128px)' }}>
-        {pillars.map((pillar, pi) => {
-          const items = capabilities.filter(c => c.pillar === pillar.key)
+        {categories.map((cat, pi) => {
+          const items = capabilities.filter(c => c.category === cat.key)
+          const anchor = cat.key.toLowerCase().replace(/[^a-z0-9]+/g, '-')
           return (
             <section
-              key={pillar.key}
-              id={pillar.key.toLowerCase()}
-              style={{ scrollMarginTop: '80px', marginBottom: pi < pillars.length - 1 ? 'clamp(48px, 6vw, 88px)' : 0 }}
+              key={cat.key}
+              id={anchor}
+              style={{ scrollMarginTop: '80px', marginBottom: pi < categories.length - 1 ? 'clamp(48px, 6vw, 88px)' : 0 }}
             >
-              <div className="flex items-baseline gap-4 mb-6 reveal">
-                <span className="t-caption" style={{ color: '#6E2237' }}>Movement 0{pi + 1}</span>
+              <div className="flex items-baseline gap-4 mb-6 reveal" style={{ flexWrap: 'wrap' }}>
+                <span aria-hidden="true" style={{ width: '10px', height: '10px', borderRadius: '100px', backgroundColor: cat.accent, flex: 'none' }} />
                 <span style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 'clamp(26px, 3vw, 40px)', color: '#221E1B', lineHeight: 1 }}>
-                  {pillar.label}
+                  {cat.label}
                 </span>
                 <span className="t-body hidden md:block" style={{ color: 'rgba(34,30,27,.5)', fontSize: '15px' }}>
-                  — {pillar.blurb}
+                  — {cat.blurb}
                 </span>
               </div>
 

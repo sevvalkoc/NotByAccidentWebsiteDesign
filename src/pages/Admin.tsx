@@ -319,7 +319,7 @@ function CompanyEditor() {
         {text('pressEmail', 'Press email')}
       </div>
       {text('hours', 'Hours')}
-      {text('registration', 'Registration')}
+      {text('registrationNote', 'Registration')}
       <p className="t-caption" style={{ color: 'rgba(34,30,27,.45)', margin: '1rem 0 0.75rem' }}>Address</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
         <div style={{ marginBottom: '16px' }}><Label>Line 1</Label><input className="input-field" value={company.address.line1} onChange={e => addr('line1', e.target.value)} /></div>

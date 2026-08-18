@@ -1,12 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import {
-  projects,
-  capabilities,
-  pillars,
-} from '@/data'
+import { projects, capabilities, categories } from '@/data'
 import { useNotes, useHero, useTestimonials, useCompany, useHomepage, useClients, usePartners } from '@/content'
 import Seo from '@/components/Seo'
+import LogoMarquee from '@/components/LogoMarquee'
 import nbaSymbol from '@/imports/NBA_Symbol_Ink_RGB.png'
 
 function useReveal(ref: React.RefObject<HTMLElement | null>) {
@@ -28,6 +25,9 @@ function useReveal(ref: React.RefObject<HTMLElement | null>) {
   }, [ref])
 }
 
+/* Section order is fixed by brief: Hero → Capabilities → Testimonials →
+   Partners → Notes → Clients → Case Studies → Final CTA (+ Footer, rendered
+   by App.tsx). No project index sits before or between these. */
 export default function Home() {
   const mainRef = useRef<HTMLElement>(null)
   useReveal(mainRef)
@@ -65,7 +65,7 @@ export default function Home() {
           name: 'What does Not by Accident do?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Not by Accident is an independent creative company in Amsterdam working across brand strategy, identity, digital products and demand generation. We make companies wanted, so that growth becomes easier to earn.',
+            text: 'Not by Accident is an independent creative company working across brand and identity, digital and product, growth and demand, market and expansion, and experiences. We make companies wanted, so that growth becomes easier to earn.',
           },
         },
         {
@@ -73,19 +73,9 @@ export default function Home() {
           name: 'What services does Not by Accident offer?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: `Our capabilities span four areas — Position (${capabilities
-              .filter(c => c.pillar === 'Position')
-              .map(c => c.name)
-              .join(', ')}), Identity (${capabilities
-              .filter(c => c.pillar === 'Identity')
-              .map(c => c.name)
-              .join(', ')}), Product (${capabilities
-              .filter(c => c.pillar === 'Product')
-              .map(c => c.name)
-              .join(', ')}) and Demand (${capabilities
-              .filter(c => c.pillar === 'Demand')
-              .map(c => c.name)
-              .join(', ')}).`,
+            text: categories
+              .map(cat => `${cat.label} (${capabilities.filter(c => c.category === cat.key).map(c => c.name).join(', ')})`)
+              .join('; '),
           },
         },
       ],
@@ -100,20 +90,20 @@ export default function Home() {
         jsonLd={homeSchema}
       />
       <Hero />
-      <FeaturedWork />
-      <ClientsSlider />
       <CapabilitiesIndex />
       <Testimonials />
-      <Journal />
+      <PartnersSlider />
+      <Notes />
+      <ClientsSlider />
+      <CaseStudiesTeaser />
       <FinalCta />
     </main>
   )
 }
 
-/* ─── Hero ─────────────────────────────────────────────────────────────────
-   Commercially clear in 30 seconds: what we are, what we do, and the work —
-   without oversized empty type. Statement sits on Milk (compliant), a real
-   image anchors it, and a definition line answers the AI-search question. */
+/* ─── 01 · Hero ────────────────────────────────────────────────────────────
+   The commercial argument and a real photograph in the same breath — a
+   colour tab stands in for decoration, not a giant block of it. */
 function Hero() {
   const hero = useHero()
   const heroWords = hero.words.length ? hero.words : ['wanted']
@@ -130,28 +120,29 @@ function Hero() {
       aria-label="Not by Accident — independent creative company"
       style={{ backgroundColor: '#F0EADA', paddingTop: '56px' }}
     >
-      <div className="page-grid" style={{ paddingTop: 'clamp(32px, 5vw, 72px)', paddingBottom: 'clamp(40px, 5vw, 72px)' }}>
+      <div className="page-grid" style={{ paddingTop: 'clamp(28px, 4vw, 56px)', paddingBottom: 'clamp(40px, 5vw, 72px)' }}>
         <div
-          style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 'clamp(32px, 4vw, 64px)', alignItems: 'center' }}
+          style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 'clamp(40px, 5vw, 64px)', alignItems: 'stretch' }}
+          className="lg:grid-cols-[1.1fr_0.9fr]"
         >
           {/* The argument */}
-          <div>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
             <img
               src={nbaSymbol}
               alt="Not by Accident brand symbol"
-              width={56}
-              height={56}
-              style={{ width: '56px', height: 'auto', marginBottom: '1.5rem', display: 'block' }}
+              width={44}
+              height={44}
+              style={{ width: '40px', height: 'auto', marginBottom: '1.5rem', display: 'block' }}
             />
-            <p className="t-caption" style={{ color: '#6E2237', marginBottom: '1.5rem' }}>
+            <p className="t-caption" style={{ color: '#6E2237', marginBottom: '1.25rem' }}>
               Independent creative company · Amsterdam · Est. 2019
             </p>
             <h1
               style={{
                 fontFamily: 'Lora, Georgia, serif',
-                fontSize: 'clamp(40px, 6vw, 88px)',
+                fontSize: 'clamp(42px, 6.4vw, 92px)',
                 fontWeight: 400,
-                lineHeight: 0.98,
+                lineHeight: 0.96,
                 letterSpacing: '-0.02em',
                 color: '#221E1B',
                 margin: 0,
@@ -167,10 +158,7 @@ function Hero() {
               </em>
               .
             </h1>
-            <p
-              className="t-subhead"
-              style={{ marginTop: '1.25rem', maxWidth: '30ch', color: 'rgba(34,30,27,.75)' }}
-            >
+            <p className="t-subhead" style={{ marginTop: '1.25rem', maxWidth: '32ch', color: 'rgba(34,30,27,.75)' }}>
               {hero.subhead}
             </p>
 
@@ -184,150 +172,58 @@ function Hero() {
             </div>
 
             {/* Definition line — the 30-second answer, also feeds AI search */}
-            <p
-              className="t-body"
-              style={{ marginTop: '2.5rem', color: 'rgba(34,30,27,.62)', maxWidth: '48ch', fontSize: '15px' }}
-            >
+            <p className="t-body" style={{ marginTop: 'auto', paddingTop: '2.5rem', color: 'rgba(34,30,27,.62)', maxWidth: '48ch', fontSize: '15px' }}>
               {hero.definition}
             </p>
           </div>
 
-        </div>
-      </div>
-    </section>
-  )
-}
-
-/* ─── Clients & partners slider ────────────────────────────────────────────
-   Two continuous marquee rows of typographic wordmarks — customers on top,
-   partners beneath, drifting in opposite directions. Pauses on hover. */
-function wordmark(style: string): React.CSSProperties {
-  switch (style) {
-    case 'serif': return { fontFamily: 'Lora, Georgia, serif', fontWeight: 400 }
-    case 'sans-tight': return { fontFamily: 'DM Sans, system-ui, sans-serif', fontWeight: 600, letterSpacing: '-0.03em' }
-    case 'sans-wide': return { fontFamily: 'DM Sans, system-ui, sans-serif', fontWeight: 500, letterSpacing: '0.22em' }
-    case 'mono': return { fontFamily: 'ui-monospace, SFMono-Regular, monospace', fontWeight: 500, letterSpacing: '0.02em' }
-    case 'italic': return { fontFamily: 'Lora, Georgia, serif', fontStyle: 'italic', fontWeight: 400 }
-    case 'black': return { fontFamily: 'DM Sans, system-ui, sans-serif', fontWeight: 800, letterSpacing: '-0.01em' }
-    default: return {}
-  }
-}
-
-function ClientsSlider() {
-  const clientLogos = useClients()
-  const partnerLogos = usePartners()
-  const rows = [
-    { label: 'Selected clients', items: clientLogos, reverse: false },
-    { label: 'Partners & collaborators', items: partnerLogos, reverse: true },
-  ]
-  return (
-    <section
-      aria-label="Clients and partners"
-      style={{ backgroundColor: '#F0EADA', paddingTop: 'clamp(48px, 6vw, 88px)', paddingBottom: 'clamp(48px, 6vw, 88px)', borderTop: '1px solid rgba(34,30,27,.12)' }}
-    >
-      <div className="page-grid">
-        <p className="t-caption reveal" style={{ color: 'rgba(34,30,27,.45)', marginBottom: 'clamp(28px, 3vw, 44px)' }}>
-          The companies and studios we work with
-        </p>
-      </div>
-      <div className="flex flex-col" style={{ gap: 'clamp(20px, 2.5vw, 36px)' }}>
-        {rows.map(row => (
-          <div key={row.label}>
-            <div className="page-grid">
-              <p className="t-caption" style={{ color: '#6E2237', marginBottom: '14px', textTransform: 'none', letterSpacing: '0.04em' }}>{row.label}</p>
+          {/* A real photograph — colour behaves like a tab, not a block */}
+          <div className="reveal" style={{ position: 'relative', minHeight: '320px' }}>
+            <div
+              aria-hidden="true"
+              style={{ position: 'absolute', top: 0, bottom: 0, left: 0, width: '6px', backgroundColor: '#7F8B3E', zIndex: 1 }}
+            />
+            <div className="work-tile img-crosshair" style={{ width: '100%', height: '100%', minHeight: '320px', overflow: 'hidden', backgroundColor: '#3a3530' }}>
+              <img
+                src={hero.image}
+                alt="Materials and notes from a Not by Accident strategy session"
+                loading="eager"
+                fetchPriority="high"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
             </div>
-            <div style={{ overflow: 'hidden', maskImage: 'linear-gradient(to right, transparent, #000 8%, #000 92%, transparent)', WebkitMaskImage: 'linear-gradient(to right, transparent, #000 8%, #000 92%, transparent)' }}>
-              <div className="marquee-track" style={row.reverse ? { animationDirection: 'reverse' } : undefined}>
-                {[...row.items, ...row.items].map((l, i) => (
-                  <span
-                    key={i}
-                    aria-hidden={i >= row.items.length}
-                    style={{
-                      flexShrink: 0,
-                      padding: '0 clamp(24px, 3vw, 52px)',
-                      fontSize: 'clamp(20px, 2.4vw, 34px)',
-                      lineHeight: 1,
-                      color: 'rgba(34,30,27,.6)',
-                      ...wordmark(l.style),
-                    }}
-                  >
-                    {l.name}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  )
-}
-
-/* ─── Featured Work ────────────────────────────────────────────────────────
-   Image-led, asymmetric, exploratory. On Ink so the work carries the screen. */
-function FeaturedWork() {
-  const tiles = projects.slice(0, 3)
-  const hp = useHomepage()
-
-  return (
-    <section
-      aria-label="Featured work"
-      style={{ backgroundColor: '#221E1B', paddingTop: 'clamp(56px, 7vw, 96px)', paddingBottom: 'clamp(56px, 7vw, 96px)' }}
-    >
-      <div className="page-grid">
-        <div className="flex items-end justify-between mb-8 reveal" style={{ flexWrap: 'wrap', gap: '1rem' }}>
-          <div>
-            <p className="t-caption" style={{ color: '#E9C558', marginBottom: '10px' }}>{hp.featuredEyebrow}</p>
-            <h2 className="t-headline-lg" style={{ color: '#F0EADA', maxWidth: '16ch' }}>
-              {hp.featuredHeading}
-            </h2>
-          </div>
-          <Link to="/work" className="t-ui link-grow" style={{ color: '#F0EADA' }}>
-            Explore all work →
-          </Link>
-        </div>
-
-        {/* Three works — even grid, no empty spot */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          {tiles.map((p, i) => (
-            <Link
-              key={p.id}
-              to={`/case-studies/${p.slug}`}
-              className="work-tile no-underline bg-carbon reveal"
-              style={{ aspectRatio: '4/5', transitionDelay: `${i * 60}ms` }}
-              aria-label={`${p.name} — ${p.discipline}. ${p.brief}`}
+            <p
+              className="t-caption"
+              style={{
+                position: 'absolute', bottom: '16px', left: '22px', right: '16px',
+                color: '#F0EADA', textTransform: 'none', letterSpacing: '0.01em',
+                textShadow: '0 1px 6px rgba(34,30,27,.6)',
+              }}
             >
-              <img src={p.img} alt={`${p.name} case study — ${p.brief}`} loading="lazy" />
-              <div
-                className="work-tile-meta absolute inset-0 flex flex-col justify-end p-4"
-                style={{ background: 'linear-gradient(to top, rgba(34,30,27,.72), transparent 58%)' }}
-              >
-                <h3 className="m-0" style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 'clamp(18px, 1.5vw, 24px)', color: '#F0EADA', lineHeight: 1.05 }}>
-                  {p.name}
-                </h3>
-                <p className="t-caption m-0" style={{ color: 'rgba(240,234,218,.6)', marginTop: '4px', textTransform: 'none', letterSpacing: '0.01em' }}>
-                  {p.discipline}
-                </p>
-              </div>
-            </Link>
-          ))}
+              Wanted, on purpose — the working method, not the tagline.
+            </p>
+          </div>
         </div>
       </div>
     </section>
   )
 }
 
-/* ─── Capabilities Index ───────────────────────────────────────────────────
-   Four movements, every service shown and linked to its own landing page. */
+/* ─── 02 · Capabilities ────────────────────────────────────────────────────
+   Five groups, colour-coded by a tab rather than an icon, with every
+   capability linked to its own SEO landing page. Editorial index, not a
+   grid of cards. */
 function CapabilitiesIndex() {
   const hp = useHomepage()
+  const [openCat, setOpenCat] = useState<string>(categories[0].key)
+
   return (
     <section
       aria-label="Capabilities"
-      style={{ backgroundColor: '#F0EADA', paddingTop: 'clamp(56px, 7vw, 104px)', paddingBottom: 'clamp(56px, 7vw, 104px)' }}
+      style={{ backgroundColor: '#F0EADA', paddingTop: 'clamp(56px, 7vw, 104px)', paddingBottom: 'clamp(56px, 7vw, 104px)', borderTop: '1px solid rgba(34,30,27,.12)' }}
     >
       <div className="page-grid">
-        <div className="flex items-end justify-between mb-12 reveal" style={{ flexWrap: 'wrap', gap: '1rem' }}>
+        <div className="flex items-end justify-between mb-10 reveal" style={{ flexWrap: 'wrap', gap: '1rem' }}>
           <div>
             <p className="t-caption" style={{ color: 'rgba(34,30,27,.45)', marginBottom: '12px' }}>What we do</p>
             <h2 className="t-headline-lg" style={{ maxWidth: '18ch' }}>
@@ -335,61 +231,82 @@ function CapabilitiesIndex() {
             </h2>
           </div>
           <p className="t-body" style={{ color: 'rgba(34,30,27,.6)', maxWidth: '34ch', fontSize: '15px' }}>
-            We move a company through four stages — Position, Identity, Product and Demand. Each has a dedicated
-            team, method and page.
+            Five groups, {capabilities.length} capabilities. Take one, or the whole sequence — each has its own team, method
+            and page.
           </p>
         </div>
 
-        {/* Compact: four pillars as cards, each capability a linked chip */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:gap-8">
-          {pillars.map((pillar, pi) => {
-            const items = capabilities.filter(c => c.pillar === pillar.key)
+        {/* Category tabs — colour-coded, not iconography */}
+        <div className="flex flex-wrap gap-2 reveal" style={{ marginBottom: 'clamp(24px, 3vw, 40px)' }}>
+          {categories.map(cat => {
+            const active = openCat === cat.key
             return (
-              <div
-                key={pillar.key}
-                className="reveal"
+              <button
+                key={cat.key}
+                onClick={() => setOpenCat(cat.key)}
+                aria-pressed={active}
                 style={{
-                  paddingTop: '22px',
-                  borderTop: '2px solid #221E1B',
-                  transitionDelay: `${(pi % 2) * 70}ms`,
+                  display: 'inline-flex', alignItems: 'center', gap: '9px',
+                  padding: '9px 16px 9px 12px',
+                  border: `1px solid ${active ? cat.accent : 'rgba(34,30,27,.18)'}`,
+                  borderRadius: '100px',
+                  backgroundColor: active ? cat.accent : 'transparent',
+                  color: active ? '#F0EADA' : '#221E1B',
+                  fontFamily: 'DM Sans, sans-serif', fontSize: '14px', fontWeight: 500,
+                  cursor: 'pointer',
+                  transition: 'background-color 180ms var(--ease-brand), color 180ms var(--ease-brand), border-color 180ms var(--ease-brand)',
                 }}
               >
-                <div className="flex items-baseline gap-3" style={{ marginBottom: '4px' }}>
-                  <span className="t-caption" style={{ color: '#6E2237' }}>0{pi + 1}</span>
-                  <span style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 'clamp(22px, 2.4vw, 30px)', color: '#221E1B' }}>
-                    {pillar.label}
-                  </span>
-                </div>
-                <p className="t-caption" style={{ color: 'rgba(34,30,27,.5)', textTransform: 'none', letterSpacing: '0.01em', maxWidth: '30ch', marginBottom: '16px' }}>
-                  {pillar.blurb}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {items.map(cap => (
-                    <Link key={cap.slug} to={`/capabilities/${cap.slug}`} className="cap-chip">
-                      {cap.name}
-                    </Link>
-                  ))}
-                </div>
-              </div>
+                <span
+                  aria-hidden="true"
+                  style={{ width: '8px', height: '8px', borderRadius: '100px', backgroundColor: active ? '#F0EADA' : cat.accent, flex: 'none' }}
+                />
+                {cat.label}
+              </button>
             )
           })}
         </div>
+
+        {/* Active category: blurb + full index of its capabilities */}
+        {categories.map(cat => {
+          if (cat.key !== openCat) return null
+          const items = capabilities.filter(c => c.category === cat.key)
+          return (
+            <div key={cat.key} style={{ borderTop: `2px solid ${cat.accent}`, paddingTop: '20px' }}>
+              <p className="t-body" style={{ color: 'rgba(34,30,27,.55)', maxWidth: '46ch', marginBottom: '4px' }}>{cat.blurb}</p>
+              <div>
+                {items.map(c => (
+                  <Link key={c.slug} to={`/capabilities/${c.slug}`} className="cap-row" style={{ gridTemplateColumns: '1fr auto', padding: '18px 12px', margin: '0 -12px' }}>
+                    <div className="grid grid-cols-1 md:grid-cols-[minmax(220px,260px)_1fr] gap-x-8 gap-y-1 items-baseline">
+                      <p className="m-0" style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 'clamp(19px, 1.8vw, 24px)', lineHeight: 1.1 }}>
+                        {c.name}
+                      </p>
+                      <p className="cap-muted m-0" style={{ fontSize: '15px', color: 'rgba(34,30,27,.6)', maxWidth: '58ch' }}>
+                        {c.summary}
+                      </p>
+                    </div>
+                    <span className="cap-arrow t-ui self-center" style={{ paddingLeft: '1rem' }}>→</span>
+                  </Link>
+                ))}
+                <div style={{ borderTop: '1px solid rgba(34,30,27,.14)' }} />
+              </div>
+            </div>
+          )
+        })}
 
         <Link
           to="/capabilities"
           className="reveal no-underline group"
           style={{
-            marginTop: 'clamp(40px, 4vw, 56px)',
+            marginTop: 'clamp(32px, 4vw, 48px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             gap: '1.5rem',
-            borderTop: '2px solid #221E1B',
-            paddingTop: '20px',
           }}
         >
           <span style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 'clamp(20px, 2.4vw, 32px)', color: '#221E1B', lineHeight: 1 }}>
-            See all eighteen capabilities
+            See all {capabilities.length} capabilities
           </span>
           <span
             aria-hidden="true"
@@ -412,13 +329,13 @@ function CapabilitiesIndex() {
   )
 }
 
-/* ─── Testimonials ─────────────────────────────────────────────────────────
-   Editorial quotations on Beetroot with a picture. No brand-name list. */
+/* ─── 03 · Testimonials ────────────────────────────────────────────────────
+   Editorial quotations on Beetroot. Quote, name, role, company — nothing
+   else. No logo wall underneath. */
 function Testimonials() {
   const testimonials = useTestimonials()
   const [active, setActive] = useState(0)
 
-  // Slow, quiet auto-rotation through the quotes.
   useEffect(() => {
     if (testimonials.length <= 1) return
     const id = setInterval(() => setActive(a => (a + 1) % testimonials.length), 8000)
@@ -433,7 +350,6 @@ function Testimonials() {
       <div className="page-grid">
         <p className="t-caption mb-10 reveal" style={{ color: 'rgba(240,234,218,.5)' }}>In their words</p>
         <div>
-          {/* Rotating quote — full width, no picture */}
           <blockquote className="m-0 p-0 reveal reveal-delay-1">
             <p
               key={active}
@@ -453,12 +369,11 @@ function Testimonials() {
               {t.quote}
               <span aria-hidden="true" style={{ opacity: 0.4 }}>”</span>
             </p>
-            <footer className="mt-8 flex items-baseline gap-3">
+            <footer className="mt-8 flex items-baseline gap-3 flex-wrap">
               <cite className="t-ui" style={{ color: '#F0EADA', fontStyle: 'normal' }}>{t.name}</cite>
-              <span className="t-caption" style={{ color: 'rgba(240,234,218,.55)' }}>{t.role}</span>
+              <span className="t-caption" style={{ color: 'rgba(240,234,218,.55)' }}>{t.role}, {t.company}</span>
             </footer>
 
-            {/* Dot navigation — no brand names */}
             {testimonials.length > 1 && (
               <div className="flex gap-2" style={{ marginTop: '2rem' }}>
                 {testimonials.map((item, i) => (
@@ -487,28 +402,43 @@ function Testimonials() {
   )
 }
 
-/* ─── Journal / Notes ──────────────────────────────────────────────────────
-   Magazine layout: one feature, a text-led list, and editorial cards. */
-function Journal() {
+/* ─── 04 · Partners ────────────────────────────────────────────────────────
+   Dedicated, visual-only, slow continuous slider. No cards, no arrows. */
+function PartnersSlider() {
+  const partnerLogos = usePartners()
+  return (
+    <section aria-label="Partners" style={{ backgroundColor: '#F0EADA', paddingTop: 'clamp(40px, 5vw, 64px)', paddingBottom: 'clamp(40px, 5vw, 64px)' }}>
+      <div className="page-grid">
+        <p className="t-caption reveal" style={{ color: 'rgba(34,30,27,.4)', marginBottom: '20px' }}>Partners</p>
+      </div>
+      <LogoMarquee items={partnerLogos} label="Partners & collaborators" speed={64} />
+    </section>
+  )
+}
+
+/* ─── 05 · Notes ───────────────────────────────────────────────────────────
+   Magazine layout: one feature, a text-led card on Carbon, and a compact
+   list — deliberately smaller than the case studies below it. */
+function Notes() {
   const notes = useNotes()
   const hp = useHomepage()
-  const [feature, second, third, fourth, fifth] = notes
+  const [feature, second, third, fourth] = notes
 
   if (!feature) return null
 
   return (
-    <section aria-label="Journal" style={{ backgroundColor: '#F0EADA', paddingTop: 'clamp(56px, 7vw, 104px)', paddingBottom: 'clamp(56px, 7vw, 104px)', borderTop: '1px solid rgba(34,30,27,.12)' }}>
+    <section aria-label="Notes" style={{ backgroundColor: '#F0EADA', paddingTop: 'clamp(56px, 7vw, 104px)', paddingBottom: 'clamp(56px, 7vw, 104px)', borderTop: '1px solid rgba(34,30,27,.12)' }}>
       <div className="page-grid">
         <div className="flex items-end justify-between mb-10 reveal" style={{ flexWrap: 'wrap', gap: '1rem' }}>
           <div>
-            <p className="t-caption" style={{ color: 'rgba(34,30,27,.45)', marginBottom: '10px' }}>The Journal — essays & notes</p>
+            <p className="t-caption" style={{ color: 'rgba(34,30,27,.45)', marginBottom: '10px' }}>Notes — an independent publication</p>
             <h2 className="t-headline-lg" style={{ maxWidth: '16ch' }}>{hp.journalHeading}</h2>
           </div>
-          <Link to="/notes" className="t-ui link-grow" style={{ color: '#221E1B' }}>Read the Journal →</Link>
+          <Link to="/notes" className="t-ui link-grow" style={{ color: '#221E1B' }}>Read Notes →</Link>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-10 lg:gap-16">
-          {/* Feature */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-10 lg:gap-16">
+          {/* Feature — image-led */}
           <article className="reveal">
             <Link to={`/notes/${feature.slug}`} className="work-tile no-underline bg-carbon img-crosshair block" style={{ aspectRatio: '3/2' }}>
               {feature.img && <img src={feature.img} alt={feature.title} loading="lazy" />}
@@ -517,43 +447,38 @@ function Journal() {
               {feature.category} · {feature.readTime} read · {feature.date}
             </p>
             <h3 className="m-0" style={{ marginTop: '10px' }}>
-              <Link to={`/notes/${feature.slug}`} className="link-grow" style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 'clamp(26px, 2.8vw, 40px)', fontWeight: 400, lineHeight: 1.06, letterSpacing: '-0.015em', color: '#221E1B' }}>
+              <Link to={`/notes/${feature.slug}`} className="link-grow" style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 'clamp(24px, 2.6vw, 36px)', fontWeight: 400, lineHeight: 1.06, letterSpacing: '-0.015em', color: '#221E1B' }}>
                 {feature.title}
               </Link>
             </h3>
             <p className="t-body" style={{ color: 'rgba(34,30,27,.65)', marginTop: '12px', maxWidth: '52ch' }}>{feature.subtitle}</p>
           </article>
 
-          {/* Right column: text-led list + card */}
-          <div className="flex flex-col">
+          {/* Right column: text-led card on Carbon + compact index */}
+          <div className="flex flex-col gap-6">
+            {second && (
+              <Link to={`/notes/${second.slug}`} className="no-underline reveal reveal-delay-1 block" style={{ backgroundColor: '#6A6383', color: '#F0EADA', padding: 'clamp(22px, 2.6vw, 32px)' }}>
+                <p className="t-caption" style={{ color: 'rgba(240,234,218,.7)', marginBottom: '0.75rem' }}>{second.category} · {second.readTime} read</p>
+                <p className="m-0" style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 'clamp(20px, 2.2vw, 27px)', fontWeight: 400, lineHeight: 1.1, color: '#F0EADA' }}>
+                  {second.title}
+                </p>
+                <p className="t-caption" style={{ color: 'rgba(240,234,218,.55)', marginTop: '1rem' }}>Read the essay →</p>
+              </Link>
+            )}
+
             <ul className="list-none m-0 p-0">
-              {[second, third, fifth].filter(Boolean).map((n, i) => (
+              {[third, fourth].filter(Boolean).map((n, i) => (
                 <li key={n.id} className="reveal" style={{ transitionDelay: `${i * 60}ms` }}>
-                  <Link to={`/notes/${n.slug}`} className="no-underline block group" style={{ padding: '20px 0', borderTop: '1px solid rgba(34,30,27,.14)' }}>
+                  <Link to={`/notes/${n.slug}`} className="no-underline block group" style={{ padding: '18px 0', borderTop: '1px solid rgba(34,30,27,.14)' }}>
                     <p className="t-caption" style={{ color: 'rgba(34,30,27,.45)', marginBottom: '8px' }}>{n.category} · {n.date}</p>
-                    <p className="m-0 group-hover:underline" style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 'clamp(19px, 1.8vw, 24px)', lineHeight: 1.12, color: '#221E1B', textDecorationColor: '#6E2237', textDecorationThickness: '1px' }}>
+                    <p className="m-0 group-hover:underline" style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 'clamp(18px, 1.7vw, 22px)', lineHeight: 1.14, color: '#221E1B', textDecorationColor: '#6E2237', textDecorationThickness: '1px' }}>
                       {n.title}
                     </p>
-                    <p className="t-body m-0" style={{ color: 'rgba(34,30,27,.55)', fontSize: '14px', marginTop: '6px', maxWidth: '46ch' }}>{n.subtitle}</p>
                   </Link>
                 </li>
               ))}
+              <div style={{ borderTop: '1px solid rgba(34,30,27,.14)' }} />
             </ul>
-
-            {/* Editorial card with small image — different ratio */}
-            {fourth && (
-              <Link to={`/notes/${fourth.slug}`} className="no-underline group reveal flex gap-4 items-center" style={{ padding: '20px 0', borderTop: '1px solid rgba(34,30,27,.14)', borderBottom: '1px solid rgba(34,30,27,.14)', marginTop: 'auto' }}>
-                <div className="work-tile bg-carbon shrink-0" style={{ width: '96px', aspectRatio: '1/1' }}>
-                  {fourth.img && <img src={fourth.img} alt={fourth.title} loading="lazy" />}
-                </div>
-                <div>
-                  <p className="t-caption" style={{ color: 'rgba(34,30,27,.45)', marginBottom: '6px' }}>{fourth.category}</p>
-                  <p className="m-0 group-hover:underline" style={{ fontFamily: 'Lora, Georgia, serif', fontSize: '19px', lineHeight: 1.1, color: '#221E1B', textDecorationColor: '#6E2237', textDecorationThickness: '1px' }}>
-                    {fourth.title}
-                  </p>
-                </div>
-              </Link>
-            )}
           </div>
         </div>
       </div>
@@ -561,13 +486,92 @@ function Journal() {
   )
 }
 
-/* ─── Final CTA ────────────────────────────────────────────────────────────
-   Confident, human close on Ink with a clear commercial next step. */
+/* ─── 06 · Clients ─────────────────────────────────────────────────────────
+   A second, separate slider — understated, real logos only. */
+function ClientsSlider() {
+  const clientLogos = useClients()
+  return (
+    <section aria-label="Clients" style={{ backgroundColor: '#F0EADA', paddingTop: 'clamp(40px, 5vw, 64px)', paddingBottom: 'clamp(40px, 5vw, 64px)', borderTop: '1px solid rgba(34,30,27,.12)' }}>
+      <div className="page-grid">
+        <p className="t-caption reveal" style={{ color: 'rgba(34,30,27,.4)', marginBottom: '20px' }}>Clients</p>
+      </div>
+      <LogoMarquee items={clientLogos} label="Selected clients" reverse speed={70} />
+    </section>
+  )
+}
+
+/* ─── 07 · Case Studies ────────────────────────────────────────────────────
+   Image-led, dynamic — the commercial thinking, not just the finish. Each
+   tile states the problem the work solved, not just its name. */
+function CaseStudiesTeaser() {
+  const hp = useHomepage()
+  const tiles = projects.filter(p => p.narrative).slice(0, 3)
+
+  return (
+    <section aria-label="Case studies" style={{ backgroundColor: '#221E1B', paddingTop: 'clamp(56px, 7vw, 104px)', paddingBottom: 'clamp(56px, 7vw, 104px)' }}>
+      <div className="page-grid">
+        <div className="flex items-end justify-between mb-10 reveal" style={{ flexWrap: 'wrap', gap: '1rem' }}>
+          <div>
+            <p className="t-caption" style={{ color: '#E9C558', marginBottom: '10px' }}>{hp.featuredEyebrow}</p>
+            <h2 className="t-headline-lg" style={{ color: '#F0EADA', maxWidth: '18ch' }}>
+              {hp.featuredHeading}
+            </h2>
+          </div>
+          <Link to="/case-studies" className="t-ui link-grow" style={{ color: '#F0EADA' }}>
+            All case studies →
+          </Link>
+        </div>
+
+        <div className="flex flex-col" style={{ gap: 'clamp(40px, 5vw, 64px)' }}>
+          {tiles.map((p, i) => (
+            <Link
+              key={p.id}
+              to={`/case-studies/${p.slug}`}
+              className="no-underline group reveal block"
+              style={{ transitionDelay: `${i * 70}ms` }}
+              aria-label={`${p.name} — ${p.brief}`}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-[1.1fr_1fr] gap-6 md:gap-10 items-center">
+                <div className="work-tile bg-carbon img-crosshair" style={{ aspectRatio: '16/10', order: i % 2 === 1 ? 2 : 1 }}>
+                  <img src={p.img} alt={`${p.name} — ${p.brief}`} loading="lazy" className="img-hover" />
+                </div>
+                <div style={{ order: i % 2 === 1 ? 1 : 2 }}>
+                  <p className="t-caption" style={{ color: 'rgba(240,234,218,.5)', marginBottom: '10px' }}>
+                    {p.num} · {p.discipline} · {p.year}
+                  </p>
+                  <h3 className="m-0 group-hover:underline" style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 'clamp(24px, 2.8vw, 38px)', fontWeight: 400, lineHeight: 1.05, color: '#F0EADA', textDecorationColor: '#E9C558', textDecorationThickness: '1px', marginBottom: '14px' }}>
+                    {p.name}
+                  </h3>
+                  {p.narrative && (
+                    <dl className="m-0" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <div>
+                        <dt className="t-caption m-0" style={{ color: 'rgba(240,234,218,.45)' }}>Problem</dt>
+                        <dd className="t-body m-0" style={{ color: 'rgba(240,234,218,.75)', fontSize: '15px', maxWidth: '46ch' }}>{p.narrative.problem}</dd>
+                      </div>
+                      <div>
+                        <dt className="t-caption m-0" style={{ color: 'rgba(240,234,218,.45)' }}>Outcome</dt>
+                        <dd className="t-body m-0" style={{ color: '#E9C558', fontSize: '15px', maxWidth: '46ch' }}>{p.narrative.outcome}</dd>
+                      </div>
+                    </dl>
+                  )}
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ─── 08 · Final CTA ───────────────────────────────────────────────────────
+   Confident, human close on Ink with a clear commercial next step. Footer
+   renders immediately below, in App.tsx. */
 function FinalCta() {
   const company = useCompany()
   const hp = useHomepage()
   return (
-    <section aria-label="Work with us" style={{ backgroundColor: '#221E1B', paddingTop: 'clamp(72px, 9vw, 140px)', paddingBottom: 'clamp(72px, 9vw, 140px)' }}>
+    <section aria-label="Work with us" style={{ backgroundColor: '#221E1B', paddingTop: 'clamp(72px, 9vw, 140px)', paddingBottom: 'clamp(72px, 9vw, 140px)', borderTop: '1px solid rgba(240,234,218,.1)' }}>
       <div className="page-grid">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-16 items-center">
           <div className="reveal md:order-2">

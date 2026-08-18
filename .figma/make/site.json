@@ -1,7 +1,7 @@
 {
   "description": "This platform showcases a premium editorial website for Not by Accident, emphasizing intelligent design, exceptional typography, and a human-centered approach.",
   "robots": {
-    "index": false
+    "index": true
   },
   "accessibility": {
     "addBypassLinks": false,
