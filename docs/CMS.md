@@ -17,7 +17,7 @@ before the admin dashboard works:
 ### 1. Run the database migrations
 
 Go to your Supabase project → **SQL Editor** → **New query**, and run these
-two files in order (copy-paste the whole file, click Run):
+four files in order (copy-paste the whole file, click Run):
 
 1. `supabase/migrations/0001_init.sql` — creates every table, security rule
    and storage bucket.
@@ -29,8 +29,23 @@ two files in order (copy-paste the whole file, click Run):
    ```
    node --experimental-strip-types scripts/generate-seed-sql.mjs
    ```
+3. `supabase/migrations/0003_auth_signup.sql` — adds self-service sign-up
+   with email verification and admin approval (see step 3 below). Safe to
+   run even if you don't plan to use sign-up — it only adds a `status`
+   column and backfills every existing account to `approved`, so nothing
+   that already has access loses it.
+4. `supabase/migrations/0004_lock_down_handle_new_user.sql` — a small
+   follow-up that closes a Supabase security-advisor warning: it revokes
+   direct public RPC access to the internal trigger function the sign-up
+   flow uses to create a profile row. It changes no behaviour — that
+   function only ever runs as the `on_auth_user_created` trigger anyway.
 
-Both files are safe to re-run if something goes wrong partway through.
+All four files are safe to re-run if something goes wrong partway through.
+
+Also turn on email confirmation: Supabase Dashboard → **Authentication** →
+**Providers** → **Email** → make sure **Confirm email** is switched on. That
+is what makes Supabase actually send the verification email when someone
+signs up from `/admin/signup`.
 
 ### 2. Set the site's environment variables
 
@@ -51,32 +66,51 @@ contact form. Never put the **service role** key anywhere in this project.
 
 ### 3. Create your first admin account
 
-There's no public sign-up — that's deliberate. To create the first admin:
+Nobody starts out as an admin — including your own first account — so
+there's one manual step to bootstrap it. After that, everything below can
+happen through the dashboard itself.
 
-1. Supabase Dashboard → **Authentication** → **Users** → **Add user** →
-   enter your email and a password (or send a magic link, your choice).
-2. Supabase Dashboard → **Table Editor** → `profiles` → **Insert row**:
-   - `id`: the UUID of the user you just created (copy it from the Users
-     list)
-   - `email`: their email
-   - `role`: `admin`
-3. Go to `/admin` on the site and sign in.
+1. Go to `/admin/signup` on the site, create an account, and click the
+   verification link Supabase emails you.
+2. Signing up lands you as a **pending editor** (see "Users and access" below)
+   — nobody can sign in until they're approved, including you right now. In
+   Supabase Dashboard → **SQL Editor**, run:
+   ```sql
+   update public.profiles set role = 'admin', status = 'approved'
+   where email = 'you@example.com';
+   ```
+3. Go to `/admin` and sign in. You're now the first admin, and can approve
+   everyone else from the **Users** screen instead of touching SQL again.
 
-To add more people later, repeat step 1, then either add their `profiles`
-row from the **Users** screen inside the admin dashboard (once you're
-signed in as an admin) or repeat step 2 manually.
+If you'd rather skip self-service sign-up entirely for a given person,
+Supabase Dashboard → **Authentication** → **Users** → **Add user** still
+works — just also give them a `profiles` row (`role`, `status: 'approved'`)
+in the **Table Editor**, since accounts created that way don't get one
+automatically.
+
+### Users and access
+
+- **Sign-up** (`/admin/signup`) is open, but new accounts start out
+  `pending` and can't sign in to anything until an admin approves them from
+  **Users**. Supabase sends the email verification link itself.
+- **Forgot password** (`/admin/forgot-password`, linked from the sign-in
+  page) emails a reset link; clicking it lands on `/admin/reset-password`
+  to set a new password.
+- Two roles exist once approved:
+  - **Admin** — everything, including Users, Brand Settings and Site Settings.
+  - **Editor** — everyday content management, without those sensitive
+    system-level screens.
+- An admin can also **Suspend** an approved account from Users, and
+  **Reinstate** it later — suspended accounts are blocked at the database
+  level (Row Level Security), not just hidden in the UI.
 
 ---
 
 ## Logging in
 
 Go to `yourdomain.com/admin` and sign in with your email and password. The
-dashboard is not linked from the public site and is set to `noindex`.
-
-Two roles exist:
-- **Admin** — everything, including Users, Brand Settings and Site Settings.
-- **Editor** — everyday content management, without those sensitive
-  system-level screens.
+dashboard is not linked from the public site and is set to `noindex`. See
+"Users and access" above for sign-up, approval, roles and password reset.
 
 ---
 
