@@ -36,7 +36,7 @@ function useReveal(ref: React.RefObject<HTMLElement | null>) {
 }
 
 /* Section order is fixed by brief: Hero → Capabilities → Testimonials →
-   Partners → Notes → Clients → Case Studies → Final CTA (+ Footer, rendered
+   Clients → Notes → Partners → Case Studies → Final CTA (+ Footer, rendered
    by App.tsx). No project index sits before or between these. */
 export default function Home() {
   const mainRef = useRef<HTMLElement>(null)
@@ -103,9 +103,9 @@ export default function Home() {
       <Hero />
       <CapabilitiesIndex />
       <Testimonials />
-      <PartnersSlider />
-      <Notes />
       <ClientsSlider />
+      <Notes />
+      <PartnersSlider />
       <CaseStudiesTeaser />
       <FinalCta />
     </main>
@@ -133,8 +133,8 @@ function Hero() {
     >
       <div className="page-grid" style={{ paddingTop: 'clamp(28px, 4vw, 56px)', paddingBottom: 'clamp(40px, 5vw, 72px)' }}>
         <div
-          style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 'clamp(40px, 5vw, 64px)', alignItems: 'stretch' }}
-          className="lg:grid-cols-[1.1fr_0.9fr]"
+          style={{ gap: 'clamp(40px, 5vw, 64px)', alignItems: 'stretch' }}
+          className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr]"
         >
           {/* The argument */}
           <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -358,7 +358,7 @@ function Testimonials() {
   if (!t) return null
 
   return (
-    <section aria-label="Client testimonials" style={{ backgroundColor: '#6E2237', paddingTop: 'clamp(56px, 7vw, 104px)', paddingBottom: 'clamp(56px, 7vw, 104px)' }}>
+    <section aria-label="Client testimonials" style={{ backgroundColor: '#6E2237', paddingTop: 'clamp(32px, 4vw, 56px)', paddingBottom: 'clamp(32px, 4vw, 56px)' }}>
       <div className="page-grid">
         <p className="t-caption mb-10 reveal" style={{ color: 'rgba(240,234,218,.5)' }}>In their words</p>
         <div>
@@ -373,7 +373,7 @@ function Testimonials() {
                 letterSpacing: '-0.015em',
                 color: '#F0EADA',
                 margin: 0,
-                maxWidth: '24ch',
+                maxWidth: '100%',
                 animation: 'testimonial-in 400ms var(--ease-brand)',
               }}
             >
