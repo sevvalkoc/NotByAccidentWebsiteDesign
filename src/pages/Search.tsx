@@ -27,14 +27,14 @@ function buildIndex(): Entry[] {
       kind: 'Capability',
       to: `/capabilities/${c.slug}`,
       blurb: c.summary,
-      terms: `${c.name} ${c.summary} ${c.pillar} ${c.queries.join(' ')} capability discipline service`,
+      terms: `${c.name} ${c.summary} ${c.category} ${c.queries.join(' ')} capability discipline service`,
     })),
     ...projects.map(p => ({
       title: p.name,
       kind: 'Case Study',
       to: `/case-studies/${p.slug}`,
       blurb: p.brief,
-      terms: `${p.name} ${p.brief} ${p.body} ${p.discipline} ${p.services.join(' ')} ${p.location} ${p.year}`,
+      terms: `${p.name} ${p.brief} ${p.narrative ? Object.values(p.narrative).join(' ') : ''} ${p.discipline} ${p.services.join(' ')} ${p.location} ${p.year}`,
     })),
     ...notes.map(n => ({
       title: n.title,

@@ -102,7 +102,7 @@ export default function CaseStudies() {
                     {projects[0].name}
                   </h2>
                   <p className="t-body m-0" style={{ color: 'rgba(34,30,27,.65)', maxWidth: '52ch' }}>
-                    {projects[0].brief}
+                    {projects[0].narrative?.problem ?? projects[0].brief}
                   </p>
                 </div>
                 <div style={{ textAlign: 'right', paddingTop: '4px' }}>

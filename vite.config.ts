@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import path from 'node:path'
 
 import siteConfiguration from './.figma/make/site.json'
+import { projects, notes, capabilities } from './src/data'
 
 // Vite config — https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -20,6 +21,7 @@ export default defineConfig(({ mode }) => {
       react(),
       tailwindcss(),
       figmaSiteConfiguration(siteConfiguration),
+      sitemapPlugin(),
       figmaErrorOverlayReplay(),
       figmaReactRefreshBoundaryFallback(),
       figmaMakeKitPlugin({ storiesGlob: '/src/**/*.stories.{ts,tsx,js,jsx}' }),
@@ -208,6 +210,61 @@ function figmaSiteConfiguration(config: FigmaSiteConfiguration): Plugin {
           tags,
         }
       },
+    },
+  }
+}
+
+/**
+ * Emits public/sitemap.xml at build time from the site's own content —
+ * every static page, capability, case study and note — so the sitemap can
+ * never drift out of sync with what actually exists. New capabilities,
+ * projects or notes appear in the next build automatically.
+ */
+function sitemapPlugin(): Plugin {
+  const BASE = 'https://notbyaccident.com'
+
+  function buildXml(): string {
+    const today = new Date().toISOString().slice(0, 10)
+    const staticRoutes: [string, string, string][] = [
+      ['/', '1.0', 'weekly'],
+      ['/work', '0.8', 'weekly'],
+      ['/case-studies', '0.8', 'weekly'],
+      ['/capabilities', '0.9', 'monthly'],
+      ['/studio', '0.6', 'monthly'],
+      ['/notes', '0.8', 'weekly'],
+      ['/trainings', '0.5', 'monthly'],
+      ['/contact', '0.7', 'monthly'],
+      ['/privacy', '0.2', 'yearly'],
+      ['/cookies', '0.2', 'yearly'],
+    ]
+
+    const urls: { loc: string; priority: string; freq: string }[] = [
+      ...staticRoutes.map(([path, priority, freq]) => ({ loc: BASE + path, priority, freq })),
+      ...capabilities.map(c => ({ loc: `${BASE}/capabilities/${c.slug}`, priority: '0.7', freq: 'monthly' })),
+      ...projects.map(p => ({ loc: `${BASE}/case-studies/${p.slug}`, priority: '0.7', freq: 'monthly' })),
+      ...notes.map(n => ({ loc: `${BASE}/notes/${n.slug}`, priority: '0.6', freq: 'yearly' })),
+    ]
+
+    const body = urls
+      .map(
+        u => `  <url>\n    <loc>${u.loc}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>${u.freq}</changefreq>\n    <priority>${u.priority}</priority>\n  </url>`
+      )
+      .join('\n')
+
+    return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`
+  }
+
+  return {
+    name: 'sitemap-generator',
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        if (req.url?.split('?')[0] !== '/sitemap.xml') return next()
+        res.setHeader('Content-Type', 'application/xml; charset=utf-8')
+        res.end(buildXml())
+      })
+    },
+    generateBundle() {
+      this.emitFile({ type: 'asset', fileName: 'sitemap.xml', source: buildXml() })
     },
   }
 }

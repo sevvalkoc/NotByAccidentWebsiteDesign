@@ -7,7 +7,7 @@ const sections = [
     id: 'who-we-are',
     heading: 'Who we are',
     body: [
-      'Not by Accident Ltd is an independent creative company registered in England and Wales. When we refer to “we”, “us” or “our” in this notice, we mean Not by Accident Ltd. When we refer to “you”, we mean anyone who visits this website or corresponds with us.',
+      'Not by Accident is an independent creative company. When we refer to “we”, “us” or “our” in this notice, we mean Not by Accident. When we refer to “you”, we mean anyone who visits this website or corresponds with us. Our full registered company details will be added here before this notice is treated as final.',
       'This notice explains what we collect, why we collect it, and what you can ask us to do about it. It is written to be read, not to be survived.',
     ],
   },

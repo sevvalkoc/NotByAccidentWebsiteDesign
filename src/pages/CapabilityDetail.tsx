@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { capabilities, pillars, projects } from '@/data'
+import { capabilities, categories, projects } from '@/data'
 import { useCompany } from '@/content'
 import Seo from '@/components/Seo'
 
@@ -40,10 +40,11 @@ export default function CapabilityDetail() {
     )
   }
 
-  const pillar = pillars.find(p => p.key === cap.pillar)!
-  const siblings = capabilities.filter(c => c.pillar === cap.pillar && c.slug !== cap.slug)
-  const related = capabilities.filter(c => c.pillar !== cap.pillar).slice(0, 4)
-  const proof = projects.filter(p => p.featured || p.result).slice(0, 3)
+  const category = categories.find(c => c.key === cap.category)!
+  const siblings = capabilities.filter(c => c.category === cap.category && c.slug !== cap.slug)
+  const related = capabilities.filter(c => c.category !== cap.category).slice(0, 4)
+  const linkedProjects = projects.filter(p => p.relatedCapabilities.includes(cap.slug))
+  const proof = (linkedProjects.length ? linkedProjects : projects.filter(p => p.featured)).slice(0, 3)
 
   const schema = [
     {
@@ -90,7 +91,7 @@ export default function CapabilityDetail() {
   return (
     <main id="main" ref={ref} style={{ paddingTop: '56px', backgroundColor: '#F0EADA' }}>
       <Seo
-        title={`${cap.name} — ${pillar.label}`}
+        title={`${cap.name} — ${category.label}`}
         description={cap.summary}
         path={`/capabilities/${cap.slug}`}
         jsonLd={schema}
@@ -103,7 +104,7 @@ export default function CapabilityDetail() {
             <p className="t-caption m-0" style={{ color: 'rgba(34,30,27,.45)' }}>
               <Link to="/capabilities" className="link-grow" style={{ color: 'rgba(34,30,27,.55)' }}>Capabilities</Link>
               <span style={{ padding: '0 8px' }}>/</span>
-              <span style={{ color: '#6E2237' }}>{pillar.label}</span>
+              <span style={{ color: category.accent }}>{category.label}</span>
             </p>
           </nav>
           <h1 className="reveal reveal-delay-1" style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 'clamp(38px, 6vw, 84px)', fontWeight: 400, lineHeight: 0.98, letterSpacing: '-0.02em', color: '#221E1B', margin: 0, maxWidth: '14ch' }}>
@@ -165,12 +166,12 @@ export default function CapabilityDetail() {
         </div>
       </div>
 
-      {/* Sibling capabilities within pillar */}
+      {/* Sibling capabilities within category */}
       {siblings.length > 0 && (
         <div style={{ backgroundColor: '#221E1B', paddingTop: 'clamp(48px, 6vw, 88px)', paddingBottom: 'clamp(48px, 6vw, 88px)' }}>
           <div className="page-grid">
             <p className="t-caption mb-6 reveal" style={{ color: 'rgba(240,234,218,.4)' }}>
-              More of the {pillar.label} movement
+              More from {category.label}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-10 reveal">
               {siblings.map(s => (

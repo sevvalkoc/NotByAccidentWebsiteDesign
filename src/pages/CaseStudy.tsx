@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useParams, Link, Navigate } from 'react-router-dom'
-import { projects } from '@/data'
+import { projects, capabilities } from '@/data'
 import { useCompany } from '@/content'
 import Seo from '@/components/Seo'
 
@@ -27,20 +27,31 @@ export default function CaseStudy() {
 
   const idx = projects.findIndex(p => p.slug === slug)
   const next = projects[(idx + 1) % projects.length]
+  const relatedCapabilities = capabilities.filter(c => project.relatedCapabilities.includes(c.slug))
 
-  const caseSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'CreativeWork',
-    name: project.name,
-    headline: `${project.name} — ${project.discipline}`,
-    description: project.brief,
-    image: project.heroImg,
-    dateCreated: project.year,
-    locationCreated: project.location,
-    url: `https://notbyaccident.com/case-studies/${project.slug}`,
-    creator: { '@type': 'Organization', name: company.legalName },
-    keywords: project.services.join(', '),
-  }
+  const caseSchema = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'CreativeWork',
+      name: project.name,
+      headline: `${project.name} — ${project.discipline}`,
+      description: project.brief,
+      image: project.heroImg,
+      dateCreated: project.year,
+      locationCreated: project.location,
+      url: `https://notbyaccident.com/case-studies/${project.slug}`,
+      creator: { '@type': 'Organization', name: company.legalName },
+      keywords: project.services.join(', '),
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Case Studies', item: 'https://notbyaccident.com/case-studies' },
+        { '@type': 'ListItem', position: 2, name: project.name, item: `https://notbyaccident.com/case-studies/${project.slug}` },
+      ],
+    },
+  ]
 
   return (
     <main
@@ -144,8 +155,8 @@ export default function CaseStudy() {
         </div>
       </div>
 
-      {/* Body copy */}
-      {project.body && (
+      {/* Problem → Insight → Intervention → Outcome */}
+      {project.narrative && (
         <div
           className="page-grid"
           style={{
@@ -153,27 +164,30 @@ export default function CaseStudy() {
             paddingBottom: 'clamp(56px, 7vw, 96px)',
           }}
         >
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr',
-            }}
-            className="md:grid-cols-[55%_1fr]"
-          >
-            <div className="reveal">
-              <p
-                style={{
-                  fontFamily: 'DM Sans, system-ui, sans-serif',
-                  fontSize: '17px',
-                  lineHeight: 1.65,
-                  color: '#221E1B',
-                  maxWidth: '60ch',
-                  margin: 0,
-                }}
-              >
-                {project.body}
-              </p>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-12">
+            {([
+              ['Problem', project.narrative.problem, '#6E2237'],
+              ['Insight', project.narrative.insight, '#7F8B3E'],
+              ['Intervention', project.narrative.intervention, '#6A6383'],
+              ['Outcome', project.narrative.outcome, '#C08A1E'],
+            ] as const).map(([label, text, accent], i) => (
+              <div key={label} className="reveal" style={{ transitionDelay: `${i * 60}ms`, borderTop: `2px solid ${accent}`, paddingTop: '18px' }}>
+                <p className="t-caption mb-3" style={{ color: accent }}>{label}</p>
+                <p
+                  style={{
+                    fontFamily: label === 'Outcome' ? 'Lora, Georgia, serif' : 'DM Sans, system-ui, sans-serif',
+                    fontStyle: label === 'Outcome' ? 'italic' : 'normal',
+                    fontSize: label === 'Outcome' ? '20px' : '17px',
+                    lineHeight: label === 'Outcome' ? 1.35 : 1.6,
+                    color: '#221E1B',
+                    maxWidth: '46ch',
+                    margin: 0,
+                  }}
+                >
+                  {text}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -196,7 +210,7 @@ export default function CaseStudy() {
         </p>
       </div>
 
-      {/* Services */}
+      {/* Capabilities — the work, linked to the discipline pages that did it */}
       <div
         className="page-grid reveal"
         style={{
@@ -205,29 +219,35 @@ export default function CaseStudy() {
         }}
       >
         <p className="t-caption mb-6" style={{ color: 'rgba(34,30,27,.45)' }}>
-          Services delivered
+          Capabilities behind this work
         </p>
         <ul
           className="list-none m-0 p-0"
           style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}
         >
-          {project.services.map(s => (
-            <li
-              key={s}
-              className="t-caption"
-              style={{
-                display: 'inline-block',
-                padding: '6px 14px',
-                border: '1px solid rgba(34,30,27,.2)',
-                borderRadius: '2px',
-                color: 'rgba(34,30,27,.7)',
-                textTransform: 'none',
-                letterSpacing: '0.02em',
-              }}
-            >
-              {s}
-            </li>
-          ))}
+          {relatedCapabilities.length > 0
+            ? relatedCapabilities.map(c => (
+                <li key={c.slug}>
+                  <Link to={`/capabilities/${c.slug}`} className="pill">{c.name}</Link>
+                </li>
+              ))
+            : project.services.map(s => (
+                <li
+                  key={s}
+                  className="t-caption"
+                  style={{
+                    display: 'inline-block',
+                    padding: '6px 14px',
+                    border: '1px solid rgba(34,30,27,.2)',
+                    borderRadius: '2px',
+                    color: 'rgba(34,30,27,.7)',
+                    textTransform: 'none',
+                    letterSpacing: '0.02em',
+                  }}
+                >
+                  {s}
+                </li>
+              ))}
         </ul>
       </div>
 
