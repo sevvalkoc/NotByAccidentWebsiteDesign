@@ -136,11 +136,27 @@ export const projects: Project[] = [
   },
 ]
 
+/* Renderable body blocks for an article — mirrors the admin's ArticleBlock
+   (src/lib/database.types.ts) but with image blocks carrying a resolved
+   `url` instead of a raw media id, since the public site has no reason to
+   know about the media table's internal ids. */
+export type NoteBlock =
+  | { type: 'h2' | 'h3' | 'paragraph' | 'quote' | 'callout'; text: string }
+  | { type: 'list'; ordered: boolean; items: string[] }
+  | { type: 'image'; url: string; caption?: string }
+  | { type: 'divider' }
+  | { type: 'embed'; url: string }
+
 export interface Note {
   id: string
   title: string
   subtitle: string
   body: string
+  /* Present when the article was written with the CMS's block editor —
+     BlogPost renders these directly instead of the plain-paragraph `body`
+     string, so lists/images/quotes/embeds/dividers survive. Absent for the
+     static seed content below, which only ever needed plain paragraphs. */
+  blocks?: NoteBlock[]
   date: string
   category: string
   readTime: string

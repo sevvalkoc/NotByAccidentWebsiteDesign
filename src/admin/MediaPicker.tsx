@@ -62,7 +62,15 @@ export default function MediaPicker({
         .single()
       if (insertErr) throw insertErr
 
-      setPreview(publicMediaUrl(bucket, (data as { storage_path: string }).storage_path))
+      const savedPath = (data as { storage_path: string }).storage_path
+      if (bucket === 'trainings') {
+        // Private bucket — the public-URL helper would 400. Use a
+        // short-lived signed URL for the preview instead.
+        const { data: signed } = await supabase.storage.from(bucket).createSignedUrl(savedPath, 60 * 60)
+        setPreview(signed?.signedUrl ?? null)
+      } else {
+        setPreview(publicMediaUrl(bucket, savedPath))
+      }
       onChange((data as { id: string }).id)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Upload failed')

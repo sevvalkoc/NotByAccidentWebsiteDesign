@@ -1,7 +1,47 @@
-import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Seo from '@/components/Seo'
+import { supabase } from '@/lib/supabase'
+
+/* Redirects created in the admin (SEO → Redirects), including the ones
+   auto-created when a Work/Article slug changes, are looked up here: this
+   is a client-side SPA with no server to issue a real HTTP 301, so a
+   checked-then-redirected 404 route is the closest equivalent. Search
+   engines that re-crawl the old URL will still see this happen via
+   history.replaceState, which is a reasonable approximation but not a true
+   301 — worth knowing if redirect SEO value matters for a specific page. */
+function useRedirectCheck() {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const [checked, setChecked] = useState(!supabase)
+
+  useEffect(() => {
+    if (!supabase) return
+    let cancelled = false
+    setChecked(false)
+    supabase
+      .from('redirects')
+      .select('to_path')
+      .eq('from_path', location.pathname)
+      .eq('is_active', true)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (cancelled) return
+        const target = (data as { to_path: string } | null)?.to_path
+        if (target) navigate(target, { replace: true })
+        else setChecked(true)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [location.pathname, navigate])
+
+  return checked
+}
 
 export default function NotFound() {
+  const checked = useRedirectCheck()
+  if (!checked) return null
   return (
     <main
       id="main"

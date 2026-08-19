@@ -33,6 +33,7 @@ export default function GalleryManager({ projectId }: { projectId: string }) {
   async function handleFiles(files: FileList) {
     if (!supabase) return
     setUploading(true)
+    let nextOrder = items?.length ?? 0
     for (const file of Array.from(files)) {
       const ext = file.name.split('.').pop()
       const path = `uploads/${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext ? `.${ext}` : ''}`
@@ -48,7 +49,7 @@ export default function GalleryManager({ projectId }: { projectId: string }) {
         project_id: projectId,
         media_id: (mediaRow as { id: string }).id,
         kind: 'gallery',
-        sort_order: items?.length ?? 0,
+        sort_order: nextOrder++,
       })
     }
     setUploading(false)

@@ -5,8 +5,9 @@
    when Supabase isn't configured yet, so callers can tell "empty" apart
    from "couldn't ask" and fall back to the static seed data accordingly. */
 import { supabase, supabaseReady, publicMediaUrl } from '@/lib/supabase'
-import type { Project, ProjectNarrative, Note, Capability, Category, TeamMember } from '@/data'
+import type { Project, ProjectNarrative, Note, NoteBlock, Capability, Category, TeamMember } from '@/data'
 import type { Testimonial, Wordmark, Social, Company, Hero, Homepage, NavLink, Seo, Trainings } from '@/content'
+import type { ArticleBlock } from '@/lib/database.types'
 
 type MediaRef = { bucket: string; storage_path: string } | null
 function mediaUrl(m: MediaRef): string {
@@ -46,7 +47,7 @@ export async function fetchProjects(): Promise<Project[] | null> {
     hero_image: MediaRef
     thumbnail: MediaRef
   }
-  return (data as unknown as Row[]).map((row): Project => {
+  return (data as unknown as Row[]).map((row, index): Project => {
     const hasNarrative = Boolean(row.challenge || row.insight || row.strategy || row.what_we_did || row.outcome)
     const narrative: ProjectNarrative | null = hasNarrative
       ? {
@@ -60,7 +61,10 @@ export async function fetchProjects(): Promise<Project[] | null> {
     const thumb = mediaUrl(row.thumbnail) || mediaUrl(row.hero_image)
     return {
       id: row.id,
-      num: String(row.sort_order + 1).padStart(2, '0'),
+      // Display position, not the raw sort_order value — keeps numbering
+      // dense and starting at 01 regardless of what sort_order a new row
+      // happens to have been created with.
+      num: String(index + 1).padStart(2, '0'),
       name: row.title,
       discipline: (row.services ?? []).join(' · '),
       year: row.year ?? '',
@@ -124,31 +128,71 @@ export async function fetchNotes(): Promise<Note[] | null> {
     .eq('status', 'published')
     .order('published_at', { ascending: false })
   if (error || !data) return null
-  type Block = { type: string; text?: string }
   type Row = {
     id: string
     slug: string
     title: string
     excerpt: string | null
-    body: Block[] | null
+    body: ArticleBlock[] | null
     reading_time_minutes: number | null
     published_at: string | null
     hero_image: MediaRef
     category: { name: string } | null
   }
-  return (data as unknown as Row[]).map((row): Note => ({
-    id: row.id,
-    title: row.title,
-    subtitle: row.excerpt ?? '',
-    body: (row.body ?? []).map(b => b.text ?? '').filter(Boolean).join('\n\n'),
-    date: row.published_at
-      ? new Date(row.published_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
-      : '',
-    category: row.category?.name ?? 'Notes',
-    readTime: row.reading_time_minutes ? `${row.reading_time_minutes} min` : '',
-    img: mediaUrl(row.hero_image),
-    slug: row.slug,
-  }))
+  const rows = data as unknown as Row[]
+
+  // Image blocks store a media id, not a URL — resolve every referenced id
+  // across all articles in one batch instead of one query per block.
+  const imageMediaIds = new Set<string>()
+  for (const row of rows) for (const b of row.body ?? []) if (b.type === 'image' && b.mediaId) imageMediaIds.add(b.mediaId)
+  const mediaById = new Map<string, string>()
+  if (imageMediaIds.size > 0) {
+    const { data: mediaRows } = await supabase.from('media').select('id, bucket, storage_path').in('id', [...imageMediaIds])
+    for (const m of (mediaRows as { id: string; bucket: string; storage_path: string }[]) ?? []) {
+      mediaById.set(m.id, publicMediaUrl(m.bucket, m.storage_path))
+    }
+  }
+
+  function toNoteBlocks(blocks: ArticleBlock[]): NoteBlock[] {
+    return blocks
+      .map((b): NoteBlock | null => {
+        if (b.type === 'image') {
+          const url = mediaById.get(b.mediaId)
+          return url ? { type: 'image', url, caption: b.caption } : null
+        }
+        return b as NoteBlock
+      })
+      .filter((b): b is NoteBlock => b !== null)
+  }
+
+  function toPlainText(blocks: ArticleBlock[]): string {
+    return blocks
+      .map(b => {
+        if (b.type === 'list') return b.items.join('\n')
+        if (b.type === 'image' || b.type === 'divider' || b.type === 'embed') return ''
+        return b.text
+      })
+      .filter(Boolean)
+      .join('\n\n')
+  }
+
+  return rows.map((row): Note => {
+    const blocks = row.body ?? []
+    return {
+      id: row.id,
+      title: row.title,
+      subtitle: row.excerpt ?? '',
+      body: toPlainText(blocks),
+      blocks: toNoteBlocks(blocks),
+      date: row.published_at
+        ? new Date(row.published_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+        : '',
+      category: row.category?.name ?? 'Notes',
+      readTime: row.reading_time_minutes ? `${row.reading_time_minutes} min` : '',
+      img: mediaUrl(row.hero_image),
+      slug: row.slug,
+    }
+  })
 }
 
 export async function fetchTestimonials(): Promise<Testimonial[] | null> {

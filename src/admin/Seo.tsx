@@ -172,7 +172,10 @@ function Redirects() {
 
   return (
     <div>
-      <AdminPageHeader title="Redirects" description="301s created automatically when you change a published Work or Article slug also appear here." />
+      <AdminPageHeader
+        title="Redirects"
+        description="Entries created automatically when you change a published Work or Article slug also appear here. Handled client-side (this site has no server of its own) — fine for normal use, but add a rule in vercel.json too if a specific old URL's SEO value really matters. See docs/CMS.md."
+      />
       <AdminCard className="p-4 mb-4">
         <div className="flex items-center gap-2 flex-wrap">
           <AdminInput placeholder="/old-path" value={from} onChange={e => setFrom(e.target.value)} className="w-48" />

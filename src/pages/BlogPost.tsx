@@ -1,7 +1,87 @@
 import { useEffect, useRef } from 'react'
 import { useParams, Link, Navigate } from 'react-router-dom'
 import { useNotes, useCompany } from '@/content'
+import type { NoteBlock } from '@/data'
 import Seo from '@/components/Seo'
+
+const bodyText: React.CSSProperties = {
+  fontFamily: 'DM Sans, system-ui, sans-serif',
+  fontSize: '17px',
+  lineHeight: 1.7,
+  color: '#221E1B',
+  maxWidth: '64ch',
+  margin: '0 0 1.6em',
+}
+
+/* Renders the CMS's structured block content with the article's own
+   typography — the block editor deliberately never stores raw font/colour
+   choices, so this is the one place that decides what each block type
+   looks like. */
+function ArticleBody({ blocks }: { blocks: NoteBlock[] }) {
+  return (
+    <>
+      {blocks.map((block, i) => {
+        switch (block.type) {
+          case 'paragraph':
+            return <p key={i} style={bodyText}>{block.text}</p>
+          case 'h2':
+            return (
+              <h2 key={i} style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 'clamp(24px, 2.6vw, 32px)', fontWeight: 400, lineHeight: 1.15, letterSpacing: '-0.01em', color: '#221E1B', margin: '1.4em 0 0.6em' }}>
+                {block.text}
+              </h2>
+            )
+          case 'h3':
+            return (
+              <h3 key={i} style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 'clamp(20px, 2vw, 25px)', fontWeight: 400, lineHeight: 1.2, color: '#221E1B', margin: '1.2em 0 0.5em' }}>
+                {block.text}
+              </h3>
+            )
+          case 'quote':
+            return (
+              <blockquote key={i} style={{ fontFamily: 'Lora, Georgia, serif', fontStyle: 'italic', fontSize: 'clamp(20px, 2.2vw, 27px)', lineHeight: 1.35, color: '#6E2237', maxWidth: '52ch', margin: '1.4em 0', paddingLeft: '1.25rem', borderLeft: '2px solid #6E2237' }}>
+                {block.text}
+              </blockquote>
+            )
+          case 'callout':
+            return (
+              <p key={i} style={{ ...bodyText, backgroundColor: 'rgba(233,197,88,.18)', padding: '1rem 1.25rem', borderRadius: '2px' }}>
+                {block.text}
+              </p>
+            )
+          case 'list':
+            return block.ordered ? (
+              <ol key={i} style={{ ...bodyText, paddingLeft: '1.25em' }}>
+                {block.items.map((item, j) => <li key={j} style={{ marginBottom: '0.4em' }}>{item}</li>)}
+              </ol>
+            ) : (
+              <ul key={i} style={{ ...bodyText, paddingLeft: '1.25em' }}>
+                {block.items.map((item, j) => <li key={j} style={{ marginBottom: '0.4em' }}>{item}</li>)}
+              </ul>
+            )
+          case 'image':
+            return (
+              <figure key={i} className="work-tile bg-carbon" style={{ margin: '1.6em 0', overflow: 'hidden', aspectRatio: '3/2' }}>
+                <img src={block.url} alt={block.caption ?? ''} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                {block.caption && (
+                  <figcaption className="t-caption" style={{ color: 'rgba(34,30,27,.45)', marginTop: '10px' }}>{block.caption}</figcaption>
+                )}
+              </figure>
+            )
+          case 'embed':
+            return (
+              <div key={i} style={{ margin: '1.6em 0', aspectRatio: '16/9', backgroundColor: '#221E1B' }}>
+                <iframe src={block.url} title="Embedded video" loading="lazy" style={{ width: '100%', height: '100%', border: 'none' }} allowFullScreen />
+              </div>
+            )
+          case 'divider':
+            return <hr key={i} style={{ border: 'none', borderTop: '1px solid rgba(34,30,27,.14)', margin: '2em 0' }} />
+          default:
+            return null
+        }
+      })}
+    </>
+  )
+}
 
 export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>()
@@ -147,21 +227,25 @@ export default function BlogPost() {
           className="md:grid-cols-[60%_1fr]"
         >
           <article className="reveal">
-            {paragraphs.map((para, i) => (
-              <p
-                key={i}
-                style={{
-                  fontFamily: 'DM Sans, system-ui, sans-serif',
-                  fontSize: '17px',
-                  lineHeight: 1.7,
-                  color: '#221E1B',
-                  maxWidth: '64ch',
-                  margin: i < paragraphs.length - 1 ? '0 0 1.6em' : 0,
-                }}
-              >
-                {para}
-              </p>
-            ))}
+            {note.blocks && note.blocks.length > 0 ? (
+              <ArticleBody blocks={note.blocks} />
+            ) : (
+              paragraphs.map((para, i) => (
+                <p
+                  key={i}
+                  style={{
+                    fontFamily: 'DM Sans, system-ui, sans-serif',
+                    fontSize: '17px',
+                    lineHeight: 1.7,
+                    color: '#221E1B',
+                    maxWidth: '64ch',
+                    margin: i < paragraphs.length - 1 ? '0 0 1.6em' : 0,
+                  }}
+                >
+                  {para}
+                </p>
+              ))
+            )}
           </article>
         </div>
       </div>

@@ -170,7 +170,12 @@ export default function WorkEditor() {
     }
 
     if (isNew) {
-      const { data, error } = await supabase.from('projects').insert(payload).select('id').single()
+      const { count } = await supabase.from('projects').select('id', { count: 'exact', head: true })
+      const { data, error } = await supabase
+        .from('projects')
+        .insert({ ...payload, sort_order: count ?? 0 })
+        .select('id')
+        .single()
       setSaving(false)
       if (error) return setError(error.message)
       refreshSite()

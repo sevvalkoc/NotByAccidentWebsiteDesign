@@ -231,8 +231,16 @@ attention** / **Missing**, with a link straight to the editor. It is not a
 full site crawler; it checks what the database actually holds.
 
 The same page also has **Redirects**: add an old path and a new path, and
-the site will 301 anyone (and every search engine) from the old URL to the
-new one. The form blocks you from creating an immediate redirect loop.
+anyone who lands on the old URL is sent on to the new one. The form blocks
+you from creating an immediate redirect loop. **One honest limitation:**
+because this is a JavaScript site with no server of its own, this isn't a
+true HTTP 301 — the old URL still briefly returns the page's normal
+"not found" response before JavaScript checks the redirects list and sends
+the visitor on. Real browsers and most modern search engine crawlers
+handle this fine, but it's not as clean as a genuine server-level redirect.
+If a specific URL's redirect really matters for SEO (a lot of existing
+backlinks, for instance), it's worth also adding a rule directly in
+`vercel.json`, which does issue a true 301 at the hosting level.
 
 Robots.txt, the XML sitemap, canonical URLs, Open Graph tags, and
 Organization/Article/BreadcrumbList structured data are already handled in
