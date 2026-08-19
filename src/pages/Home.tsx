@@ -189,7 +189,14 @@ function Hero() {
           </div>
 
           {/* A real photograph — colour behaves like a tab, not a block */}
-          <div className="reveal" style={{ position: 'relative', minHeight: '320px' }}>
+          <div
+            className="reveal"
+            style={{
+              position: 'relative',
+              minHeight: '320px',
+              transform: `translate(${hero.imageOffsetX}px, ${hero.imageOffsetY}px)`,
+            }}
+          >
             <div
               aria-hidden="true"
               style={{ position: 'absolute', top: 0, bottom: 0, left: 0, width: '6px', backgroundColor: '#7F8B3E', zIndex: 1 }}
@@ -237,7 +244,7 @@ function CapabilitiesIndex() {
       <div className="page-grid">
         <div className="flex items-end justify-between mb-10 reveal" style={{ flexWrap: 'wrap', gap: '1rem' }}>
           <div>
-            <p className="t-caption" style={{ color: 'rgba(34,30,27,.45)', marginBottom: '12px' }}>What we do</p>
+            <p className="t-caption" style={{ color: 'rgba(34,30,27,.45)', marginBottom: '12px' }}>{hp.capabilitiesEyebrow}</p>
             <h2 className="t-headline-lg" style={{ maxWidth: '18ch' }}>
               {hp.capabilitiesHeading}
             </h2>
@@ -443,7 +450,7 @@ function Notes() {
       <div className="page-grid">
         <div className="flex items-end justify-between mb-10 reveal" style={{ flexWrap: 'wrap', gap: '1rem' }}>
           <div>
-            <p className="t-caption" style={{ color: 'rgba(34,30,27,.45)', marginBottom: '10px' }}>Notes — an independent publication</p>
+            <p className="t-caption" style={{ color: 'rgba(34,30,27,.45)', marginBottom: '10px' }}>{hp.notesEyebrow}</p>
             <h2 className="t-headline-lg" style={{ maxWidth: '16ch' }}>{hp.journalHeading}</h2>
           </div>
           <Link to="/notes" className="t-ui link-grow" style={{ color: '#221E1B' }}>Read Notes →</Link>
@@ -588,7 +595,7 @@ function FinalCta() {
       <div className="page-grid">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-16 items-center">
           <div className="reveal md:order-2">
-            <p className="t-caption" style={{ color: '#E9C558', marginBottom: '1.5rem' }}>Start something</p>
+            <p className="t-caption" style={{ color: '#E9C558', marginBottom: '1.5rem' }}>{hp.ctaEyebrow}</p>
             <h2 style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 'clamp(32px, 4.5vw, 68px)', fontWeight: 400, lineHeight: 1.0, letterSpacing: '-0.02em', color: '#F0EADA', margin: 0, maxWidth: '15ch' }}>
               {hp.ctaHeading}
             </h2>

@@ -33,6 +33,7 @@ import {
   fetchTeam,
   fetchSiteSettings,
   fetchNavigation,
+  fetchHomeSections,
 } from '@/lib/cms'
 
 export interface Testimonial {
@@ -47,6 +48,11 @@ export interface Hero {
   subhead: string
   definition: string
   image: string
+  /** Bounded px nudge on the hero image, set from the admin's drag control
+   *  (Admin → Pages). Applied as a CSS transform — small range, so it never
+   *  breaks the responsive layout. */
+  imageOffsetX: number
+  imageOffsetY: number
 }
 
 export interface Seo {
@@ -72,8 +78,11 @@ export interface Trainings {
 export interface Homepage {
   featuredEyebrow: string
   featuredHeading: string
+  capabilitiesEyebrow: string
   capabilitiesHeading: string
+  notesEyebrow: string
   journalHeading: string
+  ctaEyebrow: string
   ctaHeading: string
   ctaBody: string
 }
@@ -128,6 +137,8 @@ const seedHero: Hero = {
     'Not by Accident is an independent creative company that joins brand thinking and commercial thinking. Strategy, identity, websites, digital products and the marketing that makes them pay back.',
   image:
     'https://images.unsplash.com/photo-1764096534662-a194a348c4a0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1000',
+  imageOffsetX: 0,
+  imageOffsetY: 0,
 }
 
 const seedSeo: Seo = {
@@ -160,8 +171,11 @@ const seedTrainings: Trainings = {
 const seedHomepage: Homepage = {
   featuredEyebrow: 'Selected work',
   featuredHeading: 'Proof that the brand decision was the commercial one.',
+  capabilitiesEyebrow: 'What we do',
   capabilitiesHeading: 'Capabilities. One way of working.',
+  notesEyebrow: 'Notes — an independent publication',
   journalHeading: 'How we think, in public.',
+  ctaEyebrow: 'Start something',
   ctaHeading: 'Tell us the company you want to become.',
   ctaBody:
     'We work with founders, marketing leads and creative directors who suspect their company is better than its reputation. First reply within one working day — from a person, not a form.',
@@ -240,6 +254,13 @@ function loadLiveContent() {
     fetchNavigation('header').then(v => v && write({ nav: v })),
     fetchNavigation('footer').then(v => v && write({ footerNav: v })),
     fetchSiteSettings().then(v => v && write({ company: v.company, socials: v.socials, seo: v.seo })),
+    fetchHomeSections().then(v => {
+      if (!v) return
+      write({
+        hero: { ...cache.hero, ...v.hero },
+        homepage: { ...cache.homepage, ...v.homepage },
+      })
+    }),
   ])
 }
 loadLiveContent()
