@@ -17,7 +17,7 @@ before the admin dashboard works:
 ### 1. Run the database migrations
 
 Go to your Supabase project → **SQL Editor** → **New query**, and run these
-three files in order (copy-paste the whole file, click Run):
+four files in order (copy-paste the whole file, click Run):
 
 1. `supabase/migrations/0001_init.sql` — creates every table, security rule
    and storage bucket.
@@ -34,8 +34,13 @@ three files in order (copy-paste the whole file, click Run):
    run even if you don't plan to use sign-up — it only adds a `status`
    column and backfills every existing account to `approved`, so nothing
    that already has access loses it.
+4. `supabase/migrations/0004_lock_down_handle_new_user.sql` — a small
+   follow-up that closes a Supabase security-advisor warning: it revokes
+   direct public RPC access to the internal trigger function the sign-up
+   flow uses to create a profile row. It changes no behaviour — that
+   function only ever runs as the `on_auth_user_created` trigger anyway.
 
-All three files are safe to re-run if something goes wrong partway through.
+All four files are safe to re-run if something goes wrong partway through.
 
 Also turn on email confirmation: Supabase Dashboard → **Authentication** →
 **Providers** → **Email** → make sure **Confirm email** is switched on. That
