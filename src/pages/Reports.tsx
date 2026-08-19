@@ -7,11 +7,17 @@ export default function Reports() {
   const company = useCompany()
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
+  const [error, setError] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!email.trim()) return
-    submitLead({ email, source: 'newsletter' })
+    setError('')
+    const res = await submitLead({ email, source: 'newsletter' })
+    if (!res.ok) {
+      setError(res.error ?? 'Something went wrong — please try again.')
+      return
+    }
     setSent(true)
     setEmail('')
   }
@@ -84,6 +90,7 @@ export default function Reports() {
               <button type="submit" className="btn-primary shrink-0">Notify me</button>
             </form>
           )}
+          {error && <p className="t-caption" style={{ color: '#6E2237', marginTop: '0.75rem' }}>{error}</p>}
 
           <p className="t-caption" style={{ color: 'rgba(34,30,27,.4)', marginTop: '1rem', textTransform: 'none', letterSpacing: '0.02em' }}>
             One email when it launches. Nothing else. Or write to{' '}

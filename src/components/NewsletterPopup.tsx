@@ -13,6 +13,7 @@ export default function NewsletterPopup() {
   const [open, setOpen] = useState(false)
   const [email, setEmail] = useState('')
   const [done, setDone] = useState(false)
+  const [error, setError] = useState('')
   const dialogRef = useRef<HTMLDivElement>(null)
 
   const suppressed = pathname.startsWith('/admin')
@@ -68,10 +69,15 @@ export default function NewsletterPopup() {
     setOpen(false)
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!email.trim()) return
-    submitLead({ email, source: 'newsletter-popup' })
+    setError('')
+    const res = await submitLead({ email, source: 'newsletter-popup' })
+    if (!res.ok) {
+      setError(res.error ?? 'Something went wrong — please try again.')
+      return
+    }
     setDone(true)
     remember()
     window.setTimeout(() => setOpen(false), 2600)
@@ -169,6 +175,7 @@ export default function NewsletterPopup() {
               />
               <button type="submit" className="btn-primary shrink-0">Subscribe</button>
             </form>
+            {error && <p className="t-caption" style={{ color: '#6E2237', marginTop: '0.75rem' }}>{error}</p>}
             <button
               type="button"
               onClick={close}

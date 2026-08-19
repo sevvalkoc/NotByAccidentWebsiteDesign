@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import Nav from '@/components/Nav'
 import Footer from '@/components/Footer'
@@ -18,8 +18,11 @@ import Contact from '@/pages/Contact'
 import Search from '@/pages/Search'
 import Privacy from '@/pages/Privacy'
 import Cookies from '@/pages/Cookies'
-import Admin from '@/pages/Admin'
 import NotFound from '@/pages/NotFound'
+
+/* The admin dashboard is a separate application in every sense but the
+   deployment — code-split so public visitors never download its JS. */
+const AdminApp = lazy(() => import('@/admin/AdminApp'))
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -29,11 +32,17 @@ function ScrollToTop() {
   return null
 }
 
-export default function App() {
+/* The admin dashboard is a private operating tool, not part of the public
+   brand experience — it deliberately skips the public Nav/Footer/newsletter
+   popup and gets its own layout (see src/admin/AdminApp.tsx). */
+function AppShell() {
+  const location = useLocation()
+  const isAdmin = location.pathname.startsWith('/admin')
+
   return (
-    <BrowserRouter>
+    <>
       <ScrollToTop />
-      <Nav />
+      {!isAdmin && <Nav />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/work" element={<Work />} />
@@ -50,11 +59,26 @@ export default function App() {
         <Route path="/search" element={<Search />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/cookies" element={<Cookies />} />
-        <Route path="/admin" element={<Admin />} />
+        <Route
+          path="/admin/*"
+          element={
+            <Suspense fallback={<div className="min-h-screen bg-gray-50" />}>
+              <AdminApp />
+            </Suspense>
+          }
+        />
         <Route path="*" element={<NotFound />} />
       </Routes>
-      <Footer />
-      <NewsletterPopup />
+      {!isAdmin && <Footer />}
+      {!isAdmin && <NewsletterPopup />}
+    </>
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppShell />
     </BrowserRouter>
   )
 }

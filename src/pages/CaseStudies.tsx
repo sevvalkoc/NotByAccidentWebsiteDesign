@@ -1,10 +1,11 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { projects } from '@/data'
+import { useProjects } from '@/content'
 import Seo from '@/components/Seo'
 
 export default function CaseStudies() {
   const ref = useRef<HTMLElement>(null)
+  const projects = useProjects()
 
   useEffect(() => {
     if (!ref.current) return

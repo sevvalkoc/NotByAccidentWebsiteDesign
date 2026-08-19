@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import Seo from '@/components/Seo'
+import { submitLead, useTeam } from '@/content'
 
 function AboutSignup() {
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
+  const [error, setError] = useState('')
 
   if (sent) {
     return (
@@ -15,9 +17,16 @@ function AboutSignup() {
 
   return (
     <form
-      onSubmit={e => {
+      onSubmit={async e => {
         e.preventDefault()
-        if (email.trim()) setSent(true)
+        if (!email.trim()) return
+        setError('')
+        const res = await submitLead({ email, source: 'footer' })
+        if (!res.ok) {
+          setError(res.error ?? 'Something went wrong — please try again.')
+          return
+        }
+        setSent(true)
       }}
       className="flex flex-col sm:flex-row gap-3 reveal reveal-delay-1"
       style={{ maxWidth: '440px', width: '100%' }}
@@ -34,12 +43,16 @@ function AboutSignup() {
         autoComplete="email"
       />
       <button type="submit" className="btn-primary shrink-0">Send</button>
+      {error && (
+        <p className="t-caption" style={{ color: '#6E2237', width: '100%' }}>{error}</p>
+      )}
     </form>
   )
 }
 
 export default function About() {
   const ref = useRef<HTMLElement>(null)
+  const team = useTeam()
 
   useEffect(() => {
     if (!ref.current) return
@@ -190,6 +203,43 @@ export default function About() {
           </div>
         </div>
       </div>
+
+      {/* People */}
+      {team.length > 0 && (
+        <div
+          style={{
+            backgroundColor: '#F0EADA',
+            borderTop: '1px solid rgba(34,30,27,.1)',
+            paddingTop: 'clamp(56px, 7vw, 104px)',
+            paddingBottom: 'clamp(56px, 7vw, 104px)',
+          }}
+        >
+          <div className="page-grid">
+            <p className="t-caption mb-8 reveal" style={{ color: 'rgba(34,30,27,.45)' }}>
+              The people
+            </p>
+            <div
+              style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 'clamp(32px, 4vw, 56px)' }}
+              className="sm:grid-cols-2 lg:grid-cols-3"
+            >
+              {team.map((person, i) => (
+                <div key={person.id} className="reveal" style={{ transitionDelay: `${(i % 3) * 60}ms` }}>
+                  {person.img && (
+                    <div className="work-tile img-crosshair" style={{ overflow: 'hidden', width: '100%', aspectRatio: '4/5', backgroundColor: '#3a3530', marginBottom: '16px' }}>
+                      <img src={person.img} alt={person.name} className="w-full h-full object-cover" loading="lazy" />
+                    </div>
+                  )}
+                  <h3 style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 'clamp(19px, 1.9vw, 23px)', fontWeight: 400, color: '#221E1B', margin: '0 0 4px' }}>
+                    {person.name}
+                  </h3>
+                  <p className="t-caption" style={{ color: '#6E2237', marginBottom: '10px' }}>{person.role}</p>
+                  <p className="t-body m-0" style={{ color: 'rgba(34,30,27,.65)', fontSize: '15px' }}>{person.bio}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Culture */}
       <div

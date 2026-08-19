@@ -1,13 +1,15 @@
 import { useEffect, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { capabilities, categories, projects } from '@/data'
-import { useCompany } from '@/content'
+import { categories } from '@/data'
+import { useCompany, useCapabilities, useProjects } from '@/content'
 import Seo from '@/components/Seo'
 
 export default function CapabilityDetail() {
   const { slug } = useParams()
   const ref = useRef<HTMLElement>(null)
   const company = useCompany()
+  const capabilities = useCapabilities()
+  const projects = useProjects()
   const cap = capabilities.find(c => c.slug === slug)
 
   useEffect(() => {
