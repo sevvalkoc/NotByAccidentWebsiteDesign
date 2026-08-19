@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { signIn } from '@/lib/auth'
 import { supabaseReady } from '@/lib/supabase'
 import { AdminButton, AdminInput } from '@/admin/ui'
@@ -15,11 +16,22 @@ export default function Login() {
         <div className="max-w-lg w-full bg-white border border-gray-200 rounded-lg p-8">
           <h1 className="text-lg font-semibold text-gray-900 mb-2">Not connected yet</h1>
           <p className="text-sm text-gray-600 mb-4">
-            This site isn't connected to its Supabase backend yet, so there's no admin to sign into. Set{' '}
-            <code className="bg-gray-100 px-1 rounded">VITE_SUPABASE_URL</code> and{' '}
-            <code className="bg-gray-100 px-1 rounded">VITE_SUPABASE_ANON_KEY</code>, run the migrations in{' '}
-            <code className="bg-gray-100 px-1 rounded">supabase/migrations/</code>, and create your first admin
-            user — full steps in <code className="bg-gray-100 px-1 rounded">docs/CMS.md</code>.
+            The database itself is already set up — schema and content are live in Supabase. What's missing is two
+            environment variables on this deployment (Vercel → Project → Settings → Environment Variables):
+          </p>
+          <ul className="text-sm text-gray-600 mb-4 space-y-1 list-disc list-inside">
+            <li>
+              <code className="bg-gray-100 px-1 rounded">VITE_SUPABASE_URL</code> — from Supabase Dashboard →
+              Settings → API → Project URL
+            </li>
+            <li>
+              <code className="bg-gray-100 px-1 rounded">VITE_SUPABASE_ANON_KEY</code> — same page, the{' '}
+              <span className="italic">anon / public</span> key (never the service-role key)
+            </li>
+          </ul>
+          <p className="text-sm text-gray-600">
+            Add both, redeploy, and this screen is replaced by the real sign-in form. Full steps in{' '}
+            <code className="bg-gray-100 px-1 rounded">docs/CMS.md</code>.
           </p>
         </div>
       </div>
@@ -62,8 +74,17 @@ export default function Login() {
           {loading ? 'Signing in…' : 'Sign in'}
         </AdminButton>
 
+        <div className="flex items-center justify-between mt-4">
+          <Link to="/admin/forgot-password" className="text-xs text-blue-600 hover:underline">
+            Forgot password?
+          </Link>
+          <Link to="/admin/signup" className="text-xs text-blue-600 hover:underline">
+            Create an account
+          </Link>
+        </div>
+
         <p className="text-xs text-gray-400 mt-6">
-          No public sign-up — admin accounts are created in the Supabase Dashboard. See docs/CMS.md.
+          New accounts need email verification and admin approval before they can sign in.
         </p>
       </form>
     </div>

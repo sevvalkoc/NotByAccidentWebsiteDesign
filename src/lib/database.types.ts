@@ -4,6 +4,7 @@
    this environment), so these are the source of truth for the frontend. */
 
 export type Role = 'admin' | 'editor'
+export type ProfileStatus = 'pending' | 'approved' | 'suspended'
 export type ContentStatus = 'draft' | 'published' | 'archived'
 export type TrainingStatus = 'draft' | 'ready' | 'coming_soon' | 'published' | 'archived'
 export type SubmissionStatus = 'new' | 'read' | 'replied' | 'archived'
@@ -19,6 +20,7 @@ export interface Profile {
   email: string
   full_name: string | null
   role: Role
+  status: ProfileStatus
   created_at: string
   updated_at: string
 }
