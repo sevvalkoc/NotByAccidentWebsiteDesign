@@ -5,6 +5,7 @@ import { submitLead } from '@/content'
 export default function Contact() {
   const ref = useRef<HTMLElement>(null)
   const [submitted, setSubmitted] = useState(false)
+  const [formError, setFormError] = useState('')
 
   useEffect(() => {
     if (!ref.current) return
@@ -139,13 +140,19 @@ export default function Contact() {
             </div>
           ) : (
             <form
-              onSubmit={e => {
+              onSubmit={async e => {
                 e.preventDefault()
                 const form = e.currentTarget
                 const email = (form.elements.namedItem('c-email') as HTMLInputElement)?.value ?? ''
                 const name = (form.elements.namedItem('c-name') as HTMLInputElement)?.value ?? ''
                 const message = (form.elements.namedItem('c-message') as HTMLTextAreaElement)?.value ?? ''
-                if (email.trim()) submitLead({ email, name, message, source: 'contact' })
+                if (!email.trim()) return
+                setFormError('')
+                const res = await submitLead({ email, name, message, source: 'contact' })
+                if (!res.ok) {
+                  setFormError(res.error ?? 'Something went wrong — please try again.')
+                  return
+                }
                 setSubmitted(true)
               }}
               className="reveal"
@@ -250,6 +257,9 @@ export default function Contact() {
                 <button type="submit" className="btn-primary">
                   Send message
                 </button>
+                {formError && (
+                  <p className="t-caption" style={{ color: '#6E2237', marginTop: '0.75rem' }}>{formError}</p>
+                )}
               </div>
             </form>
           )}

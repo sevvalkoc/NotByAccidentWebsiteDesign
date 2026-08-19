@@ -1,21 +1,28 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { capabilities } from '@/data'
-import { useCompany, useSocials, submitLead } from '@/content'
+import { useCompany, useSocials, useCapabilities, useFooterNav, submitLead } from '@/content'
 
 export default function Footer() {
   const company = useCompany()
   const socials = useSocials()
+  const capabilities = useCapabilities()
+  const footerNav = useFooterNav()
   const year = new Date().getFullYear()
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
+  const [error, setError] = useState('')
 
   const featured = capabilities.slice(0, 6)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!email.trim()) return
-    submitLead({ email, source: 'footer' })
+    setError('')
+    const res = await submitLead({ email, source: 'footer' })
+    if (!res.ok) {
+      setError(res.error ?? 'Something went wrong — please try again.')
+      return
+    }
     setSent(true)
     setEmail('')
   }
@@ -61,6 +68,9 @@ export default function Footer() {
                   <button type="submit" className="btn-milk shrink-0">Subscribe</button>
                 </form>
               )}
+              {error && (
+                <p className="t-caption" style={{ color: '#E9C558', marginTop: '0.75rem', textTransform: 'none' }}>{error}</p>
+              )}
               <p className="t-caption" style={{ color: `${dim}.3)`, marginTop: '0.75rem', letterSpacing: '0.02em', textTransform: 'none' }}>
                 Essays and notes only. No pitches. Unsubscribe in one click.
               </p>
@@ -75,14 +85,7 @@ export default function Footer() {
             <nav aria-label="Explore">
               <p className="t-caption" style={{ color: `${dim}.4)`, marginBottom: '1rem' }}>Explore</p>
               <ul className="list-none m-0 p-0 flex flex-col gap-2.5">
-                {[
-                  { to: '/work', label: 'Work' },
-                  { to: '/case-studies', label: 'Case Studies' },
-                  { to: '/capabilities', label: 'Capabilities' },
-                  { to: '/studio', label: 'Studio' },
-                  { to: '/notes', label: 'The Journal' },
-                  { to: '/trainings', label: 'Events & Workshops' },
-                ].map(l => (
+                {footerNav.map(l => (
                   <li key={l.to}>
                     <Link to={l.to} className="t-ui link-grow" style={{ color: `${dim}.7)` }}>{l.label}</Link>
                   </li>

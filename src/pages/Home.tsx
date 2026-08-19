@@ -1,7 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { projects, capabilities, categories } from '@/data'
-import { useNotes, useHero, useTestimonials, useCompany, useHomepage, useClients, usePartners } from '@/content'
+import { categories } from '@/data'
+import {
+  useNotes,
+  useHero,
+  useTestimonials,
+  useCompany,
+  useHomepage,
+  useClients,
+  usePartners,
+  useProjects,
+  useCapabilities,
+} from '@/content'
 import Seo from '@/components/Seo'
 import LogoMarquee from '@/components/LogoMarquee'
 import nbaSymbol from '@/imports/NBA_Symbol_Ink_RGB.png'
@@ -32,6 +42,7 @@ export default function Home() {
   const mainRef = useRef<HTMLElement>(null)
   useReveal(mainRef)
   const company = useCompany()
+  const capabilities = useCapabilities()
 
   const homeSchema = [
     {
@@ -215,6 +226,7 @@ function Hero() {
    grid of cards. */
 function CapabilitiesIndex() {
   const hp = useHomepage()
+  const capabilities = useCapabilities()
   const [openCat, setOpenCat] = useState<string>(categories[0].key)
 
   return (
@@ -505,6 +517,7 @@ function ClientsSlider() {
    tile states the problem the work solved, not just its name. */
 function CaseStudiesTeaser() {
   const hp = useHomepage()
+  const projects = useProjects()
   const tiles = projects.filter(p => p.narrative).slice(0, 3)
 
   return (

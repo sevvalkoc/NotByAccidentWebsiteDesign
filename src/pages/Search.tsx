@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { projects, notes, capabilities } from '@/data'
+import { useProjects, useNotes, useCapabilities } from '@/content'
 import Seo from '@/components/Seo'
 
 type Entry = {
@@ -19,7 +19,11 @@ const staticPages: Entry[] = [
   { title: 'Trainings', kind: 'Page', to: '/trainings', blurb: 'Workshops and training, coming soon.', terms: 'training workshops teaching learning courses education' },
 ]
 
-function buildIndex(): Entry[] {
+function buildIndex(
+  capabilities: ReturnType<typeof useCapabilities>,
+  projects: ReturnType<typeof useProjects>,
+  notes: ReturnType<typeof useNotes>
+): Entry[] {
   return [
     ...staticPages,
     ...capabilities.map(c => ({
@@ -51,8 +55,14 @@ export default function Search() {
   const initial = params.get('q') ?? ''
   const [query, setQuery] = useState(initial)
   const inputRef = useRef<HTMLInputElement>(null)
+  const capabilities = useCapabilities()
+  const projects = useProjects()
+  const notes = useNotes()
 
-  const index = useMemo(buildIndex, [])
+  const index = useMemo(
+    () => buildIndex(capabilities, projects, notes),
+    [capabilities, projects, notes]
+  )
 
   useEffect(() => {
     inputRef.current?.focus()

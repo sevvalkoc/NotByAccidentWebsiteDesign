@@ -11,7 +11,7 @@ export interface ProjectNarrative {
 }
 
 export interface Project {
-  id: number
+  id: string
   num: string
   name: string
   discipline: string
@@ -30,7 +30,7 @@ export interface Project {
 
 export const projects: Project[] = [
   {
-    id: 1,
+    id: '1',
     num: '01',
     name: 'Lavanta',
     discipline: 'Identity · Product · Demand',
@@ -52,7 +52,7 @@ export const projects: Project[] = [
     featured: true,
   },
   {
-    id: 2,
+    id: '2',
     num: '02',
     name: 'Studio Marché',
     discipline: 'Position · Demand',
@@ -74,7 +74,7 @@ export const projects: Project[] = [
     featured: false,
   },
   {
-    id: 3,
+    id: '3',
     num: '03',
     name: 'Edde',
     discipline: 'Identity · Digital',
@@ -96,7 +96,7 @@ export const projects: Project[] = [
     featured: false,
   },
   {
-    id: 4,
+    id: '4',
     num: '04',
     name: 'Hinterland',
     discipline: 'Identity · Campaigns',
@@ -118,7 +118,7 @@ export const projects: Project[] = [
     featured: false,
   },
   {
-    id: 5,
+    id: '5',
     num: '05',
     name: 'Unnamed Project',
     discipline: 'Position',
@@ -136,9 +136,21 @@ export const projects: Project[] = [
   },
 ]
 
-export const notes = [
+export interface Note {
+  id: string
+  title: string
+  subtitle: string
+  body: string
+  date: string
+  category: string
+  readTime: string
+  img: string
+  slug: string
+}
+
+export const notes: Note[] = [
   {
-    id: 1,
+    id: '1',
     title: "The brief is never the brief",
     subtitle: "Why the document handed to a creative company at the start of a project almost always describes the symptom, not the problem.",
     body: `There is a document that exists at the start of every brand project. It is usually twelve pages long. It has a section called 'Background', a section called 'Objectives', and a section called 'The Challenge'. It is called a brief.
@@ -161,7 +173,7 @@ The first job of any strategy engagement is to translate the brief into the real
     slug: 'the-brief-is-never-the-brief',
   },
   {
-    id: 2,
+    id: '2',
     title: "What packaging actually does",
     subtitle: "A note on the difference between packaging that looks expensive and packaging that makes a product cost more.",
     body: `Packaging has a job. Most packaging forgets what the job is.
@@ -178,7 +190,7 @@ Good packaging is the visual translation of product truth. When the truth is str
     slug: 'what-packaging-actually-does',
   },
   {
-    id: 3,
+    id: '3',
     title: "Naming is not a creative exercise",
     subtitle: "On the misconception that a good brand name comes from a long list and a vote.",
     body: `Every naming project starts the same way. The client wants a list. The longer the list, the better. They believe that somewhere inside a list of four hundred names, the right one is hiding.
@@ -197,7 +209,7 @@ The best names come from a decision, not a consensus.`,
     slug: 'naming-is-not-a-creative-exercise',
   },
   {
-    id: 4,
+    id: '4',
     title: "Why growth is a brand problem",
     subtitle: "The point at which demand generation and brand strategy become the same discipline.",
     body: `There is a version of marketing that treats brand and demand as separate budgets with separate goals. Brand is what you spend on awareness. Demand is what you spend on conversion. The two teams meet monthly and disagree about attribution.
@@ -214,7 +226,7 @@ Growth is a brand problem because desire is a brand outcome. You do not generate
     slug: 'why-growth-is-a-brand-problem',
   },
   {
-    id: 5,
+    id: '5',
     title: "The tyranny of the reference",
     subtitle: "Why the mood board a client arrives with is usually a description of the last brand that impressed them, not the one they should become.",
     body: `Every project begins with references. A folder, a board, a link to three companies the client admires. This is meant to be helpful, and sometimes it is. More often it is a quiet act of surrender.
@@ -231,7 +243,7 @@ So we take the references seriously — not as instructions, but as evidence. Wh
     slug: 'the-tyranny-of-the-reference',
   },
   {
-    id: 6,
+    id: '6',
     title: "Premium is a promise, not a finish",
     subtitle: "On the difference between a brand that looks costly and a brand that behaves as though it is worth the money.",
     body: `Clients ask for premium the way they ask for the weather. As if it were a setting. Make it feel more premium — add some black, a serif, a little space.
@@ -248,7 +260,7 @@ This is inconvenient, because it means premium is not something we can hand over
     slug: 'premium-is-a-promise-not-a-finish',
   },
   {
-    id: 7,
+    id: '7',
     title: "In defence of the slow project",
     subtitle: "Why the best brand work resists the timeline it was sold on, and what that actually costs.",
     body: `Every good project has a moment where it should slow down and almost never does. It is the moment after the research and before the making, when the honest answer is: we do not yet know what this is.
@@ -265,7 +277,7 @@ We are not romantic about time. Slow is expensive and we know it. But the most e
     slug: 'in-defence-of-the-slow-project',
   },
   {
-    id: 8,
+    id: '8',
     title: "The audience is not everyone",
     subtitle: "A note on why the instinct to appeal to more people is the surest way to move fewer of them.",
     body: `The most common note we receive on a piece of strategy is some version of: could this speak to more people? It is asked in good faith and it is almost always wrong.
@@ -282,7 +294,7 @@ So when we narrow the audience, we are not shrinking the opportunity. We are con
     slug: 'the-audience-is-not-everyone',
   },
   {
-    id: 9,
+    id: '9',
     title: "A logo is the least of it",
     subtitle: "Why the mark everyone argues about is the smallest decision in a brand, and the one that should be made last.",
     body: `The logo gets the meeting. It gets the revisions, the opinions, the person who was quiet all project suddenly finding their voice. It is the part everyone feels qualified to judge, because it is the part that looks like a decision.
@@ -299,7 +311,7 @@ Spend the argument on the strategy. Let the logo be the easy part.`,
     slug: 'a-logo-is-the-least-of-it',
   },
   {
-    id: 10,
+    id: '10',
     title: "The cost of sounding like everyone",
     subtitle: "On the strange comfort of the words every company uses, and the price of hiding inside them.",
     body: `Read enough brand copy and you start to notice it is all the same. Everyone is passionate. Everyone is innovative. Everyone puts the customer at the heart of everything they do. The words are so common they have stopped carrying information — they are noise dressed as meaning.
@@ -316,7 +328,7 @@ We spend a lot of time deleting the words that could belong to anyone. What is l
     slug: 'the-cost-of-sounding-like-everyone',
   },
   {
-    id: 11,
+    id: '11',
     title: "Consistency is not repetition",
     subtitle: "The difference between a brand that feels coherent and one that is merely identical everywhere.",
     body: `Somewhere along the way, consistency came to mean sameness. Use the logo at this size. This blue, never that one. The same headline treatment on every surface. Guidelines became a list of prohibitions, and the brand became a thing you could break but never build.
@@ -333,7 +345,7 @@ Write down the judgement, not just the measurements.`,
     slug: 'consistency-is-not-repetition',
   },
   {
-    id: 12,
+    id: '12',
     title: "Say the price out loud",
     subtitle: "Why a brand that is shy about what it costs is usually unsure of what it is worth.",
     body: `You can tell a lot about a company by how it behaves around its own price. The confident ones state it plainly and move on. The unsure ones bury it, gate it behind a form, surround it with justification, or avoid the subject until the last possible moment.
@@ -837,14 +849,24 @@ export const partnerLogos: { name: string; style: 'serif' | 'sans-tight' | 'sans
   { name: 'The Gourmand', style: 'italic' },
 ]
 
-export const team = [
+export interface TeamMember {
+  id: string
+  name: string
+  role: string
+  bio: string
+  img: string
+}
+
+export const team: TeamMember[] = [
   {
+    id: '1',
     name: 'Sara Okafor',
     role: 'Founding Partner, Strategy',
     bio: 'Sara spent a decade in strategy consulting before concluding that brand and commercial thinking should be one discipline, not two. She built Not by Accident on that premise.',
     img: 'https://images.unsplash.com/photo-1675773051474-55c4b7d2cf53?w=600&h=750&fit=crop&auto=format',
   },
   {
+    id: '2',
     name: 'Tomás Reyes',
     role: 'Founding Partner, Creative',
     bio: 'Tomás ran creative for two decade-long stints at independent agencies in Amsterdam and São Paulo before deciding the work was better when the creative director also sat in on the strategy.',

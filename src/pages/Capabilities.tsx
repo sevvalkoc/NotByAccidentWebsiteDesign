@@ -1,10 +1,12 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { capabilities, categories } from '@/data'
+import { categories } from '@/data'
+import { useCapabilities } from '@/content'
 import Seo from '@/components/Seo'
 
 export default function Capabilities() {
   const ref = useRef<HTMLElement>(null)
+  const capabilities = useCapabilities()
 
   useEffect(() => {
     if (!ref.current) return

@@ -1,12 +1,13 @@
 import { useEffect, useRef } from 'react'
 import { useParams, Link, Navigate } from 'react-router-dom'
-import { projects, capabilities } from '@/data'
-import { useCompany } from '@/content'
+import { useCompany, useProjects, useCapabilities } from '@/content'
 import Seo from '@/components/Seo'
 
 export default function CaseStudy() {
   const { slug } = useParams<{ slug: string }>()
   const company = useCompany()
+  const projects = useProjects()
+  const capabilities = useCapabilities()
   const project = projects.find(p => p.slug === slug)
   const ref = useRef<HTMLElement>(null)
 

@@ -1,11 +1,11 @@
-/* ── Content store ──────────────────────────────────────────────────────────
-   A localStorage-backed store for editable site content, so the /admin board
-   can edit copy, company details, testimonials and Journal posts without a
-   backend. Seeded from src/data.ts; overrides persist in the browser.
-
-   NOTE: the admin login is a lightweight client-side gate suitable for a
-   prototype. It is not real security — anyone with the bundle can read the
-   password. Move to Supabase auth for anything production-facing. */
+/* ── Public content store ───────────────────────────────────────────────────
+   A reactive store the whole public site reads through. It always starts
+   from the static seed in src/data.ts (so the site renders correctly even
+   before the CMS migration has been run, or if Supabase is briefly
+   unreachable), then — once Supabase is configured — quietly fetches the
+   live, published content and swaps it in. Every component that calls one
+   of the hooks below re-renders automatically when that happens; nothing
+   about how pages consume this data changes. */
 import { useSyncExternalStore } from 'react'
 import {
   notes as seedNotes,
@@ -14,19 +14,26 @@ import {
   socials as seedSocials,
   clientLogos as seedClients,
   partnerLogos as seedPartners,
+  projects as seedProjects,
+  capabilities as seedCapabilities,
+  team as seedTeam,
+  type Note,
+  type Project,
+  type Capability,
+  type TeamMember,
 } from '@/data'
-
-export interface Note {
-  id: number
-  title: string
-  subtitle: string
-  body: string
-  date: string
-  category: string
-  readTime: string
-  img: string
-  slug: string
-}
+import { supabase, supabaseReady } from '@/lib/supabase'
+import {
+  fetchProjects,
+  fetchCapabilities,
+  fetchNotes,
+  fetchTestimonials,
+  fetchClients,
+  fetchPartners,
+  fetchTeam,
+  fetchSiteSettings,
+  fetchNavigation,
+} from '@/lib/cms'
 
 export interface Testimonial {
   quote: string
@@ -97,6 +104,7 @@ export interface Site {
   hero: Hero
   homepage: Homepage
   nav: NavLink[]
+  footerNav: NavLink[]
   socials: Social[]
   clients: Wordmark[]
   partners: Wordmark[]
@@ -104,8 +112,14 @@ export interface Site {
   trainings: Trainings
   testimonials: Testimonial[]
   notes: Note[]
+  projects: Project[]
+  capabilities: Capability[]
+  team: TeamMember[]
 }
 
+/* Hero image and homepage section headings are not yet wired to a live CMS
+   editor (the `pages` / `page_sections` tables exist in the schema for
+   this, ready for a future admin screen) — everything else in Site is. */
 const seedHero: Hero = {
   words: ['wanted', 'chosen', 'remembered', 'recommended'],
   subhead:
@@ -146,7 +160,7 @@ const seedTrainings: Trainings = {
 const seedHomepage: Homepage = {
   featuredEyebrow: 'Selected work',
   featuredHeading: 'Proof that the brand decision was the commercial one.',
-  capabilitiesHeading: 'Eighteen capabilities. One way of working.',
+  capabilitiesHeading: 'Capabilities. One way of working.',
   journalHeading: 'How we think, in public.',
   ctaHeading: 'Tell us the company you want to become.',
   ctaBody:
@@ -162,69 +176,42 @@ const seedNav: NavLink[] = [
   { to: '/contact', label: 'Contact' },
 ]
 
+const seedFooterNav: NavLink[] = [
+  { to: '/work', label: 'Work' },
+  { to: '/case-studies', label: 'Case Studies' },
+  { to: '/capabilities', label: 'Capabilities' },
+  { to: '/studio', label: 'Studio' },
+  { to: '/notes', label: 'The Journal' },
+  { to: '/trainings', label: 'Events & Workshops' },
+]
+
 const seed: Site = {
   company: seedCompany,
   hero: seedHero,
   homepage: seedHomepage,
   nav: seedNav,
+  footerNav: seedFooterNav,
   socials: seedSocials as Social[],
   clients: seedClients as Wordmark[],
   partners: seedPartners as Wordmark[],
   seo: seedSeo,
   trainings: seedTrainings,
   testimonials: seedTestimonials as Testimonial[],
-  notes: seedNotes as Note[],
+  notes: seedNotes,
+  projects: seedProjects,
+  capabilities: seedCapabilities,
+  team: seedTeam,
 }
 
-const KEY = 'nba.content.site.v1'
+let cache: Site = seed
 const listeners = new Set<() => void>()
-let cache: Site | null = null
 
 function read(): Site {
-  if (cache) return cache
-  try {
-    const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(KEY) : null
-    cache = raw ? mergeSeed(JSON.parse(raw) as Partial<Site>) : seed
-  } catch {
-    cache = seed
-  }
   return cache
 }
 
-/* keep new seed fields if an older payload is missing them */
-function mergeNav(stored?: NavLink[]): NavLink[] {
-  if (!stored) return seed.nav
-  // Ensure the Reports link exists in previously-saved menus, placed before Contact.
-  if (stored.some(l => l.to === '/reports')) return stored
-  const reports: NavLink = { to: '/reports', label: 'Reports', soon: true }
-  const contactIdx = stored.findIndex(l => l.to === '/contact')
-  if (contactIdx === -1) return [...stored, reports]
-  return [...stored.slice(0, contactIdx), reports, ...stored.slice(contactIdx)]
-}
-
-function mergeSeed(stored: Partial<Site>): Site {
-  return {
-    company: { ...seed.company, ...(stored.company ?? {}) },
-    hero: { ...seed.hero, ...(stored.hero ?? {}) },
-    homepage: { ...seed.homepage, ...(stored.homepage ?? {}) },
-    nav: mergeNav(stored.nav),
-    socials: stored.socials ?? seed.socials,
-    clients: stored.clients ?? seed.clients,
-    partners: stored.partners ?? seed.partners,
-    seo: { ...seed.seo, ...(stored.seo ?? {}) },
-    trainings: { ...seed.trainings, ...(stored.trainings ?? {}) },
-    testimonials: stored.testimonials ?? seed.testimonials,
-    notes: stored.notes ?? seed.notes,
-  }
-}
-
-function write(next: Site) {
-  cache = next
-  try {
-    localStorage.setItem(KEY, JSON.stringify(next))
-  } catch {
-    /* storage unavailable — keep in-memory only */
-  }
+function write(patch: Partial<Site>) {
+  cache = { ...cache, ...patch }
   listeners.forEach(l => l())
 }
 
@@ -235,12 +222,50 @@ function subscribe(cb: () => void) {
   }
 }
 
+/* Fires once per page load. Each fetch is independent, so a failure in one
+   (e.g. testimonials table not seeded yet) never blocks the others from
+   loading — the store just keeps that one field on its seed value. */
+let loadStarted = false
+function loadLiveContent() {
+  if (loadStarted || !supabaseReady) return
+  loadStarted = true
+  void Promise.allSettled([
+    fetchProjects().then(v => v && write({ projects: v })),
+    fetchCapabilities().then(v => v && write({ capabilities: v })),
+    fetchNotes().then(v => v && write({ notes: v })),
+    fetchTestimonials().then(v => v && write({ testimonials: v })),
+    fetchClients().then(v => v && write({ clients: v })),
+    fetchPartners().then(v => v && write({ partners: v })),
+    fetchTeam().then(v => v && write({ team: v })),
+    fetchNavigation('header').then(v => v && write({ nav: v })),
+    fetchNavigation('footer').then(v => v && write({ footerNav: v })),
+    fetchSiteSettings().then(v => v && write({ company: v.company, socials: v.socials, seo: v.seo })),
+  ])
+}
+loadLiveContent()
+
+/** Forces an immediate re-fetch — call after an admin save so the change is
+ *  visible without a hard refresh (e.g. an admin previewing in another tab). */
+export function refreshSite() {
+  loadStarted = false
+  loadLiveContent()
+}
+
 /* ── Public hooks ─────────────────────────────────────────────────────────── */
 export function useSite(): Site {
   return useSyncExternalStore(subscribe, read, () => seed)
 }
 export function useNotes(): Note[] {
   return useSite().notes
+}
+export function useProjects(): Project[] {
+  return useSite().projects
+}
+export function useCapabilities(): Capability[] {
+  return useSite().capabilities
+}
+export function useTeam(): TeamMember[] {
+  return useSite().team
 }
 export function useCompany(): Company {
   return useSite().company
@@ -256,6 +281,9 @@ export function useHomepage(): Homepage {
 }
 export function useNav(): NavLink[] {
   return useSite().nav
+}
+export function useFooterNav(): NavLink[] {
+  return useSite().footerNav
 }
 export function useSocials(): Social[] {
   return useSite().socials
@@ -277,43 +305,6 @@ export function getSite(): Site {
   return read()
 }
 
-/* ── Mutations ────────────────────────────────────────────────────────────── */
-export function updateCompany(patch: Partial<Company>) {
-  const s = read()
-  write({ ...s, company: { ...s.company, ...patch } })
-}
-export function updateHero(patch: Partial<Hero>) {
-  const s = read()
-  write({ ...s, hero: { ...s.hero, ...patch } })
-}
-export function updateHomepage(patch: Partial<Homepage>) {
-  const s = read()
-  write({ ...s, homepage: { ...s.homepage, ...patch } })
-}
-export function updateNav(next: NavLink[]) {
-  write({ ...read(), nav: next })
-}
-export function updateSocials(next: Social[]) {
-  write({ ...read(), socials: next })
-}
-export function updateClients(next: Wordmark[]) {
-  write({ ...read(), clients: next })
-}
-export function updatePartners(next: Wordmark[]) {
-  write({ ...read(), partners: next })
-}
-export function updateSeo(patch: Partial<Seo>) {
-  const s = read()
-  write({ ...s, seo: { ...s.seo, ...patch } })
-}
-export function updateTrainings(patch: Partial<Trainings>) {
-  const s = read()
-  write({ ...s, trainings: { ...s.trainings, ...patch } })
-}
-export function updateTestimonials(next: Testimonial[]) {
-  write({ ...read(), testimonials: next })
-}
-
 export function slugify(title: string): string {
   return title
     .toLowerCase()
@@ -322,294 +313,25 @@ export function slugify(title: string): string {
     .replace(/^-+|-+$/g, '')
 }
 
-export function saveNote(input: Omit<Note, 'id'> & { id?: number }): Note {
-  const s = read()
-  const list = s.notes.slice()
-  if (input.id != null) {
-    const idx = list.findIndex(n => n.id === input.id)
-    if (idx !== -1) {
-      const updated = { ...list[idx], ...input, id: input.id } as Note
-      list[idx] = updated
-      write({ ...s, notes: list })
-      return updated
-    }
-  }
-  const id = list.reduce((m, n) => Math.max(m, n.id), 0) + 1
-  const created: Note = { ...(input as Note), id }
-  write({ ...s, notes: [created, ...list] })
-  return created
-}
-
-export function deleteNote(id: number) {
-  const s = read()
-  write({ ...s, notes: s.notes.filter(n => n.id !== id) })
-}
-
-export function resetSite() {
-  write(seed)
-}
-
-/* ── Leads (form + newsletter submissions) ─────────────────────────────────
-   Captured submissions live under their own key so they survive content
-   resets. Prototype-only: stored in this browser. Once Supabase is connected,
-   submitLead() also posts to the backend so the owner can see every email in
-   one place and a notification is sent. */
-const LEADS_KEY = 'nba.leads.v1'
-const leadListeners = new Set<() => void>()
-
+/* ── Lead capture (contact form, newsletter signups, waiting lists) ────────
+   All of these write to the same `contact_submissions` table, distinguished
+   by `source`, so the admin has one inbox instead of several. */
 export type LeadSource = 'newsletter' | 'newsletter-popup' | 'contact' | 'footer'
 
-export interface Lead {
-  id: string
+export async function submitLead(input: {
   email: string
   name?: string
   message?: string
   source: LeadSource
-  createdAt: string
-}
-
-let leadsCache: Lead[] | null = null
-
-function readLeads(): Lead[] {
-  if (leadsCache) return leadsCache
-  try {
-    const raw = localStorage.getItem(LEADS_KEY)
-    leadsCache = raw ? (JSON.parse(raw) as Lead[]) : []
-  } catch {
-    leadsCache = []
+}): Promise<{ ok: boolean; error?: string }> {
+  if (!supabase) {
+    return { ok: false, error: 'This site is not yet connected to its content backend — see docs/CMS.md.' }
   }
-  return leadsCache
-}
-
-function writeLeads(next: Lead[]) {
-  leadsCache = next
-  try {
-    localStorage.setItem(LEADS_KEY, JSON.stringify(next))
-  } catch {
-    /* storage unavailable — keep in-memory only */
-  }
-  leadListeners.forEach(l => l())
-}
-
-export function useLeads(): Lead[] {
-  return useSyncExternalStore(
-    cb => {
-      leadListeners.add(cb)
-      return () => leadListeners.delete(cb)
-    },
-    readLeads,
-    () => [],
-  )
-}
-
-/* Records a submission locally and, when a backend is available, forwards it so
-   the owner can review every email and receive a notification. Returns the
-   stored Lead. The network call is best-effort and never blocks the UI. */
-export function submitLead(input: { email: string; name?: string; message?: string; source: LeadSource }): Lead {
-  const lead: Lead = {
-    id: (crypto.randomUUID?.() ?? String(Date.now() + Math.random())),
+  const { error } = await supabase.from('contact_submissions').insert({
     email: input.email.trim(),
-    name: input.name?.trim() || undefined,
-    message: input.message?.trim() || undefined,
+    name: input.name?.trim() || null,
+    message: input.message?.trim() || null,
     source: input.source,
-    createdAt: new Date().toISOString(),
-  }
-  writeLeads([lead, ...readLeads()])
-  void forwardLead(lead)
-  return lead
-}
-
-/* Best-effort forward to the backend. No-op until Supabase is wired in — once
-   the edge function exists this posts the lead so the owner sees every email
-   and a notification is sent. The lead is always safe in localStorage first. */
-async function forwardLead(_lead: Lead): Promise<void> {
-  /* Supabase not connected yet — nothing to forward to. */
-}
-
-export function deleteLead(id: string) {
-  writeLeads(readLeads().filter(l => l.id !== id))
-}
-
-export function exportLeadsCsv(): string {
-  const rows = readLeads()
-  const head = ['createdAt', 'source', 'email', 'name', 'message']
-  const esc = (v: string) => `"${v.replace(/"/g, '""')}"`
-  const lines = [head.join(',')]
-  for (const l of rows) {
-    lines.push([l.createdAt, l.source, l.email, l.name ?? '', l.message ?? ''].map(v => esc(String(v))).join(','))
-  }
-  return lines.join('\n')
-}
-
-/* ── Auth (lightweight client-side accounts) ───────────────────────────────
-   Sign up creates an account, then sign in starts a session. Accounts live in
-   localStorage; the active session lives in sessionStorage. This is a prototype
-   gate, NOT real security — anyone with the bundle can read stored accounts.
-   Connect Supabase Auth for real, shared, secure sign-in. */
-const AUTH_KEY = 'nba.admin.session'
-const USERS_KEY = 'nba.admin.users.v1'
-const authListeners = new Set<() => void>()
-
-interface Account {
-  email: string
-  password: string
-  approved: boolean
-  verified: boolean
-  code?: string
-}
-
-const userListeners = new Set<() => void>()
-
-function readUsers(): Account[] {
-  try {
-    const raw = localStorage.getItem(USERS_KEY)
-    if (!raw) return []
-    // Back-compat: older accounts had no `approved`/`verified` flags — treat them as both.
-    return (JSON.parse(raw) as Account[]).map(u => ({
-      ...u,
-      approved: u.approved ?? true,
-      verified: u.verified ?? true,
-    }))
-  } catch {
-    return []
-  }
-}
-
-function writeUsers(users: Account[]) {
-  try {
-    localStorage.setItem(USERS_KEY, JSON.stringify(users))
-  } catch {
-    /* ignore */
-  }
-  userListeners.forEach(l => l())
-}
-
-/** Public view of an account — never exposes the password. */
-export interface AccountView {
-  email: string
-  approved: boolean
-  verified: boolean
-}
-
-function readAccountViews(): AccountView[] {
-  return readUsers().map(({ email, approved, verified }) => ({ email, approved, verified }))
-}
-
-let accountsCache: AccountView[] = []
-function readAccountsCached(): AccountView[] {
-  const next = readAccountViews()
-  // Keep a stable reference unless the data actually changed (useSyncExternalStore).
-  if (JSON.stringify(next) !== JSON.stringify(accountsCache)) accountsCache = next
-  return accountsCache
-}
-
-function subscribeUsers(cb: () => void) {
-  userListeners.add(cb)
-  return () => {
-    userListeners.delete(cb)
-  }
-}
-
-export function useAccounts(): AccountView[] {
-  return useSyncExternalStore(subscribeUsers, readAccountsCached, () => accountsCache)
-}
-
-export function approveAccount(email: string) {
-  writeUsers(readUsers().map(u => (u.email === email ? { ...u, approved: true } : u)))
-}
-
-export function revokeAccount(email: string) {
-  writeUsers(readUsers().map(u => (u.email === email ? { ...u, approved: false } : u)))
-}
-
-export function deleteAccount(email: string) {
-  writeUsers(readUsers().filter(u => u.email !== email))
-}
-
-function readAuth(): string | null {
-  try {
-    return sessionStorage.getItem(AUTH_KEY)
-  } catch {
-    return null
-  }
-}
-
-function subscribeAuth(cb: () => void) {
-  authListeners.add(cb)
-  return () => {
-    authListeners.delete(cb)
-  }
-}
-
-/** Current signed-in email, or null. */
-export function useAuth(): string | null {
-  return useSyncExternalStore(subscribeAuth, readAuth, () => null)
-}
-
-/** Six-digit code, as an email service would send. */
-function makeCode(): string {
-  return String(Math.floor(100000 + Math.random() * 900000))
-}
-
-export function signup(
-  email: string,
-  password: string
-): { ok: boolean; error?: string; code?: string } {
-  const clean = email.trim().toLowerCase()
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(clean)) return { ok: false, error: 'Enter a valid email address.' }
-  if (password.length < 6) return { ok: false, error: 'Password must be at least 6 characters.' }
-  const users = readUsers()
-  const existing = users.find(u => u.email === clean)
-  if (existing && existing.verified) {
-    return { ok: false, error: 'An account with this email already exists — sign in instead.' }
-  }
-  // The first account is the owner and is approved automatically; every
-  // subsequent request stays pending until an approved admin lets it in.
-  // Nobody is created verified — a code must be confirmed first.
-  const approved = users.filter(u => u.verified).length === 0
-  const code = makeCode()
-  const next: Account = { email: clean, password, approved, verified: false, code }
-  writeUsers(existing ? users.map(u => (u.email === clean ? next : u)) : [...users, next])
-  // NOTE: real delivery needs a backend (e.g. Supabase). We return the code so
-  // the UI can show it in place of an inbox for the prototype.
-  return { ok: true, code }
-}
-
-/** Confirm the emailed code. Verified accounts still await admin approval. */
-export function verifyEmail(
-  email: string,
-  code: string
-): { ok: boolean; error?: string; pending?: boolean } {
-  const clean = email.trim().toLowerCase()
-  const users = readUsers()
-  const user = users.find(u => u.email === clean)
-  if (!user) return { ok: false, error: 'No sign-up found for this email.' }
-  if (user.verified) return { ok: true, pending: !user.approved }
-  if (user.code !== code.trim()) return { ok: false, error: 'That code is not correct.' }
-  writeUsers(users.map(u => (u.email === clean ? { ...u, verified: true, code: undefined } : u)))
-  return { ok: true, pending: !user.approved }
-}
-
-export function login(email: string, password: string): { ok: boolean; error?: string } {
-  const clean = email.trim().toLowerCase()
-  const user = readUsers().find(u => u.email === clean)
-  if (!user || user.password !== password) return { ok: false, error: 'Email or password is incorrect.' }
-  if (!user.verified) return { ok: false, error: 'Please verify your email address first.' }
-  if (!user.approved) return { ok: false, error: 'Your account is awaiting approval from an administrator.' }
-  try {
-    sessionStorage.setItem(AUTH_KEY, clean)
-  } catch {
-    /* ignore */
-  }
-  authListeners.forEach(l => l())
-  return { ok: true }
-}
-
-export function logout() {
-  try {
-    sessionStorage.removeItem(AUTH_KEY)
-  } catch {
-    /* ignore */
-  }
-  authListeners.forEach(l => l())
+  })
+  return error ? { ok: false, error: 'Something went wrong sending that — please try again or email us directly.' } : { ok: true }
 }

@@ -7,6 +7,7 @@ export default function Trainings() {
   const ref = useRef<HTMLElement>(null)
   const [email, setEmail] = useState('')
   const [joined, setJoined] = useState(false)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     if (!ref.current) return
@@ -131,10 +132,15 @@ export default function Trainings() {
               </p>
             ) : (
               <form
-                onSubmit={e => {
+                onSubmit={async e => {
                   e.preventDefault()
                   if (!email.trim()) return
-                  submitLead({ email, source: 'newsletter', message: 'Trainings waiting list' })
+                  setError('')
+                  const res = await submitLead({ email, source: 'newsletter', message: 'Trainings waiting list' })
+                  if (!res.ok) {
+                    setError(res.error ?? 'Something went wrong — please try again.')
+                    return
+                  }
                   setJoined(true)
                   setEmail('')
                 }}
@@ -162,6 +168,7 @@ export default function Trainings() {
                 <button type="submit" className="btn-milk" style={{ alignSelf: 'flex-start' }}>
                   Join the waiting list
                 </button>
+                {error && <p className="t-caption" style={{ color: '#E9C558' }}>{error}</p>}
               </form>
             )}
           </div>
