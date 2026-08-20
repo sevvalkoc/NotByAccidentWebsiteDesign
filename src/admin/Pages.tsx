@@ -18,7 +18,14 @@ interface ListItem {
   title: string
   body: string
 }
-type Extra = { words?: string[]; imageOffsetX?: number; imageOffsetY?: number; items?: ListItem[] }
+type Extra = {
+  words?: string[]
+  imageOffsetX?: number
+  imageOffsetY?: number
+  items?: ListItem[]
+  body2?: string
+  waitingListNote?: string
+}
 
 interface SectionRow {
   id: string
@@ -35,7 +42,11 @@ interface SectionRow {
 const PAGES = [
   { slug: 'home', label: 'Homepage' },
   { slug: 'studio', label: 'Studio' },
+  { slug: 'contact', label: 'Contact' },
+  { slug: 'trainings', label: 'Trainings' },
+  { slug: 'reports', label: 'Reports' },
 ]
+type PageSlug = (typeof PAGES)[number]['slug']
 
 const SECTION_LABELS: Record<string, string> = {
   hero: 'Hero',
@@ -47,17 +58,22 @@ const SECTION_LABELS: Record<string, string> = {
   principles: 'Principles',
   culture: 'Culture',
   cta: 'Final CTA',
+  header: 'Page header',
 }
 
-/** Which text fields (beyond eyebrow/title, which every section gets) apply per section. */
+/** Which text fields (beyond eyebrow/title, which every section gets) apply,
+ *  keyed by `${pageSlug}:${section_key}` since the same section_key (e.g.
+ *  'header') means different things, with different fields, on different pages. */
 const SECTION_FIELDS: Record<string, { subtitle?: boolean; body?: boolean }> = {
-  opening: { subtitle: true, body: true },
-  final_cta: { body: true },
+  'home:final_cta': { body: true },
+  'studio:opening': { subtitle: true, body: true },
+  'contact:header': { subtitle: true, body: true },
+  'reports:header': { subtitle: true },
 }
 const LIST_SECTIONS = new Set(['principles', 'culture'])
 
 export default function Pages() {
-  const [activePage, setActivePage] = useState<'home' | 'studio'>('home')
+  const [activePage, setActivePage] = useState<PageSlug>('home')
   const [rows, setRows] = useState<SectionRow[] | null>(null)
   const [error, setError] = useState('')
 
@@ -131,7 +147,7 @@ export default function Pages() {
           <button
             key={p.slug}
             type="button"
-            onClick={() => setActivePage(p.slug as 'home' | 'studio')}
+            onClick={() => setActivePage(p.slug)}
             className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${
               activePage === p.slug ? 'border-gray-900 text-gray-900' : 'border-transparent text-gray-400 hover:text-gray-600'
             }`}
@@ -148,8 +164,9 @@ export default function Pages() {
           {rows.map(row => {
             const props = { row, onChange: (patch: Partial<SectionRow>) => patchRow(row.id, patch), onSave: () => saveRow(row) }
             if (row.section_key === 'hero') return <HeroCard key={row.id} {...props} />
+            if (activePage === 'trainings' && row.section_key === 'header') return <TrainingsHeaderCard key={row.id} {...props} />
             if (LIST_SECTIONS.has(row.section_key)) return <ListCard key={row.id} {...props} />
-            return <SectionCard key={row.id} {...props} />
+            return <SectionCard key={row.id} {...props} pageSlug={activePage} />
           })}
         </div>
       )}
@@ -185,12 +202,14 @@ function SectionCard({
   row,
   onChange,
   onSave,
+  pageSlug,
 }: {
   row: SectionRow
   onChange: (patch: Partial<SectionRow>) => void
   onSave: () => void
+  pageSlug: PageSlug
 }) {
-  const fields = SECTION_FIELDS[row.section_key] ?? {}
+  const fields = SECTION_FIELDS[`${pageSlug}:${row.section_key}`] ?? {}
   const label = SECTION_LABELS[row.section_key] ?? row.section_key
   return (
     <AdminCard className="p-6">
@@ -218,6 +237,69 @@ function SectionCard({
   )
 }
 
+/** Shared add/reorder/remove editor for a repeatable title+body list, stored
+ *  as extra.items. Used by ListCard (Principles/Culture) and
+ *  TrainingsHeaderCard (Format). */
+function ItemsEditor({
+  items,
+  onChange,
+  titlePlaceholder = 'Title',
+  bodyPlaceholder = 'Body',
+}: {
+  items: ListItem[]
+  onChange: (items: ListItem[]) => void
+  titlePlaceholder?: string
+  bodyPlaceholder?: string
+}) {
+  function updateItem(i: number, patch: Partial<ListItem>) {
+    onChange(items.map((it, idx) => (idx === i ? { ...it, ...patch } : it)))
+  }
+  function removeItem(i: number) {
+    onChange(items.filter((_, idx) => idx !== i))
+  }
+  function moveItem(i: number, dir: -1 | 1) {
+    const j = i + dir
+    if (j < 0 || j >= items.length) return
+    const next = [...items]
+    ;[next[i], next[j]] = [next[j], next[i]]
+    onChange(next)
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      {items.map((item, i) => (
+        <div key={i} className="border border-gray-200 rounded-md p-3">
+          <div className="flex items-start gap-2">
+            <div className="flex-1">
+              <AdminInput
+                value={item.title}
+                onChange={e => updateItem(i, { title: e.target.value })}
+                placeholder={titlePlaceholder}
+                className="mb-2"
+              />
+              <AdminTextarea value={item.body} onChange={e => updateItem(i, { body: e.target.value })} rows={2} placeholder={bodyPlaceholder} />
+            </div>
+            <div className="flex flex-col gap-1 shrink-0">
+              <button type="button" className="text-xs text-gray-400 hover:text-gray-700 disabled:opacity-30" disabled={i === 0} onClick={() => moveItem(i, -1)}>
+                ↑
+              </button>
+              <button type="button" className="text-xs text-gray-400 hover:text-gray-700 disabled:opacity-30" disabled={i === items.length - 1} onClick={() => moveItem(i, 1)}>
+                ↓
+              </button>
+              <button type="button" className="text-xs text-red-500 hover:text-red-700" onClick={() => removeItem(i)}>
+                ✕
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
+      <AdminButton type="button" variant="secondary" onClick={() => onChange([...items, { title: '', body: '' }])}>
+        + Add item
+      </AdminButton>
+    </div>
+  )
+}
+
 function ListCard({
   row,
   onChange,
@@ -231,23 +313,6 @@ function ListCard({
   const label = SECTION_LABELS[row.section_key] ?? row.section_key
   const showTitle = row.section_key === 'culture' // Principles has no section heading, just the list; Culture does.
 
-  function setItems(next: ListItem[]) {
-    onChange({ extra: { ...row.extra, items: next } })
-  }
-  function updateItem(i: number, patch: Partial<ListItem>) {
-    setItems(items.map((it, idx) => (idx === i ? { ...it, ...patch } : it)))
-  }
-  function removeItem(i: number) {
-    setItems(items.filter((_, idx) => idx !== i))
-  }
-  function moveItem(i: number, dir: -1 | 1) {
-    const j = i + dir
-    if (j < 0 || j >= items.length) return
-    const next = [...items]
-    ;[next[i], next[j]] = [next[j], next[i]]
-    setItems(next)
-  }
-
   return (
     <AdminCard className="p-6">
       <h2 className="text-sm font-semibold text-gray-900 mb-4">{label}</h2>
@@ -260,39 +325,66 @@ function ListCard({
         </AdminField>
       )}
 
-      <div className="mt-4 flex flex-col gap-4">
-        {items.map((item, i) => (
-          <div key={i} className="border border-gray-200 rounded-md p-3">
-            <div className="flex items-start gap-2">
-              <div className="flex-1">
-                <AdminInput
-                  value={item.title}
-                  onChange={e => updateItem(i, { title: e.target.value })}
-                  placeholder="Title"
-                  className="mb-2"
-                />
-                <AdminTextarea value={item.body} onChange={e => updateItem(i, { body: e.target.value })} rows={2} placeholder="Body" />
-              </div>
-              <div className="flex flex-col gap-1 shrink-0">
-                <button type="button" className="text-xs text-gray-400 hover:text-gray-700 disabled:opacity-30" disabled={i === 0} onClick={() => moveItem(i, -1)}>
-                  ↑
-                </button>
-                <button type="button" className="text-xs text-gray-400 hover:text-gray-700 disabled:opacity-30" disabled={i === items.length - 1} onClick={() => moveItem(i, 1)}>
-                  ↓
-                </button>
-                <button type="button" className="text-xs text-red-500 hover:text-red-700" onClick={() => removeItem(i)}>
-                  ✕
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
-        <AdminButton type="button" variant="secondary" onClick={() => setItems([...items, { title: '', body: '' }])}>
-          + Add item
-        </AdminButton>
+      <div className="mt-4">
+        <ItemsEditor items={items} onChange={next => onChange({ extra: { ...row.extra, items: next } })} />
       </div>
 
       <SaveBar onSave={onSave} label={label} />
+    </AdminCard>
+  )
+}
+
+function TrainingsHeaderCard({
+  row,
+  onChange,
+  onSave,
+}: {
+  row: SectionRow
+  onChange: (patch: Partial<SectionRow>) => void
+  onSave: () => void
+}) {
+  const items = row.extra.items ?? []
+  return (
+    <AdminCard className="p-6">
+      <h2 className="text-sm font-semibold text-gray-900 mb-4">Trainings page</h2>
+      <AdminField label="Eyebrow">
+        <AdminInput value={row.eyebrow ?? ''} onChange={e => onChange({ eyebrow: e.target.value })} />
+      </AdminField>
+      <AdminField label="Heading">
+        <AdminInput value={row.title ?? ''} onChange={e => onChange({ title: e.target.value })} />
+      </AdminField>
+      <AdminField label="Subhead">
+        <AdminTextarea value={row.subtitle ?? ''} onChange={e => onChange({ subtitle: e.target.value })} rows={2} />
+      </AdminField>
+      <AdminField label="Body — first paragraph">
+        <AdminTextarea value={row.body ?? ''} onChange={e => onChange({ body: e.target.value })} rows={2} />
+      </AdminField>
+      <AdminField label="Body — second paragraph">
+        <AdminTextarea
+          value={row.extra.body2 ?? ''}
+          onChange={e => onChange({ extra: { ...row.extra, body2: e.target.value } })}
+          rows={2}
+        />
+      </AdminField>
+      <AdminField label="Waiting list note">
+        <AdminTextarea
+          value={row.extra.waitingListNote ?? ''}
+          onChange={e => onChange({ extra: { ...row.extra, waitingListNote: e.target.value } })}
+          rows={2}
+        />
+      </AdminField>
+
+      <div className="mt-4">
+        <span className="block text-sm font-medium text-gray-700 mb-2">Format details</span>
+        <ItemsEditor
+          items={items}
+          onChange={next => onChange({ extra: { ...row.extra, items: next } })}
+          titlePlaceholder="Label (e.g. Format)"
+          bodyPlaceholder="Value (e.g. In-person workshop, two days)"
+        />
+      </div>
+
+      <SaveBar onSave={onSave} label="Trainings page" />
     </AdminCard>
   )
 }

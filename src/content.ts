@@ -35,6 +35,9 @@ import {
   fetchNavigation,
   fetchHomeSections,
   fetchStudioSections,
+  fetchContactSections,
+  fetchReportsSections,
+  fetchTrainingsPageSections,
 } from '@/lib/cms'
 
 export interface Testimonial {
@@ -94,6 +97,20 @@ export interface Studio {
   ctaHeading: string
 }
 
+export interface ContactCopy {
+  eyebrow: string
+  heading: string
+  subhead: string
+  intro1: string
+  intro2: string
+}
+
+export interface ReportsCopy {
+  eyebrow: string
+  heading: string
+  subhead: string
+}
+
 export interface Homepage {
   featuredEyebrow: string
   featuredHeading: string
@@ -132,6 +149,8 @@ export interface Site {
   hero: Hero
   homepage: Homepage
   studio: Studio
+  contact: ContactCopy
+  reportsCopy: ReportsCopy
   nav: NavLink[]
   footerNav: NavLink[]
   socials: Social[]
@@ -212,6 +231,20 @@ const seedStudio: Studio = {
   ctaHeading: 'If you would like to work with us, leave your email.',
 }
 
+const seedContact: ContactCopy = {
+  eyebrow: 'Contact',
+  heading: 'Write to us.',
+  subhead: 'We work with founders and creative leads who suspect their company is better than its reputation.',
+  intro1: 'We do not work with everyone. We work on fewer projects than most, and each one receives the attention it requires.',
+  intro2: 'Before writing, it is worth knowing that we typically begin with a strategy engagement. If you are looking for a production company or an execution partner, we are probably not the right fit.',
+}
+
+const seedReportsCopy: ReportsCopy = {
+  eyebrow: 'Reports · Coming soon',
+  heading: 'The research, in the open.',
+  subhead: 'We are putting together a small library of original reports — benchmarks, field notes and the working we usually keep to ourselves. Honest numbers, plainly argued. It is not ready yet, but it is close.',
+}
+
 const seedHomepage: Homepage = {
   featuredEyebrow: 'Selected work',
   featuredHeading: 'Proof that the brand decision was the commercial one.',
@@ -248,6 +281,8 @@ const seed: Site = {
   hero: seedHero,
   homepage: seedHomepage,
   studio: seedStudio,
+  contact: seedContact,
+  reportsCopy: seedReportsCopy,
   nav: seedNav,
   footerNav: seedFooterNav,
   socials: seedSocials as Social[],
@@ -307,6 +342,9 @@ function loadLiveContent() {
       })
     }),
     fetchStudioSections().then(v => v && write({ studio: { ...cache.studio, ...v } })),
+    fetchContactSections().then(v => v && write({ contact: { ...cache.contact, ...v } })),
+    fetchReportsSections().then(v => v && write({ reportsCopy: { ...cache.reportsCopy, ...v } })),
+    fetchTrainingsPageSections().then(v => v && write({ trainings: { ...cache.trainings, ...v } })),
   ])
 }
 loadLiveContent()
@@ -348,6 +386,12 @@ export function useHomepage(): Homepage {
 }
 export function useStudio(): Studio {
   return useSite().studio
+}
+export function useContactCopy(): ContactCopy {
+  return useSite().contact
+}
+export function useReportsCopy(): ReportsCopy {
+  return useSite().reportsCopy
 }
 export function useNav(): NavLink[] {
   return useSite().nav

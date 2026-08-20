@@ -6,7 +6,7 @@
    from "couldn't ask" and fall back to the static seed data accordingly. */
 import { supabase, supabaseReady, publicMediaUrl } from '@/lib/supabase'
 import type { Project, ProjectNarrative, Note, NoteBlock, Capability, Category, TeamMember } from '@/data'
-import type { Testimonial, Wordmark, Social, Company, Hero, Homepage, Studio, StudioListItem, NavLink, Seo, Trainings } from '@/content'
+import type { Testimonial, Wordmark, Social, Company, Hero, Homepage, Studio, StudioListItem, ContactCopy, ReportsCopy, NavLink, Seo, Trainings } from '@/content'
 import type { ArticleBlock } from '@/lib/database.types'
 
 type MediaRef = { bucket: string; storage_path: string } | null
@@ -258,7 +258,14 @@ type PageSectionRow = {
   title: string | null
   subtitle: string | null
   body: string | null
-  extra: { words?: string[]; imageOffsetX?: number; imageOffsetY?: number; items?: StudioListItem[] } | null
+  extra: {
+    words?: string[]
+    imageOffsetX?: number
+    imageOffsetY?: number
+    items?: StudioListItem[]
+    body2?: string
+    waitingListNote?: string
+  } | null
   image: MediaRef
 }
 
@@ -347,6 +354,45 @@ export async function fetchStudioSections(): Promise<Partial<Studio> | null> {
     }
   }
   return studio
+}
+
+export async function fetchContactSections(): Promise<Partial<ContactCopy> | null> {
+  const rows = await fetchPageSectionRows('contact')
+  const row = rows?.find(r => r.section_key === 'header')
+  if (!row) return null
+  const c: Partial<ContactCopy> = {}
+  if (row.eyebrow) c.eyebrow = row.eyebrow
+  if (row.title) c.heading = row.title
+  if (row.subtitle) c.subhead = row.subtitle
+  if (row.body) c.intro1 = row.body
+  if (row.extra?.body2) c.intro2 = row.extra.body2
+  return c
+}
+
+export async function fetchReportsSections(): Promise<Partial<ReportsCopy> | null> {
+  const rows = await fetchPageSectionRows('reports')
+  const row = rows?.find(r => r.section_key === 'header')
+  if (!row) return null
+  const r: Partial<ReportsCopy> = {}
+  if (row.eyebrow) r.eyebrow = row.eyebrow
+  if (row.title) r.heading = row.title
+  if (row.subtitle) r.subhead = row.subtitle
+  return r
+}
+
+export async function fetchTrainingsPageSections(): Promise<Partial<Trainings> | null> {
+  const rows = await fetchPageSectionRows('trainings')
+  const row = rows?.find(r => r.section_key === 'header')
+  if (!row) return null
+  const t: Partial<Trainings> = {}
+  if (row.eyebrow) t.eyebrow = row.eyebrow
+  if (row.title) t.heading = row.title
+  if (row.subtitle) t.subhead = row.subtitle
+  if (row.body) t.body1 = row.body
+  if (row.extra?.body2) t.body2 = row.extra.body2
+  if (row.extra?.waitingListNote) t.waitingListNote = row.extra.waitingListNote
+  if (row.extra?.items?.length) t.format = row.extra.items.map(i => ({ label: i.title, value: i.body }))
+  return t
 }
 
 export async function fetchSiteSettings(): Promise<{ company: Company; socials: Social[]; seo: Seo } | null> {
