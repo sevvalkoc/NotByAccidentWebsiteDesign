@@ -248,6 +248,68 @@ export async function fetchTeam(): Promise<TeamMember[] | null> {
   )
 }
 
+/* Homepage hero copy and section headings — reads the `pages` / `page_sections`
+   rows seeded by supabase/migrations/0005_homepage_sections.sql. Returns only
+   the fields present in the DB; content.ts merges this over the static seed
+   so a section that hasn't been edited yet just keeps its seed value. */
+export async function fetchHomeSections(): Promise<{ hero: Partial<Hero>; homepage: Partial<Homepage> } | null> {
+  if (!supabase) return null
+  const { data: page } = await supabase.from('pages').select('id').eq('slug', 'home').maybeSingle()
+  if (!page) return null
+  const { data, error } = await supabase
+    .from('page_sections')
+    .select(
+      `section_key, eyebrow, title, subtitle, body, extra,
+       image:media!image_media_id ( bucket, storage_path )`
+    )
+    .eq('page_id', (page as { id: string }).id)
+    .eq('is_visible', true)
+  if (error || !data) return null
+
+  type Row = {
+    section_key: string
+    eyebrow: string | null
+    title: string | null
+    subtitle: string | null
+    body: string | null
+    extra: { words?: string[]; imageOffsetX?: number; imageOffsetY?: number } | null
+    image: MediaRef
+  }
+  const hero: Partial<Hero> = {}
+  const homepage: Partial<Homepage> = {}
+
+  for (const row of data as unknown as Row[]) {
+    switch (row.section_key) {
+      case 'hero':
+        if (row.extra?.words?.length) hero.words = row.extra.words
+        if (row.subtitle) hero.subhead = row.subtitle
+        if (row.body) hero.definition = row.body
+        if (row.image) hero.image = mediaUrl(row.image)
+        if (typeof row.extra?.imageOffsetX === 'number') hero.imageOffsetX = row.extra.imageOffsetX
+        if (typeof row.extra?.imageOffsetY === 'number') hero.imageOffsetY = row.extra.imageOffsetY
+        break
+      case 'capabilities':
+        if (row.eyebrow) homepage.capabilitiesEyebrow = row.eyebrow
+        if (row.title) homepage.capabilitiesHeading = row.title
+        break
+      case 'notes':
+        if (row.eyebrow) homepage.notesEyebrow = row.eyebrow
+        if (row.title) homepage.journalHeading = row.title
+        break
+      case 'case_studies':
+        if (row.eyebrow) homepage.featuredEyebrow = row.eyebrow
+        if (row.title) homepage.featuredHeading = row.title
+        break
+      case 'final_cta':
+        if (row.eyebrow) homepage.ctaEyebrow = row.eyebrow
+        if (row.title) homepage.ctaHeading = row.title
+        if (row.body) homepage.ctaBody = row.body
+        break
+    }
+  }
+  return { hero, homepage }
+}
+
 export async function fetchSiteSettings(): Promise<{ company: Company; socials: Social[]; seo: Seo } | null> {
   if (!supabase) return null
   const { data, error } = await supabase.from('site_settings').select('*').eq('id', 1).maybeSingle()

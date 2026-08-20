@@ -16,27 +16,47 @@ import Seo from '@/components/Seo'
 import LogoMarquee from '@/components/LogoMarquee'
 import nbaSymbol from '@/imports/NBA_Symbol_Ink_RGB.png'
 
+/* Content that starts from the static seed and is later swapped for live
+   Supabase data (Notes, Case Studies…) remounts its DOM nodes when that
+   swap happens, because the live rows carry different ids/keys than the
+   seed. A one-shot querySelectorAll would miss anything that mounts after
+   that first scan and leave it stuck at opacity:0 forever — invisible, but
+   still taking up layout space. A MutationObserver keeps watching and picks
+   up newly-mounted .reveal elements too. */
 function useReveal(ref: React.RefObject<HTMLElement | null>) {
   useEffect(() => {
     if (!ref.current) return
-    const els = ref.current.querySelectorAll('.reveal')
-    const observer = new IntersectionObserver(
+    const seen = new WeakSet<Element>()
+    const io = new IntersectionObserver(
       entries =>
         entries.forEach(e => {
           if (e.isIntersecting) {
             e.target.classList.add('in-view')
-            observer.unobserve(e.target)
+            io.unobserve(e.target)
           }
         }),
       { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
     )
-    els.forEach(el => observer.observe(el))
-    return () => observer.disconnect()
+    function scan(root: Element) {
+      root.querySelectorAll('.reveal').forEach(el => {
+        if (!seen.has(el)) {
+          seen.add(el)
+          io.observe(el)
+        }
+      })
+    }
+    scan(ref.current)
+    const mo = new MutationObserver(() => ref.current && scan(ref.current))
+    mo.observe(ref.current, { childList: true, subtree: true })
+    return () => {
+      io.disconnect()
+      mo.disconnect()
+    }
   }, [ref])
 }
 
 /* Section order is fixed by brief: Hero → Capabilities → Testimonials →
-   Partners → Notes → Clients → Case Studies → Final CTA (+ Footer, rendered
+   Clients → Partners → Notes → Case Studies → Final CTA (+ Footer, rendered
    by App.tsx). No project index sits before or between these. */
 export default function Home() {
   const mainRef = useRef<HTMLElement>(null)
@@ -103,9 +123,9 @@ export default function Home() {
       <Hero />
       <CapabilitiesIndex />
       <Testimonials />
+      <ClientsSlider />
       <PartnersSlider />
       <Notes />
-      <ClientsSlider />
       <CaseStudiesTeaser />
       <FinalCta />
     </main>
@@ -133,8 +153,8 @@ function Hero() {
     >
       <div className="page-grid" style={{ paddingTop: 'clamp(28px, 4vw, 56px)', paddingBottom: 'clamp(40px, 5vw, 72px)' }}>
         <div
-          style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 'clamp(40px, 5vw, 64px)', alignItems: 'stretch' }}
-          className="lg:grid-cols-[1.1fr_0.9fr]"
+          style={{ gap: 'clamp(40px, 5vw, 64px)', alignItems: 'start' }}
+          className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr]"
         >
           {/* The argument */}
           <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -189,12 +209,21 @@ function Hero() {
           </div>
 
           {/* A real photograph — colour behaves like a tab, not a block */}
-          <div className="reveal" style={{ position: 'relative', minHeight: '320px' }}>
+          <div
+            className="reveal"
+            style={{
+              position: 'relative',
+              transform: `translate(${hero.imageOffsetX}px, ${hero.imageOffsetY}px)`,
+            }}
+          >
             <div
               aria-hidden="true"
               style={{ position: 'absolute', top: 0, bottom: 0, left: 0, width: '6px', backgroundColor: '#7F8B3E', zIndex: 1 }}
             />
-            <div className="work-tile img-crosshair" style={{ width: '100%', height: '100%', minHeight: '320px', overflow: 'hidden', backgroundColor: '#3a3530' }}>
+            <div
+              className="work-tile img-crosshair"
+              style={{ width: '100%', aspectRatio: '4 / 5', maxHeight: 'clamp(360px, 44vw, 560px)', overflow: 'hidden', backgroundColor: '#3a3530' }}
+            >
               <img
                 src={hero.image}
                 alt="Materials and notes from a Not by Accident strategy session"
@@ -237,7 +266,7 @@ function CapabilitiesIndex() {
       <div className="page-grid">
         <div className="flex items-end justify-between mb-10 reveal" style={{ flexWrap: 'wrap', gap: '1rem' }}>
           <div>
-            <p className="t-caption" style={{ color: 'rgba(34,30,27,.45)', marginBottom: '12px' }}>What we do</p>
+            <p className="t-caption" style={{ color: 'rgba(34,30,27,.45)', marginBottom: '12px' }}>{hp.capabilitiesEyebrow}</p>
             <h2 className="t-headline-lg" style={{ maxWidth: '18ch' }}>
               {hp.capabilitiesHeading}
             </h2>
@@ -358,7 +387,7 @@ function Testimonials() {
   if (!t) return null
 
   return (
-    <section aria-label="Client testimonials" style={{ backgroundColor: '#6E2237', paddingTop: 'clamp(56px, 7vw, 104px)', paddingBottom: 'clamp(56px, 7vw, 104px)' }}>
+    <section aria-label="Client testimonials" style={{ backgroundColor: '#6E2237', paddingTop: 'clamp(32px, 4vw, 56px)', paddingBottom: 'clamp(32px, 4vw, 56px)' }}>
       <div className="page-grid">
         <p className="t-caption mb-10 reveal" style={{ color: 'rgba(240,234,218,.5)' }}>In their words</p>
         <div>
@@ -373,7 +402,7 @@ function Testimonials() {
                 letterSpacing: '-0.015em',
                 color: '#F0EADA',
                 margin: 0,
-                maxWidth: '24ch',
+                maxWidth: '100%',
                 animation: 'testimonial-in 400ms var(--ease-brand)',
               }}
             >
@@ -443,7 +472,7 @@ function Notes() {
       <div className="page-grid">
         <div className="flex items-end justify-between mb-10 reveal" style={{ flexWrap: 'wrap', gap: '1rem' }}>
           <div>
-            <p className="t-caption" style={{ color: 'rgba(34,30,27,.45)', marginBottom: '10px' }}>Notes — an independent publication</p>
+            <p className="t-caption" style={{ color: 'rgba(34,30,27,.45)', marginBottom: '10px' }}>{hp.notesEyebrow}</p>
             <h2 className="t-headline-lg" style={{ maxWidth: '16ch' }}>{hp.journalHeading}</h2>
           </div>
           <Link to="/notes" className="t-ui link-grow" style={{ color: '#221E1B' }}>Read Notes →</Link>
@@ -588,7 +617,7 @@ function FinalCta() {
       <div className="page-grid">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-16 items-center">
           <div className="reveal md:order-2">
-            <p className="t-caption" style={{ color: '#E9C558', marginBottom: '1.5rem' }}>Start something</p>
+            <p className="t-caption" style={{ color: '#E9C558', marginBottom: '1.5rem' }}>{hp.ctaEyebrow}</p>
             <h2 style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 'clamp(32px, 4.5vw, 68px)', fontWeight: 400, lineHeight: 1.0, letterSpacing: '-0.02em', color: '#F0EADA', margin: 0, maxWidth: '15ch' }}>
               {hp.ctaHeading}
             </h2>
