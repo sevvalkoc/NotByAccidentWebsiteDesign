@@ -62,7 +62,14 @@ export interface Hero {
    *  breaks the responsive layout. */
   imageOffsetX: number
   imageOffsetY: number
+  buttons: HeroButton[]
 }
+
+export interface HeroButton {
+  label: string
+  url: string
+}
+
 
 export interface Seo {
   description: string
@@ -159,6 +166,8 @@ export interface Homepage {
   ctaEyebrow: string
   ctaHeading: string
   ctaBody: string
+  ctaButtonLabel: string
+  ctaButtonUrl: string
 }
 
 export interface NavLink {
@@ -186,6 +195,7 @@ export interface Site {
   company: Company
   hero: Hero
   homepage: Homepage
+  homeSections: string[]
   studio: Studio
   contact: ContactCopy
   reportsCopy: ReportsCopy
@@ -221,7 +231,18 @@ const seedHero: Hero = {
     'https://images.unsplash.com/photo-1764096534662-a194a348c4a0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1000',
   imageOffsetX: 0,
   imageOffsetY: 0,
+  buttons: [
+    { label: 'Start a project', url: '/contact' },
+    { label: 'See the work', url: '/work' },
+  ],
 }
+
+/** Default order — the ordered list of visible homepage section keys.
+ *  Matches what was previously a fixed JSX sequence in Home.tsx, so a site
+ *  with Supabase unreachable still renders identically to before this
+ *  became data-driven. Hidden sections just aren't in the list — there's
+ *  no separate visible flag to track. */
+const seedHomeSections: string[] = ['hero', 'capabilities', 'testimonials', 'clients', 'partners', 'notes', 'case_studies', 'final_cta']
 
 const seedSeo: Seo = {
   description:
@@ -359,6 +380,8 @@ const seedHomepage: Homepage = {
   ctaHeading: 'Tell us the company you want to become.',
   ctaBody:
     'We work with founders, marketing leads and creative directors who suspect their company is better than its reputation. First reply within one working day — from a person, not a form.',
+  ctaButtonLabel: 'Start a project',
+  ctaButtonUrl: '/contact',
 }
 
 const seedNav: NavLink[] = [
@@ -383,6 +406,7 @@ const seed: Site = {
   company: seedCompany,
   hero: seedHero,
   homepage: seedHomepage,
+  homeSections: seedHomeSections,
   studio: seedStudio,
   contact: seedContact,
   reportsCopy: seedReportsCopy,
@@ -447,6 +471,7 @@ function loadLiveContent() {
       write({
         hero: { ...cache.hero, ...v.hero },
         homepage: { ...cache.homepage, ...v.homepage },
+        homeSections: v.sections.length ? v.sections : cache.homeSections,
       })
     }),
     fetchStudioSections().then(v => v && write({ studio: { ...cache.studio, ...v } })),
@@ -496,6 +521,9 @@ export function useHero(): Hero {
 }
 export function useHomepage(): Homepage {
   return useSite().homepage
+}
+export function useHomeSections(): string[] {
+  return useSite().homeSections
 }
 export function useStudio(): Studio {
   return useSite().studio

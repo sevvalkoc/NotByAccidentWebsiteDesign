@@ -7,6 +7,7 @@ import {
   useTestimonials,
   useCompany,
   useHomepage,
+  useHomeSections,
   useClients,
   usePartners,
   useProjects,
@@ -17,14 +18,28 @@ import LogoMarquee from '@/components/LogoMarquee'
 import nbaSymbol from '@/imports/NBA_Symbol_Ink_RGB.png'
 import { useReveal } from '@/hooks/useReveal'
 
-/* Section order is fixed by brief: Hero → Capabilities → Testimonials →
-   Clients → Partners → Notes → Case Studies → Final CTA (+ Footer, rendered
-   by App.tsx). No project index sits before or between these. */
+/* Default section order: Hero → Capabilities → Testimonials → Clients →
+   Partners → Notes → Case Studies → Final CTA (+ Footer, rendered by
+   App.tsx). Reorderable/hideable from Admin → Pages — see useHomeSections()
+   and SECTION_COMPONENTS below; no project index sits before or between
+   these regardless of order. */
+const SECTION_COMPONENTS: Record<string, () => React.JSX.Element | null> = {
+  hero: Hero,
+  capabilities: CapabilitiesIndex,
+  testimonials: Testimonials,
+  clients: ClientsSlider,
+  partners: PartnersSlider,
+  notes: Notes,
+  case_studies: CaseStudiesTeaser,
+  final_cta: FinalCta,
+}
+
 export default function Home() {
   const mainRef = useRef<HTMLElement>(null)
   useReveal(mainRef)
   const company = useCompany()
   const capabilities = useCapabilities()
+  const sectionOrder = useHomeSections()
 
   const homeSchema = [
     {
@@ -82,14 +97,10 @@ export default function Home() {
         path="/"
         jsonLd={homeSchema}
       />
-      <Hero />
-      <CapabilitiesIndex />
-      <Testimonials />
-      <ClientsSlider />
-      <PartnersSlider />
-      <Notes />
-      <CaseStudiesTeaser />
-      <FinalCta />
+      {sectionOrder.map(key => {
+        const Section = SECTION_COMPONENTS[key]
+        return Section ? <Section key={key} /> : null
+      })}
     </main>
   )
 }
@@ -156,12 +167,11 @@ function Hero() {
             </p>
 
             <div className="flex flex-wrap items-center gap-3" style={{ marginTop: '2rem' }}>
-              <Link to="/contact" className="btn-primary" style={{ textDecoration: 'none' }}>
-                Start a project
-              </Link>
-              <Link to="/work" className="btn-ghost" style={{ textDecoration: 'none' }}>
-                See the work
-              </Link>
+              {hero.buttons.map((b, i) => (
+                <Link key={b.label} to={b.url} className={i === 0 ? 'btn-primary' : 'btn-ghost'} style={{ textDecoration: 'none' }}>
+                  {b.label}
+                </Link>
+              ))}
             </div>
 
             {/* Definition line — the 30-second answer, also feeds AI search */}
@@ -589,7 +599,7 @@ function FinalCta() {
               {hp.ctaBody}
             </p>
             <div className="flex flex-wrap items-center gap-3" style={{ marginTop: '1.75rem' }}>
-              <Link to="/contact" className="btn-milk" style={{ textDecoration: 'none' }}>Start a project</Link>
+              <Link to={hp.ctaButtonUrl} className="btn-milk" style={{ textDecoration: 'none' }}>{hp.ctaButtonLabel}</Link>
               <a href={`mailto:${company.newBusinessEmail}`} className="t-ui link-grow" style={{ color: '#F0EADA' }}>
                 {company.newBusinessEmail} →
               </a>
