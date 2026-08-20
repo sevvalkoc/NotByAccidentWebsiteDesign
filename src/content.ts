@@ -38,6 +38,11 @@ import {
   fetchContactSections,
   fetchReportsSections,
   fetchTrainingsPageSections,
+  fetchWorkSections,
+  fetchCaseStudiesSections,
+  fetchCapabilitiesPageSections,
+  fetchPrivacySections,
+  fetchCookiesSections,
 } from '@/lib/cms'
 
 export interface Testimonial {
@@ -82,6 +87,39 @@ export interface Trainings {
 export interface StudioListItem {
   title: string
   body: string
+  /** Optional third field — only Cookies' table (lifespan column) uses it. */
+  meta?: string
+}
+
+export interface PageHeader {
+  eyebrow: string
+  heading: string
+  subhead: string
+}
+
+export interface CapabilitiesPageCopy {
+  eyebrow: string
+  /** Appears after the live capability count, e.g. "42 <headingSuffix>" — the
+   *  count itself is generated in code, not stored, so it can never go stale. */
+  headingSuffix: string
+  subhead: string
+}
+
+export interface LegalCopy {
+  eyebrow: string
+  heading: string
+  subhead: string
+  lastUpdated: string
+  sections: StudioListItem[]
+}
+
+export interface CookiesCopy {
+  eyebrow: string
+  heading: string
+  subhead: string
+  rows: StudioListItem[]
+  managingHeading: string
+  managingBody: string
 }
 
 export interface Studio {
@@ -151,6 +189,11 @@ export interface Site {
   studio: Studio
   contact: ContactCopy
   reportsCopy: ReportsCopy
+  work: PageHeader
+  caseStudiesCopy: PageHeader
+  capabilitiesCopy: CapabilitiesPageCopy
+  privacyCopy: LegalCopy
+  cookiesCopy: CookiesCopy
   nav: NavLink[]
   footerNav: NavLink[]
   socials: Social[]
@@ -245,6 +288,66 @@ const seedReportsCopy: ReportsCopy = {
   subhead: 'We are putting together a small library of original reports — benchmarks, field notes and the working we usually keep to ourselves. Honest numbers, plainly argued. It is not ready yet, but it is close.',
 }
 
+const seedWork: PageHeader = {
+  eyebrow: 'Work',
+  heading: 'An independent record of what we have made.',
+  subhead: 'We work on fewer projects than most. Each one receives the attention it requires. This is the archive.',
+}
+
+const seedCaseStudiesCopy: PageHeader = {
+  eyebrow: 'Case Studies',
+  heading: 'Work examined at length.',
+  subhead: 'Each case study is a full account of a project — the problem, the thinking and the result. Not a highlights reel.',
+}
+
+const seedCapabilitiesCopy: CapabilitiesPageCopy = {
+  eyebrow: 'Capabilities',
+  headingSuffix: 'capabilities, in the order a company actually needs them.',
+  subhead: 'Five groups — Brand & Identity, Digital & Product, Growth & Demand, Market & Expansion, and Experiences. Take one, or the whole sequence. Each has its own team, method and page.',
+}
+
+const seedPrivacyCopy: LegalCopy = {
+  eyebrow: 'Privacy',
+  heading: 'What we hold, and why.',
+  subhead: 'We collect very little and we treat it plainly. This notice explains exactly how, in language you should not need a lawyer to follow.',
+  lastUpdated: '8 August 2026',
+  sections: [
+    {
+      title: 'Who we are',
+      body: 'Not by Accident is an independent creative company. When we refer to “we”, “us” or “our” in this notice, we mean Not by Accident. When we refer to “you”, we mean anyone who visits this website or corresponds with us. Our full registered company details will be added here before this notice is treated as final.\n\nThis notice explains what we collect, why we collect it, and what you can ask us to do about it. It is written to be read, not to be survived.',
+    },
+    {
+      title: 'What we collect',
+      body: 'We collect only what a conversation requires. When you write to us through the contact form or by email, we hold your name, your company, your email address and whatever you choose to tell us about your project. We keep it for as long as the conversation is live and for a reasonable period afterwards.\n\nWhen you browse the site, our hosting provider records standard technical information — the pages requested, the approximate region, the browser used. This is ordinary server activity, not surveillance.',
+    },
+    {
+      title: 'Why we hold it',
+      body: 'We use your information for one purpose: to respond to you and, where it becomes relevant, to carry out work you have asked us to do. We do not sell it. We do not build advertising profiles. We do not enrich it with data bought from elsewhere.\n\nOur lawful basis is either your consent, given when you write to us, or our legitimate interest in running a small business well.',
+    },
+    {
+      title: 'Who sees it',
+      body: 'Your information is seen by the people at Not by Accident who need to see it, and by a short list of service providers who help us operate — email, hosting and analytics. Each is bound by its own obligations. We choose them carefully and review them.',
+    },
+    {
+      title: 'Your rights',
+      body: 'You may ask to see the information we hold about you, to correct it, or to have it deleted. You may withdraw consent at any time. You may also complain to the Information Commissioner’s Office, though we would rather you told us first, so we can put it right.\n\nTo exercise any of these rights, write to hello@notbyaccident.com. We will respond within one month, usually sooner.',
+    },
+  ],
+}
+
+const seedCookiesCopy: CookiesCopy = {
+  eyebrow: 'Cookies',
+  heading: 'A short note on cookies.',
+  subhead: 'We use a handful, and only the useful kind. No advertising trackers, no third-party profiling, no reselling of attention.',
+  rows: [
+    { title: 'Essential', body: 'Keeps the site working — remembers your cookie choice and secures the connection. Nothing to opt out of; without these, nothing loads.', meta: 'Session – 12 months' },
+    { title: 'Analytics', body: 'A single, privacy-respecting measure of which pages are read and roughly where readers arrive from. Aggregated, never tied to a name.', meta: '12 months' },
+    { title: 'Preferences', body: 'Remembers small things you would rather we did not ask twice — such as whether you have dismissed a notice.', meta: '6 months' },
+  ],
+  managingHeading: 'Managing them yourself',
+  managingBody: 'Every browser lets you see, block or delete cookies from its settings. Blocking the essential ones will stop parts of the site working; blocking the rest changes nothing you would notice.',
+}
+
 const seedHomepage: Homepage = {
   featuredEyebrow: 'Selected work',
   featuredHeading: 'Proof that the brand decision was the commercial one.',
@@ -283,6 +386,11 @@ const seed: Site = {
   studio: seedStudio,
   contact: seedContact,
   reportsCopy: seedReportsCopy,
+  work: seedWork,
+  caseStudiesCopy: seedCaseStudiesCopy,
+  capabilitiesCopy: seedCapabilitiesCopy,
+  privacyCopy: seedPrivacyCopy,
+  cookiesCopy: seedCookiesCopy,
   nav: seedNav,
   footerNav: seedFooterNav,
   socials: seedSocials as Social[],
@@ -345,6 +453,11 @@ function loadLiveContent() {
     fetchContactSections().then(v => v && write({ contact: { ...cache.contact, ...v } })),
     fetchReportsSections().then(v => v && write({ reportsCopy: { ...cache.reportsCopy, ...v } })),
     fetchTrainingsPageSections().then(v => v && write({ trainings: { ...cache.trainings, ...v } })),
+    fetchWorkSections().then(v => v && write({ work: { ...cache.work, ...v } })),
+    fetchCaseStudiesSections().then(v => v && write({ caseStudiesCopy: { ...cache.caseStudiesCopy, ...v } })),
+    fetchCapabilitiesPageSections().then(v => v && write({ capabilitiesCopy: { ...cache.capabilitiesCopy, ...v } })),
+    fetchPrivacySections().then(v => v && write({ privacyCopy: { ...cache.privacyCopy, ...v } })),
+    fetchCookiesSections().then(v => v && write({ cookiesCopy: { ...cache.cookiesCopy, ...v } })),
   ])
 }
 loadLiveContent()
@@ -392,6 +505,21 @@ export function useContactCopy(): ContactCopy {
 }
 export function useReportsCopy(): ReportsCopy {
   return useSite().reportsCopy
+}
+export function useWorkCopy(): PageHeader {
+  return useSite().work
+}
+export function useCaseStudiesCopy(): PageHeader {
+  return useSite().caseStudiesCopy
+}
+export function useCapabilitiesCopy(): CapabilitiesPageCopy {
+  return useSite().capabilitiesCopy
+}
+export function usePrivacyCopy(): LegalCopy {
+  return useSite().privacyCopy
+}
+export function useCookiesCopy(): CookiesCopy {
+  return useSite().cookiesCopy
 }
 export function useNav(): NavLink[] {
   return useSite().nav

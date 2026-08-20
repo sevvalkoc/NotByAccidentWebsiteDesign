@@ -2,51 +2,17 @@ import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import Seo from '@/components/Seo'
 import { useReveal } from '@/hooks/useReveal'
+import { usePrivacyCopy } from '@/content'
 
-const sections = [
-  {
-    id: 'who-we-are',
-    heading: 'Who we are',
-    body: [
-      'Not by Accident is an independent creative company. When we refer to “we”, “us” or “our” in this notice, we mean Not by Accident. When we refer to “you”, we mean anyone who visits this website or corresponds with us. Our full registered company details will be added here before this notice is treated as final.',
-      'This notice explains what we collect, why we collect it, and what you can ask us to do about it. It is written to be read, not to be survived.',
-    ],
-  },
-  {
-    id: 'what-we-collect',
-    heading: 'What we collect',
-    body: [
-      'We collect only what a conversation requires. When you write to us through the contact form or by email, we hold your name, your company, your email address and whatever you choose to tell us about your project. We keep it for as long as the conversation is live and for a reasonable period afterwards.',
-      'When you browse the site, our hosting provider records standard technical information — the pages requested, the approximate region, the browser used. This is ordinary server activity, not surveillance.',
-    ],
-  },
-  {
-    id: 'why-we-hold-it',
-    heading: 'Why we hold it',
-    body: [
-      'We use your information for one purpose: to respond to you and, where it becomes relevant, to carry out work you have asked us to do. We do not sell it. We do not build advertising profiles. We do not enrich it with data bought from elsewhere.',
-      'Our lawful basis is either your consent, given when you write to us, or our legitimate interest in running a small business well.',
-    ],
-  },
-  {
-    id: 'who-sees-it',
-    heading: 'Who sees it',
-    body: [
-      'Your information is seen by the people at Not by Accident who need to see it, and by a short list of service providers who help us operate — email, hosting and analytics. Each is bound by its own obligations. We choose them carefully and review them.',
-    ],
-  },
-  {
-    id: 'your-rights',
-    heading: 'Your rights',
-    body: [
-      'You may ask to see the information we hold about you, to correct it, or to have it deleted. You may withdraw consent at any time. You may also complain to the Information Commissioner’s Office, though we would rather you told us first, so we can put it right.',
-      'To exercise any of these rights, write to hello@notbyaccident.com. We will respond within one month, usually sooner.',
-    ],
-  },
-]
+/* Fixed anchor ids for the "On this page" nav — kept independent of the
+   (editable, via Admin → Pages) section heading text, positional so they
+   stay stable even if an editor reorders the sections. */
+const SECTION_IDS = ['who-we-are', 'what-we-collect', 'why-we-hold-it', 'who-sees-it', 'your-rights']
 
 export default function Privacy() {
   const ref = useRef<HTMLElement>(null)
+  const copy = usePrivacyCopy()
+  const sections = copy.sections.map((s, i) => ({ id: SECTION_IDS[i] ?? `section-${i}`, heading: s.title, body: s.body.split('\n\n') }))
   useReveal(ref, { threshold: 0.08 })
 
   return (
@@ -61,18 +27,18 @@ export default function Privacy() {
         }}
       >
         <div className="page-grid">
-          <p className="t-caption mb-4 reveal" style={{ color: 'rgba(34,30,27,.45)' }}>Privacy</p>
+          <p className="t-caption mb-4 reveal" style={{ color: 'rgba(34,30,27,.45)' }}>{copy.eyebrow}</p>
           <h1 className="t-display reveal reveal-delay-1" style={{ maxWidth: '16ch', marginBottom: '1.5rem' }}>
-            What we hold, and why.
+            {copy.heading}
           </h1>
           <p
             className="t-subhead reveal reveal-delay-2"
             style={{ color: 'rgba(34,30,27,.65)', fontWeight: 400, maxWidth: '46ch' }}
           >
-            We collect very little and we treat it plainly. This notice explains exactly how, in language you should not need a lawyer to follow.
+            {copy.subhead}
           </p>
           <p className="t-caption mt-8 reveal reveal-delay-3" style={{ color: 'rgba(34,30,27,.4)' }}>
-            Last updated · 8 August 2026
+            Last updated · {copy.lastUpdated}
           </p>
         </div>
       </div>

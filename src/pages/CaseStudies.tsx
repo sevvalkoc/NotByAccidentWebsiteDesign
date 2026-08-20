@@ -1,12 +1,13 @@
 import { useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { useProjects } from '@/content'
+import { useProjects, useCaseStudiesCopy } from '@/content'
 import Seo from '@/components/Seo'
 import { useReveal } from '@/hooks/useReveal'
 
 export default function CaseStudies() {
   const ref = useRef<HTMLElement>(null)
   const projects = useProjects()
+  const copy = useCaseStudiesCopy()
   useReveal(ref, { threshold: 0.08 })
 
   return (
@@ -21,19 +22,19 @@ export default function CaseStudies() {
         }}
       >
         <div className="page-grid">
-          <p className="t-caption mb-4 reveal" style={{ color: 'rgba(34,30,27,.45)' }}>Case Studies</p>
+          <p className="t-caption mb-4 reveal" style={{ color: 'rgba(34,30,27,.45)' }}>{copy.eyebrow}</p>
           <div
             style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }}
             className="md:grid-cols-[50%_1fr]"
           >
             <h1 className="t-headline-lg reveal reveal-delay-1" style={{ margin: 0 }}>
-              Work examined at length.
+              {copy.heading}
             </h1>
             <p
               className="t-body reveal reveal-delay-2"
               style={{ color: 'rgba(34,30,27,.6)', maxWidth: '44ch', alignSelf: 'end' }}
             >
-              Each case study is a full account of a project — the problem, the thinking and the result. Not a highlights reel.
+              {copy.subhead}
             </p>
           </div>
         </div>

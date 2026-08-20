@@ -17,6 +17,7 @@ import MediaPicker from '@/admin/MediaPicker'
 interface ListItem {
   title: string
   body: string
+  meta?: string
 }
 type Extra = {
   words?: string[]
@@ -25,6 +26,7 @@ type Extra = {
   items?: ListItem[]
   body2?: string
   waitingListNote?: string
+  lastUpdated?: string
 }
 
 interface SectionRow {
@@ -45,6 +47,11 @@ const PAGES = [
   { slug: 'contact', label: 'Contact' },
   { slug: 'trainings', label: 'Trainings' },
   { slug: 'reports', label: 'Reports' },
+  { slug: 'work', label: 'Work' },
+  { slug: 'case-studies', label: 'Case Studies' },
+  { slug: 'capabilities', label: 'Capabilities' },
+  { slug: 'privacy', label: 'Privacy' },
+  { slug: 'cookies', label: 'Cookies' },
 ]
 type PageSlug = (typeof PAGES)[number]['slug']
 
@@ -59,18 +66,30 @@ const SECTION_LABELS: Record<string, string> = {
   culture: 'Culture',
   cta: 'Final CTA',
   header: 'Page header',
+  legal: 'Legal sections',
+  table: 'Cookie categories',
+  managing: 'Managing cookies',
 }
 
 /** Which text fields (beyond eyebrow/title, which every section gets) apply,
  *  keyed by `${pageSlug}:${section_key}` since the same section_key (e.g.
  *  'header') means different things, with different fields, on different pages. */
-const SECTION_FIELDS: Record<string, { subtitle?: boolean; body?: boolean }> = {
+const SECTION_FIELDS: Record<string, { subtitle?: boolean; body?: boolean; titleHint?: string; lastUpdatedField?: boolean }> = {
   'home:final_cta': { body: true },
   'studio:opening': { subtitle: true, body: true },
   'contact:header': { subtitle: true, body: true },
   'reports:header': { subtitle: true },
+  'work:header': { subtitle: true },
+  'case-studies:header': { subtitle: true },
+  'capabilities:header': {
+    subtitle: true,
+    titleHint: 'Appears after the live capability count, e.g. "42 capabilities, in the order…" — only type the part after the number.',
+  },
+  'privacy:header': { subtitle: true, lastUpdatedField: true },
+  'cookies:header': { subtitle: true },
+  'cookies:managing': { body: true },
 }
-const LIST_SECTIONS = new Set(['principles', 'culture'])
+const LIST_SECTIONS = new Set(['principles', 'culture', 'legal'])
 
 export default function Pages() {
   const [activePage, setActivePage] = useState<PageSlug>('home')
@@ -165,6 +184,7 @@ export default function Pages() {
             const props = { row, onChange: (patch: Partial<SectionRow>) => patchRow(row.id, patch), onSave: () => saveRow(row) }
             if (row.section_key === 'hero') return <HeroCard key={row.id} {...props} />
             if (activePage === 'trainings' && row.section_key === 'header') return <TrainingsHeaderCard key={row.id} {...props} />
+            if (activePage === 'cookies' && row.section_key === 'table') return <CookiesTableCard key={row.id} {...props} />
             if (LIST_SECTIONS.has(row.section_key)) return <ListCard key={row.id} {...props} />
             return <SectionCard key={row.id} {...props} pageSlug={activePage} />
           })}
@@ -219,7 +239,7 @@ function SectionCard({
           <AdminInput value={row.eyebrow ?? ''} onChange={e => onChange({ eyebrow: e.target.value })} />
         </AdminField>
       )}
-      <AdminField label="Heading">
+      <AdminField label="Heading" hint={fields.titleHint}>
         <AdminInput value={row.title ?? ''} onChange={e => onChange({ title: e.target.value })} />
       </AdminField>
       {fields.subtitle && (
@@ -232,23 +252,33 @@ function SectionCard({
           <AdminTextarea value={row.body ?? ''} onChange={e => onChange({ body: e.target.value })} rows={3} />
         </AdminField>
       )}
+      {fields.lastUpdatedField && (
+        <AdminField label="Last updated" hint="Shown under the intro as 'Last updated · …'.">
+          <AdminInput
+            value={row.extra.lastUpdated ?? ''}
+            onChange={e => onChange({ extra: { ...row.extra, lastUpdated: e.target.value } })}
+          />
+        </AdminField>
+      )}
       <SaveBar onSave={onSave} label={label} />
     </AdminCard>
   )
 }
 
-/** Shared add/reorder/remove editor for a repeatable title+body list, stored
- *  as extra.items. Used by ListCard (Principles/Culture) and
- *  TrainingsHeaderCard (Format). */
+/** Shared add/reorder/remove editor for a repeatable title+body(+meta) list,
+ *  stored as extra.items. Used by ListCard (Principles/Culture/Privacy's
+ *  legal sections), TrainingsHeaderCard (Format) and CookiesTableCard. */
 function ItemsEditor({
   items,
   onChange,
   titlePlaceholder = 'Title',
   bodyPlaceholder = 'Body',
+  metaLabel,
 }: {
   items: ListItem[]
   onChange: (items: ListItem[]) => void
   titlePlaceholder?: string
+  metaLabel?: string
   bodyPlaceholder?: string
 }) {
   function updateItem(i: number, patch: Partial<ListItem>) {
@@ -278,6 +308,14 @@ function ItemsEditor({
                 className="mb-2"
               />
               <AdminTextarea value={item.body} onChange={e => updateItem(i, { body: e.target.value })} rows={2} placeholder={bodyPlaceholder} />
+              {metaLabel && (
+                <AdminInput
+                  value={item.meta ?? ''}
+                  onChange={e => updateItem(i, { meta: e.target.value })}
+                  placeholder={metaLabel}
+                  className="mt-2"
+                />
+              )}
             </div>
             <div className="flex flex-col gap-1 shrink-0">
               <button type="button" className="text-xs text-gray-400 hover:text-gray-700 disabled:opacity-30" disabled={i === 0} onClick={() => moveItem(i, -1)}>
@@ -385,6 +423,32 @@ function TrainingsHeaderCard({
       </div>
 
       <SaveBar onSave={onSave} label="Trainings page" />
+    </AdminCard>
+  )
+}
+
+function CookiesTableCard({
+  row,
+  onChange,
+  onSave,
+}: {
+  row: SectionRow
+  onChange: (patch: Partial<SectionRow>) => void
+  onSave: () => void
+}) {
+  const items = row.extra.items ?? []
+  return (
+    <AdminCard className="p-6">
+      <h2 className="text-sm font-semibold text-gray-900 mb-4">Cookie categories</h2>
+      <p className="text-xs text-gray-400 mb-4">Each row: name, what it does, and its lifespan.</p>
+      <ItemsEditor
+        items={items}
+        onChange={next => onChange({ extra: { ...row.extra, items: next } })}
+        titlePlaceholder="Category name (e.g. Essential)"
+        bodyPlaceholder="What it does"
+        metaLabel="Lifespan (e.g. 12 months)"
+      />
+      <SaveBar onSave={onSave} label="Cookie categories" />
     </AdminCard>
   )
 }
