@@ -543,12 +543,12 @@ export async function fetchNavigation(location: 'header' | 'footer' = 'header'):
   if (!supabase) return null
   const { data, error } = await supabase
     .from('navigation_items')
-    .select('label, url')
+    .select('label, url, soon')
     .eq('location', location)
     .eq('is_visible', true)
     .order('sort_order', { ascending: true })
   if (error || !data) return null
-  return (data as { label: string; url: string }[]).map(row => ({ to: row.url, label: row.label }))
+  return (data as { label: string; url: string; soon: boolean }[]).map(row => ({ to: row.url, label: row.label, soon: row.soon || undefined }))
 }
 
 /* Hero / homepage section copy and the Trainings "coming soon" copy live as
