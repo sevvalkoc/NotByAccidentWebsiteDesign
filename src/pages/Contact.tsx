@@ -1,24 +1,15 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import Seo from '@/components/Seo'
-import { submitLead } from '@/content'
+import { submitLead, useCompany, useContactCopy } from '@/content'
+import { useReveal } from '@/hooks/useReveal'
 
 export default function Contact() {
   const ref = useRef<HTMLElement>(null)
   const [submitted, setSubmitted] = useState(false)
   const [formError, setFormError] = useState('')
-
-  useEffect(() => {
-    if (!ref.current) return
-    const els = ref.current.querySelectorAll('.reveal')
-    const observer = new IntersectionObserver(
-      entries => entries.forEach(e => {
-        if (e.isIntersecting) { e.target.classList.add('in-view'); observer.unobserve(e.target) }
-      }),
-      { threshold: 0.08 }
-    )
-    els.forEach(el => observer.observe(el))
-    return () => observer.disconnect()
-  }, [])
+  const company = useCompany()
+  const copy = useContactCopy()
+  useReveal(ref, { threshold: 0.08 })
 
   return (
     <main id="main" ref={ref} style={{ paddingTop: '56px', backgroundColor: '#F0EADA' }}>
@@ -33,15 +24,15 @@ export default function Contact() {
         }}
       >
         <div className="page-grid">
-          <p className="t-caption mb-4 reveal" style={{ color: 'rgba(34,30,27,.45)' }}>Contact</p>
+          <p className="t-caption mb-4 reveal" style={{ color: 'rgba(34,30,27,.45)' }}>{copy.eyebrow}</p>
           <h1 className="t-display reveal reveal-delay-1" style={{ maxWidth: '14ch', marginBottom: '1.5rem' }}>
-            Write to us.
+            {copy.heading}
           </h1>
           <p
             className="t-subhead reveal reveal-delay-2"
             style={{ color: 'rgba(34,30,27,.65)', fontWeight: 400, maxWidth: '40ch' }}
           >
-            We work with founders and creative leads who suspect their company is better than its reputation.
+            {copy.subhead}
           </p>
         </div>
       </div>
@@ -69,10 +60,10 @@ export default function Contact() {
                 className="t-body"
                 style={{ color: 'rgba(34,30,27,.7)', marginBottom: '1.5rem' }}
               >
-                We do not work with everyone. We work on fewer projects than most, and each one receives the attention it requires.
+                {copy.intro1}
               </p>
               <p className="t-body" style={{ color: 'rgba(34,30,27,.7)' }}>
-                Before writing, it is worth knowing that we typically begin with a strategy engagement. If you are looking for a production company or an execution partner, we are probably not the right fit.
+                {copy.intro2}
               </p>
             </div>
 
@@ -81,10 +72,10 @@ export default function Contact() {
                 Email
               </p>
               <a
-                href="mailto:hello@notbyaccident.com"
+                href={`mailto:${company.email}`}
                 className="link-beetroot t-ui block mb-4"
               >
-                hello@notbyaccident.com
+                {company.email}
               </a>
 
               <p className="t-caption mb-2" style={{ color: 'rgba(34,30,27,.4)' }}>

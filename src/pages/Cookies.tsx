@@ -1,40 +1,14 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import Seo from '@/components/Seo'
-
-const rows = [
-  {
-    name: 'Essential',
-    purpose: 'Keeps the site working — remembers your cookie choice and secures the connection. Nothing to opt out of; without these, nothing loads.',
-    life: 'Session – 12 months',
-  },
-  {
-    name: 'Analytics',
-    purpose: 'A single, privacy-respecting measure of which pages are read and roughly where readers arrive from. Aggregated, never tied to a name.',
-    life: '12 months',
-  },
-  {
-    name: 'Preferences',
-    purpose: 'Remembers small things you would rather we did not ask twice — such as whether you have dismissed a notice.',
-    life: '6 months',
-  },
-]
+import { useReveal } from '@/hooks/useReveal'
+import { useCookiesCopy } from '@/content'
 
 export default function Cookies() {
   const ref = useRef<HTMLElement>(null)
-
-  useEffect(() => {
-    if (!ref.current) return
-    const els = ref.current.querySelectorAll('.reveal')
-    const observer = new IntersectionObserver(
-      entries => entries.forEach(e => {
-        if (e.isIntersecting) { e.target.classList.add('in-view'); observer.unobserve(e.target) }
-      }),
-      { threshold: 0.08 }
-    )
-    els.forEach(el => observer.observe(el))
-    return () => observer.disconnect()
-  }, [])
+  const copy = useCookiesCopy()
+  const rows = copy.rows.map(r => ({ name: r.title, purpose: r.body, life: r.meta ?? '' }))
+  useReveal(ref, { threshold: 0.08 })
 
   return (
     <main id="main" ref={ref} style={{ paddingTop: '56px', backgroundColor: '#F0EADA' }}>
@@ -48,19 +22,19 @@ export default function Cookies() {
         }}
       >
         <div className="page-grid">
-          <p className="t-caption mb-4 reveal" style={{ color: 'rgba(34,30,27,.45)' }}>Cookies</p>
+          <p className="t-caption mb-4 reveal" style={{ color: 'rgba(34,30,27,.45)' }}>{copy.eyebrow}</p>
           <div
             style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }}
             className="md:grid-cols-[52%_1fr]"
           >
             <h1 className="t-display reveal reveal-delay-1" style={{ margin: 0, maxWidth: '13ch' }}>
-              A short note on cookies.
+              {copy.heading}
             </h1>
             <p
               className="t-body reveal reveal-delay-2"
               style={{ color: 'rgba(34,30,27,.65)', maxWidth: '42ch', alignSelf: 'end' }}
             >
-              We use a handful, and only the useful kind. No advertising trackers, no third-party profiling, no reselling of attention.
+              {copy.subhead}
             </p>
           </div>
         </div>
@@ -139,9 +113,9 @@ export default function Cookies() {
       >
         <div className="reveal" style={{ maxWidth: '56ch' }}>
           <div style={{ height: '2px', width: '40px', backgroundColor: '#7F8B3E', marginBottom: '1.5rem' }} aria-hidden="true" />
-          <h2 className="t-headline" style={{ marginBottom: '1.25rem' }}>Managing them yourself</h2>
+          <h2 className="t-headline" style={{ marginBottom: '1.25rem' }}>{copy.managingHeading}</h2>
           <p className="t-body" style={{ color: 'rgba(34,30,27,.72)', marginBottom: '1.25rem' }}>
-            Every browser lets you see, block or delete cookies from its settings. Blocking the essential ones will stop parts of the site working; blocking the rest changes nothing you would notice.
+            {copy.managingBody}
           </p>
           <p className="t-body" style={{ color: 'rgba(34,30,27,.72)' }}>
             For the fuller picture of what we hold and why, see our{' '}

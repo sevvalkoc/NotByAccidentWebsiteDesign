@@ -15,45 +15,7 @@ import {
 import Seo from '@/components/Seo'
 import LogoMarquee from '@/components/LogoMarquee'
 import nbaSymbol from '@/imports/NBA_Symbol_Ink_RGB.png'
-
-/* Content that starts from the static seed and is later swapped for live
-   Supabase data (Notes, Case Studies…) remounts its DOM nodes when that
-   swap happens, because the live rows carry different ids/keys than the
-   seed. A one-shot querySelectorAll would miss anything that mounts after
-   that first scan and leave it stuck at opacity:0 forever — invisible, but
-   still taking up layout space. A MutationObserver keeps watching and picks
-   up newly-mounted .reveal elements too. */
-function useReveal(ref: React.RefObject<HTMLElement | null>) {
-  useEffect(() => {
-    if (!ref.current) return
-    const seen = new WeakSet<Element>()
-    const io = new IntersectionObserver(
-      entries =>
-        entries.forEach(e => {
-          if (e.isIntersecting) {
-            e.target.classList.add('in-view')
-            io.unobserve(e.target)
-          }
-        }),
-      { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
-    )
-    function scan(root: Element) {
-      root.querySelectorAll('.reveal').forEach(el => {
-        if (!seen.has(el)) {
-          seen.add(el)
-          io.observe(el)
-        }
-      })
-    }
-    scan(ref.current)
-    const mo = new MutationObserver(() => ref.current && scan(ref.current))
-    mo.observe(ref.current, { childList: true, subtree: true })
-    return () => {
-      io.disconnect()
-      mo.disconnect()
-    }
-  }, [ref])
-}
+import { useReveal } from '@/hooks/useReveal'
 
 /* Section order is fixed by brief: Hero → Capabilities → Testimonials →
    Clients → Partners → Notes → Case Studies → Final CTA (+ Footer, rendered

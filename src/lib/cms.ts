@@ -6,7 +6,25 @@
    from "couldn't ask" and fall back to the static seed data accordingly. */
 import { supabase, supabaseReady, publicMediaUrl } from '@/lib/supabase'
 import type { Project, ProjectNarrative, Note, NoteBlock, Capability, Category, TeamMember } from '@/data'
-import type { Testimonial, Wordmark, Social, Company, Hero, Homepage, NavLink, Seo, Trainings } from '@/content'
+import type {
+  Testimonial,
+  Wordmark,
+  Social,
+  Company,
+  Hero,
+  Homepage,
+  Studio,
+  StudioListItem,
+  ContactCopy,
+  ReportsCopy,
+  PageHeader,
+  CapabilitiesPageCopy,
+  LegalCopy,
+  CookiesCopy,
+  NavLink,
+  Seo,
+  Trainings,
+} from '@/content'
 import type { ArticleBlock } from '@/lib/database.types'
 
 type MediaRef = { bucket: string; storage_path: string } | null
@@ -252,9 +270,29 @@ export async function fetchTeam(): Promise<TeamMember[] | null> {
    rows seeded by supabase/migrations/0005_homepage_sections.sql. Returns only
    the fields present in the DB; content.ts merges this over the static seed
    so a section that hasn't been edited yet just keeps its seed value. */
-export async function fetchHomeSections(): Promise<{ hero: Partial<Hero>; homepage: Partial<Homepage> } | null> {
+type PageSectionRow = {
+  section_key: string
+  eyebrow: string | null
+  title: string | null
+  subtitle: string | null
+  body: string | null
+  extra: {
+    words?: string[]
+    imageOffsetX?: number
+    imageOffsetY?: number
+    items?: StudioListItem[]
+    body2?: string
+    waitingListNote?: string
+    lastUpdated?: string
+  } | null
+  image: MediaRef
+}
+
+/** Shared by every page's section-fetcher below — one page lookup, one
+ *  section-rows query, reused instead of repeated per page. */
+async function fetchPageSectionRows(slug: string): Promise<PageSectionRow[] | null> {
   if (!supabase) return null
-  const { data: page } = await supabase.from('pages').select('id').eq('slug', 'home').maybeSingle()
+  const { data: page } = await supabase.from('pages').select('id').eq('slug', slug).maybeSingle()
   if (!page) return null
   const { data, error } = await supabase
     .from('page_sections')
@@ -265,20 +303,17 @@ export async function fetchHomeSections(): Promise<{ hero: Partial<Hero>; homepa
     .eq('page_id', (page as { id: string }).id)
     .eq('is_visible', true)
   if (error || !data) return null
+  return data as unknown as PageSectionRow[]
+}
 
-  type Row = {
-    section_key: string
-    eyebrow: string | null
-    title: string | null
-    subtitle: string | null
-    body: string | null
-    extra: { words?: string[]; imageOffsetX?: number; imageOffsetY?: number } | null
-    image: MediaRef
-  }
+export async function fetchHomeSections(): Promise<{ hero: Partial<Hero>; homepage: Partial<Homepage> } | null> {
+  const rows = await fetchPageSectionRows('home')
+  if (!rows) return null
+
   const hero: Partial<Hero> = {}
   const homepage: Partial<Homepage> = {}
 
-  for (const row of data as unknown as Row[]) {
+  for (const row of rows) {
     switch (row.section_key) {
       case 'hero':
         if (row.extra?.words?.length) hero.words = row.extra.words
@@ -308,6 +343,129 @@ export async function fetchHomeSections(): Promise<{ hero: Partial<Hero>; homepa
     }
   }
   return { hero, homepage }
+}
+
+export async function fetchStudioSections(): Promise<Partial<Studio> | null> {
+  const rows = await fetchPageSectionRows('studio')
+  if (!rows) return null
+
+  const studio: Partial<Studio> = {}
+  for (const row of rows) {
+    switch (row.section_key) {
+      case 'opening':
+        if (row.eyebrow) studio.eyebrow = row.eyebrow
+        if (row.title) studio.heading = row.title
+        if (row.subtitle) studio.subhead = row.subtitle
+        if (row.body) studio.body = row.body
+        break
+      case 'principles':
+        if (row.eyebrow) studio.principlesEyebrow = row.eyebrow
+        if (row.extra?.items?.length) studio.principles = row.extra.items
+        break
+      case 'culture':
+        if (row.eyebrow) studio.cultureEyebrow = row.eyebrow
+        if (row.title) studio.cultureHeading = row.title
+        if (row.extra?.items?.length) studio.cultureItems = row.extra.items
+        break
+      case 'cta':
+        if (row.title) studio.ctaHeading = row.title
+        break
+    }
+  }
+  return studio
+}
+
+export async function fetchContactSections(): Promise<Partial<ContactCopy> | null> {
+  const rows = await fetchPageSectionRows('contact')
+  const row = rows?.find(r => r.section_key === 'header')
+  if (!row) return null
+  const c: Partial<ContactCopy> = {}
+  if (row.eyebrow) c.eyebrow = row.eyebrow
+  if (row.title) c.heading = row.title
+  if (row.subtitle) c.subhead = row.subtitle
+  if (row.body) c.intro1 = row.body
+  if (row.extra?.body2) c.intro2 = row.extra.body2
+  return c
+}
+
+export async function fetchReportsSections(): Promise<Partial<ReportsCopy> | null> {
+  const rows = await fetchPageSectionRows('reports')
+  const row = rows?.find(r => r.section_key === 'header')
+  if (!row) return null
+  const r: Partial<ReportsCopy> = {}
+  if (row.eyebrow) r.eyebrow = row.eyebrow
+  if (row.title) r.heading = row.title
+  if (row.subtitle) r.subhead = row.subtitle
+  return r
+}
+
+export async function fetchTrainingsPageSections(): Promise<Partial<Trainings> | null> {
+  const rows = await fetchPageSectionRows('trainings')
+  const row = rows?.find(r => r.section_key === 'header')
+  if (!row) return null
+  const t: Partial<Trainings> = {}
+  if (row.eyebrow) t.eyebrow = row.eyebrow
+  if (row.title) t.heading = row.title
+  if (row.subtitle) t.subhead = row.subtitle
+  if (row.body) t.body1 = row.body
+  if (row.extra?.body2) t.body2 = row.extra.body2
+  if (row.extra?.waitingListNote) t.waitingListNote = row.extra.waitingListNote
+  if (row.extra?.items?.length) t.format = row.extra.items.map(i => ({ label: i.title, value: i.body }))
+  return t
+}
+
+async function fetchPageHeader(slug: string): Promise<Partial<PageHeader> | null> {
+  const rows = await fetchPageSectionRows(slug)
+  const row = rows?.find(r => r.section_key === 'header')
+  if (!row) return null
+  const h: Partial<PageHeader> = {}
+  if (row.eyebrow) h.eyebrow = row.eyebrow
+  if (row.title) h.heading = row.title
+  if (row.subtitle) h.subhead = row.subtitle
+  return h
+}
+export const fetchWorkSections = () => fetchPageHeader('work')
+export const fetchCaseStudiesSections = () => fetchPageHeader('case-studies')
+
+export async function fetchCapabilitiesPageSections(): Promise<Partial<CapabilitiesPageCopy> | null> {
+  const rows = await fetchPageSectionRows('capabilities')
+  const row = rows?.find(r => r.section_key === 'header')
+  if (!row) return null
+  const c: Partial<CapabilitiesPageCopy> = {}
+  if (row.eyebrow) c.eyebrow = row.eyebrow
+  if (row.title) c.headingSuffix = row.title
+  if (row.subtitle) c.subhead = row.subtitle
+  return c
+}
+
+export async function fetchPrivacySections(): Promise<Partial<LegalCopy> | null> {
+  const rows = await fetchPageSectionRows('privacy')
+  if (!rows) return null
+  const header = rows.find(r => r.section_key === 'header')
+  const legal = rows.find(r => r.section_key === 'legal')
+  const p: Partial<LegalCopy> = {}
+  if (header?.eyebrow) p.eyebrow = header.eyebrow
+  if (header?.title) p.heading = header.title
+  if (header?.subtitle) p.subhead = header.subtitle
+  if (typeof header?.extra?.lastUpdated === 'string') p.lastUpdated = header.extra.lastUpdated
+  if (legal?.extra?.items?.length) p.sections = legal.extra.items
+  return p
+}
+
+export async function fetchCookiesSections(): Promise<Partial<CookiesCopy> | null> {
+  const rows = await fetchPageSectionRows('cookies')
+  if (!rows) return null
+  const header = rows.find(r => r.section_key === 'header')
+  const table = rows.find(r => r.section_key === 'table')
+  const managing = rows.find(r => r.section_key === 'managing')
+  const c: Partial<CookiesCopy> = {}
+  if (header?.eyebrow) c.eyebrow = header.eyebrow
+  if (header?.title) c.heading = header.title
+  if (header?.subtitle) c.subhead = header.subtitle
+  if (table?.extra?.items?.length) c.rows = table.extra.items
+  if (managing?.title) c.managingHeading = managing.title
+  if (managing?.body) c.managingBody = managing.body
+  return c
 }
 
 export async function fetchSiteSettings(): Promise<{ company: Company; socials: Social[]; seo: Seo } | null> {

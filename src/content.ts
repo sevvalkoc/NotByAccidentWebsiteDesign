@@ -34,6 +34,15 @@ import {
   fetchSiteSettings,
   fetchNavigation,
   fetchHomeSections,
+  fetchStudioSections,
+  fetchContactSections,
+  fetchReportsSections,
+  fetchTrainingsPageSections,
+  fetchWorkSections,
+  fetchCaseStudiesSections,
+  fetchCapabilitiesPageSections,
+  fetchPrivacySections,
+  fetchCookiesSections,
 } from '@/lib/cms'
 
 export interface Testimonial {
@@ -75,6 +84,71 @@ export interface Trainings {
   format: TrainingRow[]
 }
 
+export interface StudioListItem {
+  title: string
+  body: string
+  /** Optional third field — only Cookies' table (lifespan column) uses it. */
+  meta?: string
+}
+
+export interface PageHeader {
+  eyebrow: string
+  heading: string
+  subhead: string
+}
+
+export interface CapabilitiesPageCopy {
+  eyebrow: string
+  /** Appears after the live capability count, e.g. "42 <headingSuffix>" — the
+   *  count itself is generated in code, not stored, so it can never go stale. */
+  headingSuffix: string
+  subhead: string
+}
+
+export interface LegalCopy {
+  eyebrow: string
+  heading: string
+  subhead: string
+  lastUpdated: string
+  sections: StudioListItem[]
+}
+
+export interface CookiesCopy {
+  eyebrow: string
+  heading: string
+  subhead: string
+  rows: StudioListItem[]
+  managingHeading: string
+  managingBody: string
+}
+
+export interface Studio {
+  eyebrow: string
+  heading: string
+  subhead: string
+  body: string
+  principlesEyebrow: string
+  principles: StudioListItem[]
+  cultureEyebrow: string
+  cultureHeading: string
+  cultureItems: StudioListItem[]
+  ctaHeading: string
+}
+
+export interface ContactCopy {
+  eyebrow: string
+  heading: string
+  subhead: string
+  intro1: string
+  intro2: string
+}
+
+export interface ReportsCopy {
+  eyebrow: string
+  heading: string
+  subhead: string
+}
+
 export interface Homepage {
   featuredEyebrow: string
   featuredHeading: string
@@ -112,6 +186,14 @@ export interface Site {
   company: Company
   hero: Hero
   homepage: Homepage
+  studio: Studio
+  contact: ContactCopy
+  reportsCopy: ReportsCopy
+  work: PageHeader
+  caseStudiesCopy: PageHeader
+  capabilitiesCopy: CapabilitiesPageCopy
+  privacyCopy: LegalCopy
+  cookiesCopy: CookiesCopy
   nav: NavLink[]
   footerNav: NavLink[]
   socials: Social[]
@@ -168,6 +250,104 @@ const seedTrainings: Trainings = {
   ],
 }
 
+const seedStudio: Studio = {
+  eyebrow: 'Studio',
+  heading: 'We make companies wanted.',
+  subhead: 'Growth is what happens next. Wanted, on purpose.',
+  body: 'Not by Accident is an independent creative company working across brand, product and demand. Brand thinking and commercial thinking do not sit in separate rooms.',
+  principlesEyebrow: 'How we think',
+  principles: [
+    { title: 'Specific', body: 'Name the material, the month, the number, the street. A range of possibilities is not a description. It is an avoidance of one.' },
+    { title: 'Decided', body: 'Present decisions as decisions. Two routes, never three. The recommendation comes first, not last. We are paid to have a view.' },
+    { title: 'Warm, not soft', body: 'People, hands, imperfection and humour. The work stays sharp. Warmth and rigour are not in tension. Softness is just politeness at the cost of truth.' },
+    { title: 'Culturally awake', body: 'References from outside design, credited always and never explained. We do not borrow from culture without knowing where we borrowed from.' },
+    { title: 'Quietly funny', body: 'One human moment per communication. In the last line, never the headline. Funny because it is true, not because it is trying.' },
+    { title: 'Commercially literate', body: 'Every soft attribute shows up one step downstream as a hard number. We do not separate aesthetic decisions from commercial ones.' },
+  ],
+  cultureEyebrow: 'The culture',
+  cultureHeading: 'Small on purpose. Senior in the room. Commercial by instinct.',
+  cultureItems: [
+    { title: 'One room', body: 'Strategy, design and demand sit together from day one — no relay races, no telephone game between departments.' },
+    { title: 'Senior hands', body: 'The people who win the work do the work. We stay small so the standard never gets diluted downstream.' },
+    { title: 'Commercial first', body: 'Every decision traces back to a number a client can actually move. Beauty is the method, not the goal.' },
+  ],
+  ctaHeading: 'If you would like to work with us, leave your email.',
+}
+
+const seedContact: ContactCopy = {
+  eyebrow: 'Contact',
+  heading: 'Write to us.',
+  subhead: 'We work with founders and creative leads who suspect their company is better than its reputation.',
+  intro1: 'We do not work with everyone. We work on fewer projects than most, and each one receives the attention it requires.',
+  intro2: 'Before writing, it is worth knowing that we typically begin with a strategy engagement. If you are looking for a production company or an execution partner, we are probably not the right fit.',
+}
+
+const seedReportsCopy: ReportsCopy = {
+  eyebrow: 'Reports · Coming soon',
+  heading: 'The research, in the open.',
+  subhead: 'We are putting together a small library of original reports — benchmarks, field notes and the working we usually keep to ourselves. Honest numbers, plainly argued. It is not ready yet, but it is close.',
+}
+
+const seedWork: PageHeader = {
+  eyebrow: 'Work',
+  heading: 'An independent record of what we have made.',
+  subhead: 'We work on fewer projects than most. Each one receives the attention it requires. This is the archive.',
+}
+
+const seedCaseStudiesCopy: PageHeader = {
+  eyebrow: 'Case Studies',
+  heading: 'Work examined at length.',
+  subhead: 'Each case study is a full account of a project — the problem, the thinking and the result. Not a highlights reel.',
+}
+
+const seedCapabilitiesCopy: CapabilitiesPageCopy = {
+  eyebrow: 'Capabilities',
+  headingSuffix: 'capabilities, in the order a company actually needs them.',
+  subhead: 'Five groups — Brand & Identity, Digital & Product, Growth & Demand, Market & Expansion, and Experiences. Take one, or the whole sequence. Each has its own team, method and page.',
+}
+
+const seedPrivacyCopy: LegalCopy = {
+  eyebrow: 'Privacy',
+  heading: 'What we hold, and why.',
+  subhead: 'We collect very little and we treat it plainly. This notice explains exactly how, in language you should not need a lawyer to follow.',
+  lastUpdated: '8 August 2026',
+  sections: [
+    {
+      title: 'Who we are',
+      body: 'Not by Accident is an independent creative company. When we refer to “we”, “us” or “our” in this notice, we mean Not by Accident. When we refer to “you”, we mean anyone who visits this website or corresponds with us. Our full registered company details will be added here before this notice is treated as final.\n\nThis notice explains what we collect, why we collect it, and what you can ask us to do about it. It is written to be read, not to be survived.',
+    },
+    {
+      title: 'What we collect',
+      body: 'We collect only what a conversation requires. When you write to us through the contact form or by email, we hold your name, your company, your email address and whatever you choose to tell us about your project. We keep it for as long as the conversation is live and for a reasonable period afterwards.\n\nWhen you browse the site, our hosting provider records standard technical information — the pages requested, the approximate region, the browser used. This is ordinary server activity, not surveillance.',
+    },
+    {
+      title: 'Why we hold it',
+      body: 'We use your information for one purpose: to respond to you and, where it becomes relevant, to carry out work you have asked us to do. We do not sell it. We do not build advertising profiles. We do not enrich it with data bought from elsewhere.\n\nOur lawful basis is either your consent, given when you write to us, or our legitimate interest in running a small business well.',
+    },
+    {
+      title: 'Who sees it',
+      body: 'Your information is seen by the people at Not by Accident who need to see it, and by a short list of service providers who help us operate — email, hosting and analytics. Each is bound by its own obligations. We choose them carefully and review them.',
+    },
+    {
+      title: 'Your rights',
+      body: 'You may ask to see the information we hold about you, to correct it, or to have it deleted. You may withdraw consent at any time. You may also complain to the Information Commissioner’s Office, though we would rather you told us first, so we can put it right.\n\nTo exercise any of these rights, write to hello@notbyaccident.com. We will respond within one month, usually sooner.',
+    },
+  ],
+}
+
+const seedCookiesCopy: CookiesCopy = {
+  eyebrow: 'Cookies',
+  heading: 'A short note on cookies.',
+  subhead: 'We use a handful, and only the useful kind. No advertising trackers, no third-party profiling, no reselling of attention.',
+  rows: [
+    { title: 'Essential', body: 'Keeps the site working — remembers your cookie choice and secures the connection. Nothing to opt out of; without these, nothing loads.', meta: 'Session – 12 months' },
+    { title: 'Analytics', body: 'A single, privacy-respecting measure of which pages are read and roughly where readers arrive from. Aggregated, never tied to a name.', meta: '12 months' },
+    { title: 'Preferences', body: 'Remembers small things you would rather we did not ask twice — such as whether you have dismissed a notice.', meta: '6 months' },
+  ],
+  managingHeading: 'Managing them yourself',
+  managingBody: 'Every browser lets you see, block or delete cookies from its settings. Blocking the essential ones will stop parts of the site working; blocking the rest changes nothing you would notice.',
+}
+
 const seedHomepage: Homepage = {
   featuredEyebrow: 'Selected work',
   featuredHeading: 'Proof that the brand decision was the commercial one.',
@@ -203,6 +383,14 @@ const seed: Site = {
   company: seedCompany,
   hero: seedHero,
   homepage: seedHomepage,
+  studio: seedStudio,
+  contact: seedContact,
+  reportsCopy: seedReportsCopy,
+  work: seedWork,
+  caseStudiesCopy: seedCaseStudiesCopy,
+  capabilitiesCopy: seedCapabilitiesCopy,
+  privacyCopy: seedPrivacyCopy,
+  cookiesCopy: seedCookiesCopy,
   nav: seedNav,
   footerNav: seedFooterNav,
   socials: seedSocials as Social[],
@@ -261,6 +449,15 @@ function loadLiveContent() {
         homepage: { ...cache.homepage, ...v.homepage },
       })
     }),
+    fetchStudioSections().then(v => v && write({ studio: { ...cache.studio, ...v } })),
+    fetchContactSections().then(v => v && write({ contact: { ...cache.contact, ...v } })),
+    fetchReportsSections().then(v => v && write({ reportsCopy: { ...cache.reportsCopy, ...v } })),
+    fetchTrainingsPageSections().then(v => v && write({ trainings: { ...cache.trainings, ...v } })),
+    fetchWorkSections().then(v => v && write({ work: { ...cache.work, ...v } })),
+    fetchCaseStudiesSections().then(v => v && write({ caseStudiesCopy: { ...cache.caseStudiesCopy, ...v } })),
+    fetchCapabilitiesPageSections().then(v => v && write({ capabilitiesCopy: { ...cache.capabilitiesCopy, ...v } })),
+    fetchPrivacySections().then(v => v && write({ privacyCopy: { ...cache.privacyCopy, ...v } })),
+    fetchCookiesSections().then(v => v && write({ cookiesCopy: { ...cache.cookiesCopy, ...v } })),
   ])
 }
 loadLiveContent()
@@ -299,6 +496,30 @@ export function useHero(): Hero {
 }
 export function useHomepage(): Homepage {
   return useSite().homepage
+}
+export function useStudio(): Studio {
+  return useSite().studio
+}
+export function useContactCopy(): ContactCopy {
+  return useSite().contact
+}
+export function useReportsCopy(): ReportsCopy {
+  return useSite().reportsCopy
+}
+export function useWorkCopy(): PageHeader {
+  return useSite().work
+}
+export function useCaseStudiesCopy(): PageHeader {
+  return useSite().caseStudiesCopy
+}
+export function useCapabilitiesCopy(): CapabilitiesPageCopy {
+  return useSite().capabilitiesCopy
+}
+export function usePrivacyCopy(): LegalCopy {
+  return useSite().privacyCopy
+}
+export function useCookiesCopy(): CookiesCopy {
+  return useSite().cookiesCopy
 }
 export function useNav(): NavLink[] {
   return useSite().nav

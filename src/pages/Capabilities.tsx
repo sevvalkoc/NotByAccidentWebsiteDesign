@@ -1,29 +1,15 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { categories } from '@/data'
-import { useCapabilities } from '@/content'
+import { useCapabilities, useCapabilitiesCopy } from '@/content'
 import Seo from '@/components/Seo'
+import { useReveal } from '@/hooks/useReveal'
 
 export default function Capabilities() {
   const ref = useRef<HTMLElement>(null)
   const capabilities = useCapabilities()
-
-  useEffect(() => {
-    if (!ref.current) return
-    const els = ref.current.querySelectorAll('.reveal')
-    const observer = new IntersectionObserver(
-      entries =>
-        entries.forEach(e => {
-          if (e.isIntersecting) {
-            e.target.classList.add('in-view')
-            observer.unobserve(e.target)
-          }
-        }),
-      { threshold: 0.06 }
-    )
-    els.forEach(el => observer.observe(el))
-    return () => observer.disconnect()
-  }, [])
+  const copy = useCapabilitiesCopy()
+  useReveal(ref, { threshold: 0.06 })
 
   const schema = {
     '@context': 'https://schema.org',
@@ -46,14 +32,13 @@ export default function Capabilities() {
       {/* Header — dark ground */}
       <div style={{ backgroundColor: '#221E1B', paddingTop: 'clamp(64px, 8vw, 128px)', paddingBottom: 'clamp(56px, 7vw, 104px)' }}>
         <div className="page-grid">
-          <p className="t-caption mb-6 reveal" style={{ color: 'rgba(240,234,218,.4)' }}>Capabilities</p>
+          <p className="t-caption mb-6 reveal" style={{ color: 'rgba(240,234,218,.4)' }}>{copy.eyebrow}</p>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }} className="md:grid-cols-[56%_40%]">
             <h1 className="t-headline-lg reveal reveal-delay-1" style={{ color: '#F0EADA', margin: 0, maxWidth: '18ch' }}>
-              {capabilities.length} capabilities, in the order a company actually needs them.
+              {capabilities.length} {copy.headingSuffix}
             </h1>
             <p className="t-body reveal reveal-delay-2" style={{ color: 'rgba(240,234,218,.6)', maxWidth: '44ch', alignSelf: 'end' }}>
-              Five groups — Brand & Identity, Digital & Product, Growth & Demand, Market & Expansion, and Experiences.
-              Take one, or the whole sequence. Each has its own team, method and page.
+              {copy.subhead}
             </p>
           </div>
 

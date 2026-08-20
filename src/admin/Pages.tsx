@@ -4,15 +4,30 @@ import { refreshSite } from '@/content'
 import { AdminPageHeader, AdminCard, AdminField, AdminInput, AdminTextarea, AdminButton } from '@/admin/ui'
 import MediaPicker from '@/admin/MediaPicker'
 
-/* Homepage section editor. Reads/writes the `page_sections` rows for the
-   'home' page (seeded by supabase/migrations/0005_homepage_sections.sql),
-   which src/lib/cms.ts's fetchHomeSections() reads back on the public site.
-   Each section saves independently. The hero section additionally gets a
-   drag control for nudging the hero photo's position — a bounded,
-   responsive-safe placement adjustment (stored as a px offset in `extra`),
-   not a freeform pixel canvas. */
+/* Homepage + Studio section editor. Reads/writes the `page_sections` rows
+   seeded by supabase/migrations/0005_homepage_sections.sql (home) and
+   0006_studio_sections.sql (studio), which src/lib/cms.ts's
+   fetchHomeSections()/fetchStudioSections() read back on the public site.
+   Each section saves independently. Hero additionally gets a drag control
+   for nudging the hero photo's position — a bounded, responsive-safe
+   placement adjustment (stored as a px offset in `extra`), not a freeform
+   canvas. Principles/Culture are repeatable lists (title + body pairs),
+   stored as extra.items since page_sections has no dedicated list columns. */
 
-type Extra = { words?: string[]; imageOffsetX?: number; imageOffsetY?: number }
+interface ListItem {
+  title: string
+  body: string
+  meta?: string
+}
+type Extra = {
+  words?: string[]
+  imageOffsetX?: number
+  imageOffsetY?: number
+  items?: ListItem[]
+  body2?: string
+  waitingListNote?: string
+  lastUpdated?: string
+}
 
 interface SectionRow {
   id: string
@@ -22,8 +37,23 @@ interface SectionRow {
   subtitle: string | null
   body: string | null
   image_media_id: string | null
+  sort_order: number
   extra: Extra
 }
+
+const PAGES = [
+  { slug: 'home', label: 'Homepage' },
+  { slug: 'studio', label: 'Studio' },
+  { slug: 'contact', label: 'Contact' },
+  { slug: 'trainings', label: 'Trainings' },
+  { slug: 'reports', label: 'Reports' },
+  { slug: 'work', label: 'Work' },
+  { slug: 'case-studies', label: 'Case Studies' },
+  { slug: 'capabilities', label: 'Capabilities' },
+  { slug: 'privacy', label: 'Privacy' },
+  { slug: 'cookies', label: 'Cookies' },
+]
+type PageSlug = (typeof PAGES)[number]['slug']
 
 const SECTION_LABELS: Record<string, string> = {
   hero: 'Hero',
@@ -31,34 +61,65 @@ const SECTION_LABELS: Record<string, string> = {
   notes: 'Notes',
   case_studies: 'Case studies',
   final_cta: 'Final CTA',
+  opening: 'Opening statement',
+  principles: 'Principles',
+  culture: 'Culture',
+  cta: 'Final CTA',
+  header: 'Page header',
+  legal: 'Legal sections',
+  table: 'Cookie categories',
+  managing: 'Managing cookies',
 }
-const SECTION_ORDER = ['hero', 'capabilities', 'notes', 'case_studies', 'final_cta']
+
+/** Which text fields (beyond eyebrow/title, which every section gets) apply,
+ *  keyed by `${pageSlug}:${section_key}` since the same section_key (e.g.
+ *  'header') means different things, with different fields, on different pages. */
+const SECTION_FIELDS: Record<string, { subtitle?: boolean; body?: boolean; titleHint?: string; lastUpdatedField?: boolean }> = {
+  'home:final_cta': { body: true },
+  'studio:opening': { subtitle: true, body: true },
+  'contact:header': { subtitle: true, body: true },
+  'reports:header': { subtitle: true },
+  'work:header': { subtitle: true },
+  'case-studies:header': { subtitle: true },
+  'capabilities:header': {
+    subtitle: true,
+    titleHint: 'Appears after the live capability count, e.g. "42 capabilities, in the order…" — only type the part after the number.',
+  },
+  'privacy:header': { subtitle: true, lastUpdatedField: true },
+  'cookies:header': { subtitle: true },
+  'cookies:managing': { body: true },
+}
+const LIST_SECTIONS = new Set(['principles', 'culture', 'legal'])
 
 export default function Pages() {
+  const [activePage, setActivePage] = useState<PageSlug>('home')
   const [rows, setRows] = useState<SectionRow[] | null>(null)
   const [error, setError] = useState('')
 
   useEffect(() => {
     if (!supabase) return
-    void load()
-  }, [])
+    setRows(null)
+    void load(activePage)
+  }, [activePage])
 
-  async function load() {
+  async function load(slug: string) {
     if (!supabase) return
-    const { data: page, error: pageError } = await supabase.from('pages').select('id').eq('slug', 'home').maybeSingle()
+    const { data: page, error: pageError } = await supabase.from('pages').select('id').eq('slug', slug).maybeSingle()
     if (pageError || !page) {
-      setError(pageError?.message ?? "No 'home' page row found — run supabase/migrations/0005_homepage_sections.sql.")
+      setError(pageError?.message ?? `No '${slug}' page row found — its migration may not have run yet.`)
+      setRows([])
       return
     }
+    setError('')
     const { data, error } = await supabase
       .from('page_sections')
-      .select('id, section_key, eyebrow, title, subtitle, body, image_media_id, extra')
+      .select('id, section_key, eyebrow, title, subtitle, body, image_media_id, sort_order, extra')
       .eq('page_id', (page as { id: string }).id)
     if (error) {
       setError(error.message)
       return
     }
-    setRows(((data ?? []) as unknown as SectionRow[]).sort((a, b) => SECTION_ORDER.indexOf(a.section_key) - SECTION_ORDER.indexOf(b.section_key)))
+    setRows(((data ?? []) as unknown as SectionRow[]).sort((a, b) => a.sort_order - b.sort_order))
   }
 
   function patchRow(id: string, patch: Partial<SectionRow>) {
@@ -98,20 +159,35 @@ export default function Pages() {
     <div>
       <AdminPageHeader
         title="Pages"
-        description="Edit the homepage's hero and section headings. Changes go live immediately after Save — check the site in another tab."
+        description="Edit each page's headings, body copy and images. Changes go live immediately after Save — check the site in another tab."
       />
+      <div className="flex gap-1 mb-6 border-b border-gray-200">
+        {PAGES.map(p => (
+          <button
+            key={p.slug}
+            type="button"
+            onClick={() => setActivePage(p.slug)}
+            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${
+              activePage === p.slug ? 'border-gray-900 text-gray-900' : 'border-transparent text-gray-400 hover:text-gray-600'
+            }`}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
       {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
       {rows === null ? (
         <p className="text-sm text-gray-400">Loading…</p>
       ) : (
         <div className="flex flex-col gap-6 max-w-2xl">
-          {rows.map(row =>
-            row.section_key === 'hero' ? (
-              <HeroCard key={row.id} row={row} onChange={patch => patchRow(row.id, patch)} onSave={() => saveRow(row)} />
-            ) : (
-              <SectionCard key={row.id} row={row} onChange={patch => patchRow(row.id, patch)} onSave={() => saveRow(row)} />
-            )
-          )}
+          {rows.map(row => {
+            const props = { row, onChange: (patch: Partial<SectionRow>) => patchRow(row.id, patch), onSave: () => saveRow(row) }
+            if (row.section_key === 'hero') return <HeroCard key={row.id} {...props} />
+            if (activePage === 'trainings' && row.section_key === 'header') return <TrainingsHeaderCard key={row.id} {...props} />
+            if (activePage === 'cookies' && row.section_key === 'table') return <CookiesTableCard key={row.id} {...props} />
+            if (LIST_SECTIONS.has(row.section_key)) return <ListCard key={row.id} {...props} />
+            return <SectionCard key={row.id} {...props} pageSlug={activePage} />
+          })}
         </div>
       )}
     </div>
@@ -146,26 +222,233 @@ function SectionCard({
   row,
   onChange,
   onSave,
+  pageSlug,
+}: {
+  row: SectionRow
+  onChange: (patch: Partial<SectionRow>) => void
+  onSave: () => void
+  pageSlug: PageSlug
+}) {
+  const fields = SECTION_FIELDS[`${pageSlug}:${row.section_key}`] ?? {}
+  const label = SECTION_LABELS[row.section_key] ?? row.section_key
+  return (
+    <AdminCard className="p-6">
+      <h2 className="text-sm font-semibold text-gray-900 mb-4">{label}</h2>
+      {row.eyebrow !== null && (
+        <AdminField label="Eyebrow">
+          <AdminInput value={row.eyebrow ?? ''} onChange={e => onChange({ eyebrow: e.target.value })} />
+        </AdminField>
+      )}
+      <AdminField label="Heading" hint={fields.titleHint}>
+        <AdminInput value={row.title ?? ''} onChange={e => onChange({ title: e.target.value })} />
+      </AdminField>
+      {fields.subtitle && (
+        <AdminField label="Subhead">
+          <AdminTextarea value={row.subtitle ?? ''} onChange={e => onChange({ subtitle: e.target.value })} rows={2} />
+        </AdminField>
+      )}
+      {fields.body && (
+        <AdminField label="Body">
+          <AdminTextarea value={row.body ?? ''} onChange={e => onChange({ body: e.target.value })} rows={3} />
+        </AdminField>
+      )}
+      {fields.lastUpdatedField && (
+        <AdminField label="Last updated" hint="Shown under the intro as 'Last updated · …'.">
+          <AdminInput
+            value={row.extra.lastUpdated ?? ''}
+            onChange={e => onChange({ extra: { ...row.extra, lastUpdated: e.target.value } })}
+          />
+        </AdminField>
+      )}
+      <SaveBar onSave={onSave} label={label} />
+    </AdminCard>
+  )
+}
+
+/** Shared add/reorder/remove editor for a repeatable title+body(+meta) list,
+ *  stored as extra.items. Used by ListCard (Principles/Culture/Privacy's
+ *  legal sections), TrainingsHeaderCard (Format) and CookiesTableCard. */
+function ItemsEditor({
+  items,
+  onChange,
+  titlePlaceholder = 'Title',
+  bodyPlaceholder = 'Body',
+  metaLabel,
+}: {
+  items: ListItem[]
+  onChange: (items: ListItem[]) => void
+  titlePlaceholder?: string
+  metaLabel?: string
+  bodyPlaceholder?: string
+}) {
+  function updateItem(i: number, patch: Partial<ListItem>) {
+    onChange(items.map((it, idx) => (idx === i ? { ...it, ...patch } : it)))
+  }
+  function removeItem(i: number) {
+    onChange(items.filter((_, idx) => idx !== i))
+  }
+  function moveItem(i: number, dir: -1 | 1) {
+    const j = i + dir
+    if (j < 0 || j >= items.length) return
+    const next = [...items]
+    ;[next[i], next[j]] = [next[j], next[i]]
+    onChange(next)
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      {items.map((item, i) => (
+        <div key={i} className="border border-gray-200 rounded-md p-3">
+          <div className="flex items-start gap-2">
+            <div className="flex-1">
+              <AdminInput
+                value={item.title}
+                onChange={e => updateItem(i, { title: e.target.value })}
+                placeholder={titlePlaceholder}
+                className="mb-2"
+              />
+              <AdminTextarea value={item.body} onChange={e => updateItem(i, { body: e.target.value })} rows={2} placeholder={bodyPlaceholder} />
+              {metaLabel && (
+                <AdminInput
+                  value={item.meta ?? ''}
+                  onChange={e => updateItem(i, { meta: e.target.value })}
+                  placeholder={metaLabel}
+                  className="mt-2"
+                />
+              )}
+            </div>
+            <div className="flex flex-col gap-1 shrink-0">
+              <button type="button" className="text-xs text-gray-400 hover:text-gray-700 disabled:opacity-30" disabled={i === 0} onClick={() => moveItem(i, -1)}>
+                ↑
+              </button>
+              <button type="button" className="text-xs text-gray-400 hover:text-gray-700 disabled:opacity-30" disabled={i === items.length - 1} onClick={() => moveItem(i, 1)}>
+                ↓
+              </button>
+              <button type="button" className="text-xs text-red-500 hover:text-red-700" onClick={() => removeItem(i)}>
+                ✕
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
+      <AdminButton type="button" variant="secondary" onClick={() => onChange([...items, { title: '', body: '' }])}>
+        + Add item
+      </AdminButton>
+    </div>
+  )
+}
+
+function ListCard({
+  row,
+  onChange,
+  onSave,
 }: {
   row: SectionRow
   onChange: (patch: Partial<SectionRow>) => void
   onSave: () => void
 }) {
+  const items = row.extra.items ?? []
+  const label = SECTION_LABELS[row.section_key] ?? row.section_key
+  const showTitle = row.section_key === 'culture' // Principles has no section heading, just the list; Culture does.
+
   return (
     <AdminCard className="p-6">
-      <h2 className="text-sm font-semibold text-gray-900 mb-4">{SECTION_LABELS[row.section_key] ?? row.section_key}</h2>
+      <h2 className="text-sm font-semibold text-gray-900 mb-4">{label}</h2>
+      <AdminField label="Eyebrow">
+        <AdminInput value={row.eyebrow ?? ''} onChange={e => onChange({ eyebrow: e.target.value })} />
+      </AdminField>
+      {showTitle && (
+        <AdminField label="Heading">
+          <AdminInput value={row.title ?? ''} onChange={e => onChange({ title: e.target.value })} />
+        </AdminField>
+      )}
+
+      <div className="mt-4">
+        <ItemsEditor items={items} onChange={next => onChange({ extra: { ...row.extra, items: next } })} />
+      </div>
+
+      <SaveBar onSave={onSave} label={label} />
+    </AdminCard>
+  )
+}
+
+function TrainingsHeaderCard({
+  row,
+  onChange,
+  onSave,
+}: {
+  row: SectionRow
+  onChange: (patch: Partial<SectionRow>) => void
+  onSave: () => void
+}) {
+  const items = row.extra.items ?? []
+  return (
+    <AdminCard className="p-6">
+      <h2 className="text-sm font-semibold text-gray-900 mb-4">Trainings page</h2>
       <AdminField label="Eyebrow">
         <AdminInput value={row.eyebrow ?? ''} onChange={e => onChange({ eyebrow: e.target.value })} />
       </AdminField>
       <AdminField label="Heading">
         <AdminInput value={row.title ?? ''} onChange={e => onChange({ title: e.target.value })} />
       </AdminField>
-      {row.section_key === 'final_cta' && (
-        <AdminField label="Body">
-          <AdminTextarea value={row.body ?? ''} onChange={e => onChange({ body: e.target.value })} rows={3} />
-        </AdminField>
-      )}
-      <SaveBar onSave={onSave} label={SECTION_LABELS[row.section_key] ?? row.section_key} />
+      <AdminField label="Subhead">
+        <AdminTextarea value={row.subtitle ?? ''} onChange={e => onChange({ subtitle: e.target.value })} rows={2} />
+      </AdminField>
+      <AdminField label="Body — first paragraph">
+        <AdminTextarea value={row.body ?? ''} onChange={e => onChange({ body: e.target.value })} rows={2} />
+      </AdminField>
+      <AdminField label="Body — second paragraph">
+        <AdminTextarea
+          value={row.extra.body2 ?? ''}
+          onChange={e => onChange({ extra: { ...row.extra, body2: e.target.value } })}
+          rows={2}
+        />
+      </AdminField>
+      <AdminField label="Waiting list note">
+        <AdminTextarea
+          value={row.extra.waitingListNote ?? ''}
+          onChange={e => onChange({ extra: { ...row.extra, waitingListNote: e.target.value } })}
+          rows={2}
+        />
+      </AdminField>
+
+      <div className="mt-4">
+        <span className="block text-sm font-medium text-gray-700 mb-2">Format details</span>
+        <ItemsEditor
+          items={items}
+          onChange={next => onChange({ extra: { ...row.extra, items: next } })}
+          titlePlaceholder="Label (e.g. Format)"
+          bodyPlaceholder="Value (e.g. In-person workshop, two days)"
+        />
+      </div>
+
+      <SaveBar onSave={onSave} label="Trainings page" />
+    </AdminCard>
+  )
+}
+
+function CookiesTableCard({
+  row,
+  onChange,
+  onSave,
+}: {
+  row: SectionRow
+  onChange: (patch: Partial<SectionRow>) => void
+  onSave: () => void
+}) {
+  const items = row.extra.items ?? []
+  return (
+    <AdminCard className="p-6">
+      <h2 className="text-sm font-semibold text-gray-900 mb-4">Cookie categories</h2>
+      <p className="text-xs text-gray-400 mb-4">Each row: name, what it does, and its lifespan.</p>
+      <ItemsEditor
+        items={items}
+        onChange={next => onChange({ extra: { ...row.extra, items: next } })}
+        titlePlaceholder="Category name (e.g. Essential)"
+        bodyPlaceholder="What it does"
+        metaLabel="Lifespan (e.g. 12 months)"
+      />
+      <SaveBar onSave={onSave} label="Cookie categories" />
     </AdminCard>
   )
 }

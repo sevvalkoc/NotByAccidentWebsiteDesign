@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Seo from '@/components/Seo'
-import { useCompany, submitLead } from '@/content'
+import { useCompany, useReportsCopy, submitLead } from '@/content'
 
 export default function Reports() {
   const company = useCompany()
+  const copy = useReportsCopy()
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
@@ -51,23 +52,21 @@ export default function Reports() {
               style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#7F8B3E', display: 'inline-block' }}
               aria-hidden="true"
             />
-            Reports · Coming soon
+            {copy.eyebrow}
           </p>
 
           <h1
             className="t-display"
             style={{ maxWidth: '18ch', marginBottom: '1.75rem' }}
           >
-            The research, in the open.
+            {copy.heading}
           </h1>
 
           <p
             className="t-subhead"
             style={{ color: 'rgba(34,30,27,.65)', fontWeight: 400, maxWidth: '52ch', marginBottom: '2.5rem' }}
           >
-            We are putting together a small library of original reports — benchmarks, field notes
-            and the working we usually keep to ourselves. Honest numbers, plainly argued. It is not
-            ready yet, but it is close.
+            {copy.subhead}
           </p>
 
           {sent ? (

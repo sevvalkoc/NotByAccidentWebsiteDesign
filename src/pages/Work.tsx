@@ -1,24 +1,14 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { useProjects } from '@/content'
+import { useProjects, useWorkCopy } from '@/content'
 import Seo from '@/components/Seo'
+import { useReveal } from '@/hooks/useReveal'
 
 export default function Work() {
   const ref = useRef<HTMLElement>(null)
   const projects = useProjects()
-
-  useEffect(() => {
-    if (!ref.current) return
-    const els = ref.current.querySelectorAll('.reveal')
-    const observer = new IntersectionObserver(
-      entries => entries.forEach(e => {
-        if (e.isIntersecting) { e.target.classList.add('in-view'); observer.unobserve(e.target) }
-      }),
-      { threshold: 0.08 }
-    )
-    els.forEach(el => observer.observe(el))
-    return () => observer.disconnect()
-  }, [])
+  const copy = useWorkCopy()
+  useReveal(ref, { threshold: 0.08 })
 
   return (
     <main id="main" ref={ref} style={{ paddingTop: '56px' }}>
@@ -43,16 +33,16 @@ export default function Work() {
             className="md:grid-cols-[55%_45%]"
           >
             <div>
-              <p className="t-caption mb-4" style={{ color: 'rgba(34,30,27,.45)' }}>Work</p>
+              <p className="t-caption mb-4" style={{ color: 'rgba(34,30,27,.45)' }}>{copy.eyebrow}</p>
               <h1 className="t-headline-lg reveal" style={{ margin: 0 }}>
-                An independent record of what we have made.
+                {copy.heading}
               </h1>
             </div>
             <p
               className="t-body reveal reveal-delay-1"
               style={{ color: 'rgba(34,30,27,.6)', maxWidth: '42ch' }}
             >
-              We work on fewer projects than most. Each one receives the attention it requires. This is the archive.
+              {copy.subhead}
             </p>
           </div>
         </div>
