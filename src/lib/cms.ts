@@ -337,6 +337,7 @@ export async function fetchHomeSections(): Promise<{
       case 'capabilities':
         if (row.eyebrow) homepage.capabilitiesEyebrow = row.eyebrow
         if (row.title) homepage.capabilitiesHeading = row.title
+        if (row.image) homepage.capabilitiesImage = mediaUrl(row.image)
         break
       case 'notes':
         if (row.eyebrow) homepage.notesEyebrow = row.eyebrow
@@ -352,6 +353,7 @@ export async function fetchHomeSections(): Promise<{
         if (row.body) homepage.ctaBody = row.body
         if (row.cta_label) homepage.ctaButtonLabel = row.cta_label
         if (row.cta_url) homepage.ctaButtonUrl = row.cta_url
+        if (row.image) homepage.finalCtaImage = mediaUrl(row.image)
         break
     }
   }

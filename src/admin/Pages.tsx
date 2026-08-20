@@ -87,9 +87,10 @@ const SECTION_LABELS: Record<string, string> = {
  *  'header') means different things, with different fields, on different pages. */
 const SECTION_FIELDS: Record<
   string,
-  { subtitle?: boolean; body?: boolean; titleHint?: string; lastUpdatedField?: boolean; ctaFields?: boolean }
+  { subtitle?: boolean; body?: boolean; titleHint?: string; lastUpdatedField?: boolean; ctaFields?: boolean; imageField?: boolean }
 > = {
-  'home:final_cta': { body: true, ctaFields: true },
+  'home:final_cta': { body: true, ctaFields: true, imageField: true },
+  'home:capabilities': { imageField: true },
   'studio:opening': { subtitle: true, body: true },
   'contact:header': { subtitle: true, body: true },
   'reports:header': { subtitle: true },
@@ -352,6 +353,11 @@ function SectionCard({
           <AdminField label="Button link" hint="A path like /contact, or a full https:// URL.">
             <AdminInput value={row.cta_url ?? ''} onChange={e => onChange({ cta_url: e.target.value })} />
           </AdminField>
+        </div>
+      )}
+      {fields.imageField && (
+        <div className="mb-4">
+          <MediaPicker label="Image (optional — leave empty for no image)" mediaId={row.image_media_id} onChange={id => onChange({ image_media_id: id })} />
         </div>
       )}
       <SaveBar onSave={onSave} label={label} />

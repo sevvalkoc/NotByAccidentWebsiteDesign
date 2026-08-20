@@ -243,10 +243,20 @@ function CapabilitiesIndex() {
               {hp.capabilitiesHeading}
             </h2>
           </div>
-          <p className="t-body" style={{ color: 'rgba(34,30,27,.6)', maxWidth: '34ch', fontSize: '15px' }}>
-            Five groups, {capabilities.length} capabilities. Take one, or the whole sequence — each has its own team, method
-            and page.
-          </p>
+          <div className="flex items-center gap-4">
+            {hp.capabilitiesImage && (
+              <div
+                className="work-tile img-crosshair shrink-0"
+                style={{ width: '64px', height: '64px', overflow: 'hidden', backgroundColor: '#3a3530' }}
+              >
+                <img src={hp.capabilitiesImage} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
+            )}
+            <p className="t-body" style={{ color: 'rgba(34,30,27,.6)', maxWidth: '34ch', fontSize: '15px' }}>
+              Five groups, {capabilities.length} capabilities. Take one, or the whole sequence — each has its own team, method
+              and page.
+            </p>
+          </div>
         </div>
 
         {/* Category tabs — colour-coded, not iconography */}
@@ -595,6 +605,14 @@ function FinalCta() {
             </h2>
           </div>
           <div className="reveal reveal-delay-1 md:order-1">
+            {hp.finalCtaImage && (
+              <div
+                className="work-tile img-crosshair"
+                style={{ width: '160px', height: '100px', overflow: 'hidden', backgroundColor: '#3a3530', marginBottom: '1.5rem' }}
+              >
+                <img src={hp.finalCtaImage} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
+            )}
             <p className="t-body" style={{ color: 'rgba(240,234,218,.72)', maxWidth: '40ch' }}>
               {hp.ctaBody}
             </p>

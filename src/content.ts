@@ -161,6 +161,9 @@ export interface Homepage {
   featuredHeading: string
   capabilitiesEyebrow: string
   capabilitiesHeading: string
+  /** Optional small side image — empty string means "not set", section
+   *  renders exactly as it always has. */
+  capabilitiesImage: string
   notesEyebrow: string
   journalHeading: string
   ctaEyebrow: string
@@ -168,6 +171,8 @@ export interface Homepage {
   ctaBody: string
   ctaButtonLabel: string
   ctaButtonUrl: string
+  /** Optional small side image — empty string means "not set". */
+  finalCtaImage: string
 }
 
 export interface NavLink {
@@ -374,6 +379,7 @@ const seedHomepage: Homepage = {
   featuredHeading: 'Proof that the brand decision was the commercial one.',
   capabilitiesEyebrow: 'What we do',
   capabilitiesHeading: 'Capabilities. One way of working.',
+  capabilitiesImage: '',
   notesEyebrow: 'Notes — an independent publication',
   journalHeading: 'How we think, in public.',
   ctaEyebrow: 'Start something',
@@ -382,6 +388,7 @@ const seedHomepage: Homepage = {
     'We work with founders, marketing leads and creative directors who suspect their company is better than its reputation. First reply within one working day — from a person, not a form.',
   ctaButtonLabel: 'Start a project',
   ctaButtonUrl: '/contact',
+  finalCtaImage: '',
 }
 
 const seedNav: NavLink[] = [
