@@ -6,6 +6,7 @@ import {
   AdminButton,
   AdminInput,
   AdminTextarea,
+  AdminSelect,
   AdminCheckbox,
   AdminEmptyState,
   ConfirmButton,
@@ -16,6 +17,8 @@ export type FieldConfig =
   | { key: string; label: string; type: 'text' | 'textarea' | 'url'; required?: boolean }
   | { key: string; label: string; type: 'media' }
   | { key: string; label: string; type: 'checkbox'; default?: boolean }
+  | { key: string; label: string; type: 'select'; options: string[]; required?: boolean }
+  | { key: string; label: string; type: 'string-array'; hint?: string }
 
 export interface SimpleCollectionConfig {
   table: string
@@ -166,7 +169,8 @@ function CollectionForm({
           e.preventDefault()
           const out: Record<string, unknown> = {}
           for (const f of config.fields) {
-            const fallback = f.type === 'media' ? null : f.type === 'checkbox' ? (f.default ?? false) : ''
+            const fallback =
+              f.type === 'media' ? null : f.type === 'checkbox' ? (f.default ?? false) : f.type === 'string-array' ? [] : ''
             out[f.key] = values[f.key] ?? fallback
           }
           if (config.activeKey) out[config.activeKey] = values[config.activeKey] ?? true
@@ -186,6 +190,22 @@ function CollectionForm({
                   onChange={e => set(f.key, e.target.checked)}
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
+              ) : f.type === 'select' ? (
+                <AdminSelect value={(values[f.key] as string) ?? f.options[0]} required={f.required} onChange={e => set(f.key, e.target.value)}>
+                  {f.options.map(o => (
+                    <option key={o} value={o}>
+                      {o}
+                    </option>
+                  ))}
+                </AdminSelect>
+              ) : f.type === 'string-array' ? (
+                <>
+                  <AdminInput
+                    value={((values[f.key] as string[]) ?? []).join(', ')}
+                    onChange={e => set(f.key, e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
+                  />
+                  {f.hint && <span className="block text-xs text-gray-400 mt-1">{f.hint}</span>}
+                </>
               ) : f.type === 'textarea' ? (
                 <AdminTextarea
                   value={(values[f.key] as string) ?? ''}

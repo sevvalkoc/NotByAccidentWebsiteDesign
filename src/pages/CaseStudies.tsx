@@ -1,18 +1,20 @@
 import { useRef } from 'react'
-import { Link } from 'react-router-dom'
+import Link from '@/components/LocalizedLink'
 import { useProjects, useCaseStudiesCopy } from '@/content'
 import Seo from '@/components/Seo'
 import { useReveal } from '@/hooks/useReveal'
+import { usePageSeo } from '@/i18n/pageSeo'
 
 export default function CaseStudies() {
   const ref = useRef<HTMLElement>(null)
   const projects = useProjects()
   const copy = useCaseStudiesCopy()
+  const seo = usePageSeo('/case-studies')
   useReveal(ref, { threshold: 0.08 })
 
   return (
     <main id="main" ref={ref} style={{ paddingTop: '56px', backgroundColor: '#F0EADA' }}>
-      <Seo title="Case Studies" description="In-depth case studies from Not by Accident — how brand strategy, identity and demand work translated into measurable commercial results." path="/case-studies" />
+      <Seo title={seo.title} description={seo.description} path="/case-studies" />
       {/* Header */}
       <div
         style={{

@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
+import Link from '@/components/LocalizedLink'
 import Seo from '@/components/Seo'
 import { supabase } from '@/lib/supabase'
+import { useT } from '@/i18n/ui'
+import { usePageSeo } from '@/i18n/pageSeo'
 
 /* Redirects created in the admin (SEO → Redirects), including the ones
    auto-created when a Work/Article slug changes, are looked up here: this
@@ -41,6 +44,8 @@ function useRedirectCheck() {
 
 export default function NotFound() {
   const checked = useRedirectCheck()
+  const t = useT()
+  const seo = usePageSeo('/404')
   if (!checked) return null
   return (
     <main
@@ -53,7 +58,7 @@ export default function NotFound() {
         alignItems: 'center',
       }}
     >
-      <Seo title="Page not found" description="The page you were looking for doesn't exist." path="/404" noindex />
+      <Seo title={seo.title} description={seo.description} path="/404" noindex />
       <div
         className="page-grid w-full"
         style={{
@@ -74,7 +79,7 @@ export default function NotFound() {
               className="t-caption mb-8"
               style={{ color: 'rgba(34,30,27,.35)' }}
             >
-              404
+              {t.notFound.code}
             </p>
             <h1
               style={{
@@ -88,13 +93,13 @@ export default function NotFound() {
                 maxWidth: '12ch',
               }}
             >
-              This page does not exist.
+              {t.notFound.heading}
             </h1>
             <p
               className="t-body"
               style={{ color: 'rgba(34,30,27,.65)', maxWidth: '40ch', marginBottom: '2.5rem' }}
             >
-              Everything else does. You may have followed a broken link, or the page has moved.
+              {t.notFound.body}
             </p>
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <Link
@@ -102,14 +107,14 @@ export default function NotFound() {
                 className="btn-primary"
                 style={{ textDecoration: 'none', display: 'inline-flex' }}
               >
-                Go home
+                {t.notFound.goHome}
               </Link>
               <Link
                 to="/work"
                 className="btn-ghost"
                 style={{ textDecoration: 'none', display: 'inline-flex' }}
               >
-                See the work
+                {t.notFound.seeWork}
               </Link>
             </div>
           </div>
@@ -127,10 +132,10 @@ export default function NotFound() {
                 paddingLeft: '1.5rem',
               }}
             >
-              "We make companies wanted. Growth is what happens next."
+              "{t.notFound.quote}"
             </p>
             <p className="t-caption mt-4" style={{ color: 'rgba(34,30,27,.3)', paddingLeft: '1.5rem' }}>
-              Not by Accident
+              {t.notFound.attribution}
             </p>
           </div>
         </div>

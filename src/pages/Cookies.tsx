@@ -1,18 +1,22 @@
 import { useRef } from 'react'
-import { Link } from 'react-router-dom'
+import Link from '@/components/LocalizedLink'
 import Seo from '@/components/Seo'
 import { useReveal } from '@/hooks/useReveal'
 import { useCookiesCopy } from '@/content'
+import { useT } from '@/i18n/ui'
+import { usePageSeo } from '@/i18n/pageSeo'
 
 export default function Cookies() {
   const ref = useRef<HTMLElement>(null)
   const copy = useCookiesCopy()
+  const t = useT()
+  const seo = usePageSeo('/cookies')
   const rows = copy.rows.map(r => ({ name: r.title, purpose: r.body, life: r.meta ?? '' }))
   useReveal(ref, { threshold: 0.08 })
 
   return (
     <main id="main" ref={ref} style={{ paddingTop: '56px', backgroundColor: '#F0EADA' }}>
-      <Seo title="Cookies" description="How Not by Accident uses cookies and similar technologies on this website." path="/cookies" />
+      <Seo title={seo.title} description={seo.description} path="/cookies" />
       {/* Header */}
       <div
         style={{
@@ -60,9 +64,9 @@ export default function Cookies() {
             }}
           >
             <div className="hidden md:grid" style={{ gridTemplateColumns: '160px 1fr 160px', gap: '2rem', paddingBottom: '1rem' }}>
-              <p className="t-caption m-0" style={{ color: 'rgba(34,30,27,.4)' }}>Category</p>
-              <p className="t-caption m-0" style={{ color: 'rgba(34,30,27,.4)' }}>What it does</p>
-              <p className="t-caption m-0" style={{ color: 'rgba(34,30,27,.4)' }}>Lifespan</p>
+              <p className="t-caption m-0" style={{ color: 'rgba(34,30,27,.4)' }}>{t.cookies.category}</p>
+              <p className="t-caption m-0" style={{ color: 'rgba(34,30,27,.4)' }}>{t.cookies.whatItDoes}</p>
+              <p className="t-caption m-0" style={{ color: 'rgba(34,30,27,.4)' }}>{t.cookies.lifespan}</p>
             </div>
           </div>
 
@@ -118,8 +122,8 @@ export default function Cookies() {
             {copy.managingBody}
           </p>
           <p className="t-body" style={{ color: 'rgba(34,30,27,.72)' }}>
-            For the fuller picture of what we hold and why, see our{' '}
-            <Link to="/privacy" className="link-beetroot">privacy notice</Link>. Anything unclear — write to{' '}
+            {t.cookies.fullerPicturePrefix}{' '}
+            <Link to="/privacy" className="link-beetroot">{t.cookies.privacyNoticeLink}</Link>. {t.cookies.unclearPrefix}{' '}
             <a href="mailto:hello@notbyaccident.com" className="link-beetroot">hello@notbyaccident.com</a>.
           </p>
         </div>

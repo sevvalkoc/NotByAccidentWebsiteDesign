@@ -19,6 +19,10 @@ interface ListItem {
   body: string
   meta?: string
 }
+interface ButtonItem {
+  label: string
+  url: string
+}
 type Extra = {
   words?: string[]
   imageOffsetX?: number
@@ -27,6 +31,7 @@ type Extra = {
   body2?: string
   waitingListNote?: string
   lastUpdated?: string
+  buttons?: ButtonItem[]
 }
 
 interface SectionRow {
@@ -36,8 +41,11 @@ interface SectionRow {
   title: string | null
   subtitle: string | null
   body: string | null
+  cta_label: string | null
+  cta_url: string | null
   image_media_id: string | null
   sort_order: number
+  is_visible: boolean
   extra: Extra
 }
 
@@ -69,13 +77,20 @@ const SECTION_LABELS: Record<string, string> = {
   legal: 'Legal sections',
   table: 'Cookie categories',
   managing: 'Managing cookies',
+  testimonials: 'Testimonials',
+  clients: 'Clients',
+  partners: 'Partners',
 }
 
 /** Which text fields (beyond eyebrow/title, which every section gets) apply,
  *  keyed by `${pageSlug}:${section_key}` since the same section_key (e.g.
  *  'header') means different things, with different fields, on different pages. */
-const SECTION_FIELDS: Record<string, { subtitle?: boolean; body?: boolean; titleHint?: string; lastUpdatedField?: boolean }> = {
-  'home:final_cta': { body: true },
+const SECTION_FIELDS: Record<
+  string,
+  { subtitle?: boolean; body?: boolean; titleHint?: string; lastUpdatedField?: boolean; ctaFields?: boolean; imageField?: boolean }
+> = {
+  'home:final_cta': { body: true, ctaFields: true, imageField: true },
+  'home:capabilities': { imageField: true },
   'studio:opening': { subtitle: true, body: true },
   'contact:header': { subtitle: true, body: true },
   'reports:header': { subtitle: true },
@@ -90,6 +105,11 @@ const SECTION_FIELDS: Record<string, { subtitle?: boolean; body?: boolean; title
   'cookies:managing': { body: true },
 }
 const LIST_SECTIONS = new Set(['principles', 'culture', 'legal'])
+/** These sections' actual content comes from their own tables/admin screens
+ *  (Testimonials, Clients, Partners) — their page_sections row exists only
+ *  to carry position and visibility, so they get a lightweight card instead
+ *  of text fields that would do nothing if edited. */
+const ORDER_ONLY_SECTIONS = new Set(['testimonials', 'clients', 'partners'])
 
 export default function Pages() {
   const [activePage, setActivePage] = useState<PageSlug>('home')
@@ -113,7 +133,7 @@ export default function Pages() {
     setError('')
     const { data, error } = await supabase
       .from('page_sections')
-      .select('id, section_key, eyebrow, title, subtitle, body, image_media_id, sort_order, extra')
+      .select('id, section_key, eyebrow, title, subtitle, body, cta_label, cta_url, image_media_id, sort_order, is_visible, extra')
       .eq('page_id', (page as { id: string }).id)
     if (error) {
       setError(error.message)
@@ -135,6 +155,8 @@ export default function Pages() {
         title: row.title,
         subtitle: row.subtitle,
         body: row.body,
+        cta_label: row.cta_label,
+        cta_url: row.cta_url,
         image_media_id: row.image_media_id,
         extra: row.extra,
       })
@@ -144,6 +166,31 @@ export default function Pages() {
       return
     }
     refreshSite()
+  }
+
+  /* Reordering/visibility save immediately (no Save button) — same
+   *  instant-write pattern SimpleCollection's move() uses. Only meaningful
+   *  on 'home' today, since Home.tsx is the only page that reads
+   *  sort_order/is_visible to decide what renders where; see
+   *  src/pages/Home.tsx's SECTION_COMPONENTS + useHomeSections(). */
+  async function moveSection(row: SectionRow, dir: -1 | 1) {
+    if (!supabase || !rows) return
+    const idx = rows.findIndex(r => r.id === row.id)
+    const swapWith = rows[idx + dir]
+    if (!swapWith) return
+    await Promise.all([
+      supabase.from('page_sections').update({ sort_order: swapWith.sort_order }).eq('id', row.id),
+      supabase.from('page_sections').update({ sort_order: row.sort_order }).eq('id', swapWith.id),
+    ])
+    refreshSite()
+    await load(activePage)
+  }
+
+  async function toggleVisible(row: SectionRow) {
+    if (!supabase) return
+    await supabase.from('page_sections').update({ is_visible: !row.is_visible }).eq('id', row.id)
+    refreshSite()
+    await load(activePage)
   }
 
   if (!supabase) {
@@ -180,13 +227,51 @@ export default function Pages() {
         <p className="text-sm text-gray-400">Loading…</p>
       ) : (
         <div className="flex flex-col gap-6 max-w-2xl">
-          {rows.map(row => {
+          {rows.map((row, idx) => {
             const props = { row, onChange: (patch: Partial<SectionRow>) => patchRow(row.id, patch), onSave: () => saveRow(row) }
-            if (row.section_key === 'hero') return <HeroCard key={row.id} {...props} />
-            if (activePage === 'trainings' && row.section_key === 'header') return <TrainingsHeaderCard key={row.id} {...props} />
-            if (activePage === 'cookies' && row.section_key === 'table') return <CookiesTableCard key={row.id} {...props} />
-            if (LIST_SECTIONS.has(row.section_key)) return <ListCard key={row.id} {...props} />
-            return <SectionCard key={row.id} {...props} pageSlug={activePage} />
+            const card = ORDER_ONLY_SECTIONS.has(row.section_key) ? (
+              <OrderOnlyCard key={row.id} row={row} />
+            ) : row.section_key === 'hero' ? (
+              <HeroCard key={row.id} {...props} />
+            ) : activePage === 'trainings' && row.section_key === 'header' ? (
+              <TrainingsHeaderCard key={row.id} {...props} />
+            ) : activePage === 'cookies' && row.section_key === 'table' ? (
+              <CookiesTableCard key={row.id} {...props} />
+            ) : LIST_SECTIONS.has(row.section_key) ? (
+              <ListCard key={row.id} {...props} />
+            ) : (
+              <SectionCard key={row.id} {...props} pageSlug={activePage} />
+            )
+            if (activePage !== 'home') return card
+            return (
+              <div key={row.id}>
+                <div className="flex items-center gap-3 mb-2 px-1">
+                  <button
+                    type="button"
+                    className="text-sm text-gray-400 hover:text-gray-700 disabled:opacity-30"
+                    disabled={idx === 0}
+                    onClick={() => moveSection(row, -1)}
+                    aria-label="Move up"
+                  >
+                    ↑
+                  </button>
+                  <button
+                    type="button"
+                    className="text-sm text-gray-400 hover:text-gray-700 disabled:opacity-30"
+                    disabled={idx === rows.length - 1}
+                    onClick={() => moveSection(row, 1)}
+                    aria-label="Move down"
+                  >
+                    ↓
+                  </button>
+                  <label className="flex items-center gap-1.5 text-xs text-gray-500">
+                    <input type="checkbox" checked={row.is_visible} onChange={() => toggleVisible(row)} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                    Visible on homepage
+                  </label>
+                </div>
+                {card}
+              </div>
+            )
           })}
         </div>
       )}
@@ -260,7 +345,38 @@ function SectionCard({
           />
         </AdminField>
       )}
+      {fields.ctaFields && (
+        <div className="grid grid-cols-2 gap-4">
+          <AdminField label="Button label">
+            <AdminInput value={row.cta_label ?? ''} onChange={e => onChange({ cta_label: e.target.value })} />
+          </AdminField>
+          <AdminField label="Button link" hint="A path like /contact, or a full https:// URL.">
+            <AdminInput value={row.cta_url ?? ''} onChange={e => onChange({ cta_url: e.target.value })} />
+          </AdminField>
+        </div>
+      )}
+      {fields.imageField && (
+        <div className="mb-4">
+          <MediaPicker label="Image (optional — leave empty for no image)" mediaId={row.image_media_id} onChange={id => onChange({ image_media_id: id })} />
+        </div>
+      )}
       <SaveBar onSave={onSave} label={label} />
+    </AdminCard>
+  )
+}
+
+/** Testimonials/Clients/Partners on the homepage: content lives in their own
+ *  tables and admin screens — this card only explains that and lets the
+ *  reorder/visibility toolbar (rendered by the parent) do its job. */
+function OrderOnlyCard({ row }: { row: SectionRow }) {
+  const label = SECTION_LABELS[row.section_key] ?? row.section_key
+  return (
+    <AdminCard className="p-6">
+      <h2 className="text-sm font-semibold text-gray-900 mb-2">{label}</h2>
+      <p className="text-sm text-gray-500">
+        Content for this section is managed on its own screen — <strong>{label}</strong> in the sidebar. This card only
+        controls where it sits on the homepage and whether it's shown, via the arrows and checkbox above.
+      </p>
     </AdminCard>
   )
 }
@@ -333,6 +449,48 @@ function ItemsEditor({
       ))}
       <AdminButton type="button" variant="secondary" onClick={() => onChange([...items, { title: '', body: '' }])}>
         + Add item
+      </AdminButton>
+    </div>
+  )
+}
+
+/** Add/reorder/remove editor for a list of label+link buttons. Used by
+ *  HeroCard today; any other section that gets its own button(s) beyond a
+ *  single cta_label/cta_url pair can reuse it. */
+function ButtonsEditor({ buttons, onChange }: { buttons: ButtonItem[]; onChange: (buttons: ButtonItem[]) => void }) {
+  function update(i: number, patch: Partial<ButtonItem>) {
+    onChange(buttons.map((b, idx) => (idx === i ? { ...b, ...patch } : b)))
+  }
+  function remove(i: number) {
+    onChange(buttons.filter((_, idx) => idx !== i))
+  }
+  function move(i: number, dir: -1 | 1) {
+    const j = i + dir
+    if (j < 0 || j >= buttons.length) return
+    const next = [...buttons]
+    ;[next[i], next[j]] = [next[j], next[i]]
+    onChange(next)
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      {buttons.map((b, i) => (
+        <div key={i} className="flex items-center gap-2">
+          <AdminInput value={b.label} onChange={e => update(i, { label: e.target.value })} placeholder="Label" className="flex-1" />
+          <AdminInput value={b.url} onChange={e => update(i, { url: e.target.value })} placeholder="/path or https://…" className="flex-1" />
+          <button type="button" className="text-xs text-gray-400 hover:text-gray-700 disabled:opacity-30" disabled={i === 0} onClick={() => move(i, -1)}>
+            ↑
+          </button>
+          <button type="button" className="text-xs text-gray-400 hover:text-gray-700 disabled:opacity-30" disabled={i === buttons.length - 1} onClick={() => move(i, 1)}>
+            ↓
+          </button>
+          <button type="button" className="text-xs text-red-500 hover:text-red-700" onClick={() => remove(i)}>
+            ✕
+          </button>
+        </div>
+      ))}
+      <AdminButton type="button" variant="secondary" onClick={() => onChange([...buttons, { label: '', url: '' }])}>
+        + Add button
       </AdminButton>
     </div>
   )
@@ -506,6 +664,15 @@ function HeroCard({
       <AdminField label="Definition line (bottom of column)">
         <AdminTextarea value={row.body ?? ''} onChange={e => onChange({ body: e.target.value })} rows={2} />
       </AdminField>
+
+      <div className="mb-4">
+        <span className="block text-sm font-medium text-gray-700 mb-1">Buttons</span>
+        <p className="text-xs text-gray-400 mb-2">The first button is styled solid, the rest outlined — reorder to change which one stands out.</p>
+        <ButtonsEditor
+          buttons={row.extra.buttons ?? []}
+          onChange={next => onChange({ extra: { ...row.extra, buttons: next } })}
+        />
+      </div>
 
       <MediaPicker
         label="Hero image"

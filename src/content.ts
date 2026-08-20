@@ -23,6 +23,9 @@ import {
   type TeamMember,
 } from '@/data'
 import { supabase, supabaseReady } from '@/lib/supabase'
+import { useLocale } from '@/i18n/locale'
+import { site as nlSite } from '@/content.nl'
+import { site as frSite } from '@/content.fr'
 import {
   fetchProjects,
   fetchCapabilities,
@@ -62,7 +65,14 @@ export interface Hero {
    *  breaks the responsive layout. */
   imageOffsetX: number
   imageOffsetY: number
+  buttons: HeroButton[]
 }
+
+export interface HeroButton {
+  label: string
+  url: string
+}
+
 
 export interface Seo {
   description: string
@@ -154,11 +164,18 @@ export interface Homepage {
   featuredHeading: string
   capabilitiesEyebrow: string
   capabilitiesHeading: string
+  /** Optional small side image — empty string means "not set", section
+   *  renders exactly as it always has. */
+  capabilitiesImage: string
   notesEyebrow: string
   journalHeading: string
   ctaEyebrow: string
   ctaHeading: string
   ctaBody: string
+  ctaButtonLabel: string
+  ctaButtonUrl: string
+  /** Optional small side image — empty string means "not set". */
+  finalCtaImage: string
 }
 
 export interface NavLink {
@@ -186,6 +203,7 @@ export interface Site {
   company: Company
   hero: Hero
   homepage: Homepage
+  homeSections: string[]
   studio: Studio
   contact: ContactCopy
   reportsCopy: ReportsCopy
@@ -221,7 +239,18 @@ const seedHero: Hero = {
     'https://images.unsplash.com/photo-1764096534662-a194a348c4a0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1000',
   imageOffsetX: 0,
   imageOffsetY: 0,
+  buttons: [
+    { label: 'Start a project', url: '/contact' },
+    { label: 'See the work', url: '/work' },
+  ],
 }
+
+/** Default order — the ordered list of visible homepage section keys.
+ *  Matches what was previously a fixed JSX sequence in Home.tsx, so a site
+ *  with Supabase unreachable still renders identically to before this
+ *  became data-driven. Hidden sections just aren't in the list — there's
+ *  no separate visible flag to track. */
+const seedHomeSections: string[] = ['hero', 'capabilities', 'testimonials', 'clients', 'partners', 'notes', 'case_studies', 'final_cta']
 
 const seedSeo: Seo = {
   description:
@@ -353,19 +382,23 @@ const seedHomepage: Homepage = {
   featuredHeading: 'Proof that the brand decision was the commercial one.',
   capabilitiesEyebrow: 'What we do',
   capabilitiesHeading: 'Capabilities. One way of working.',
+  capabilitiesImage: '',
   notesEyebrow: 'Notes — an independent publication',
   journalHeading: 'How we think, in public.',
   ctaEyebrow: 'Start something',
   ctaHeading: 'Tell us the company you want to become.',
   ctaBody:
     'We work with founders, marketing leads and creative directors who suspect their company is better than its reputation. First reply within one working day — from a person, not a form.',
+  ctaButtonLabel: 'Start a project',
+  ctaButtonUrl: '/contact',
+  finalCtaImage: '',
 }
 
 const seedNav: NavLink[] = [
   { to: '/work', label: 'Work' },
   { to: '/notes', label: 'Notes' },
   { to: '/studio', label: 'Studio' },
-  { to: '/trainings', label: 'Trainings' },
+  { to: '/trainings', label: 'Trainings', soon: true },
   { to: '/reports', label: 'Reports', soon: true },
   { to: '/contact', label: 'Contact' },
 ]
@@ -383,6 +416,7 @@ const seed: Site = {
   company: seedCompany,
   hero: seedHero,
   homepage: seedHomepage,
+  homeSections: seedHomeSections,
   studio: seedStudio,
   contact: seedContact,
   reportsCopy: seedReportsCopy,
@@ -447,6 +481,7 @@ function loadLiveContent() {
       write({
         hero: { ...cache.hero, ...v.hero },
         homepage: { ...cache.homepage, ...v.homepage },
+        homeSections: v.sections.length ? v.sections : cache.homeSections,
       })
     }),
     fetchStudioSections().then(v => v && write({ studio: { ...cache.studio, ...v } })),
@@ -470,8 +505,16 @@ export function refreshSite() {
 }
 
 /* ── Public hooks ─────────────────────────────────────────────────────────── */
+/* Dutch and French are static translations (src/content.nl.ts, src/content.fr.ts)
+   that never touch Supabase or the admin panel — only the English site is
+   CMS-editable. Every hook below reads through useSite(), so this single
+   switch is enough to localize the whole public site. */
 export function useSite(): Site {
-  return useSyncExternalStore(subscribe, read, () => seed)
+  const en = useSyncExternalStore(subscribe, read, () => seed)
+  const locale = useLocale()
+  if (locale === 'nl') return nlSite
+  if (locale === 'fr') return frSite
+  return en
 }
 export function useNotes(): Note[] {
   return useSite().notes
@@ -496,6 +539,9 @@ export function useHero(): Hero {
 }
 export function useHomepage(): Homepage {
   return useSite().homepage
+}
+export function useHomeSections(): string[] {
+  return useSite().homeSections
 }
 export function useStudio(): Studio {
   return useSite().studio

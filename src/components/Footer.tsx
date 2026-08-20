@@ -1,12 +1,14 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import Link from '@/components/LocalizedLink'
 import { useCompany, useSocials, useCapabilities, useFooterNav, submitLead } from '@/content'
+import { useT } from '@/i18n/ui'
 
 export default function Footer() {
   const company = useCompany()
   const socials = useSocials()
   const capabilities = useCapabilities()
   const footerNav = useFooterNav()
+  const t = useT()
   const year = new Date().getFullYear()
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
@@ -20,7 +22,7 @@ export default function Footer() {
     setError('')
     const res = await submitLead({ email, source: 'footer' })
     if (!res.ok) {
-      setError(res.error ?? 'Something went wrong — please try again.')
+      setError(res.error ?? t.newsletterPopup.formError)
       return
     }
     setSent(true)
@@ -41,38 +43,38 @@ export default function Footer() {
                 Not by Accident
               </p>
               <p className="t-body" style={{ color: `${dim}.6)`, marginTop: '1rem', maxWidth: '38ch' }}>
-                {company.proposition} An independent creative company working across brand, product and demand.
+                {company.proposition} {t.footer.companyDescriptor}
               </p>
             </div>
 
             {/* Newsletter */}
             <div>
-              <p className="t-caption" style={{ color: `${dim}.5)`, marginBottom: '1rem' }}>The Journal, occasionally by email</p>
+              <p className="t-caption" style={{ color: `${dim}.5)`, marginBottom: '1rem' }}>{t.footer.newsletterEyebrow}</p>
               {sent ? (
                 <p className="t-subhead" style={{ color: '#E9C558', margin: 0 }}>
-                  Thank you — you’re on the list.
+                  {t.footer.thankYou}
                 </p>
               ) : (
                 <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3" style={{ maxWidth: '420px' }}>
-                  <label htmlFor="footer-email" className="sr-only">Email address</label>
+                  <label htmlFor="footer-email" className="sr-only">{t.footer.emailLabel}</label>
                   <input
                     id="footer-email"
                     type="email"
                     required
                     value={email}
                     onChange={e => setEmail(e.target.value)}
-                    placeholder="you@company.com"
+                    placeholder={t.footer.emailPlaceholder}
                     className="input-field-milk"
                     autoComplete="email"
                   />
-                  <button type="submit" className="btn-milk shrink-0">Subscribe</button>
+                  <button type="submit" className="btn-milk shrink-0">{t.footer.subscribe}</button>
                 </form>
               )}
               {error && (
                 <p className="t-caption" style={{ color: '#E9C558', marginTop: '0.75rem', textTransform: 'none' }}>{error}</p>
               )}
               <p className="t-caption" style={{ color: `${dim}.3)`, marginTop: '0.75rem', letterSpacing: '0.02em', textTransform: 'none' }}>
-                Essays and notes only. No pitches. Unsubscribe in one click.
+                {t.footer.newsletterDisclaimer}
               </p>
             </div>
           </div>
@@ -83,7 +85,7 @@ export default function Footer() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-10" style={{ paddingTop: 'clamp(40px, 5vw, 64px)', paddingBottom: 'clamp(40px, 5vw, 64px)' }}>
             {/* Explore */}
             <nav aria-label="Explore">
-              <p className="t-caption" style={{ color: `${dim}.4)`, marginBottom: '1rem' }}>Explore</p>
+              <p className="t-caption" style={{ color: `${dim}.4)`, marginBottom: '1rem' }}>{t.footer.explore}</p>
               <ul className="list-none m-0 p-0 flex flex-col gap-2.5">
                 {footerNav.map(l => (
                   <li key={l.to}>
@@ -95,7 +97,7 @@ export default function Footer() {
 
             {/* Capabilities */}
             <nav aria-label="Capabilities">
-              <p className="t-caption" style={{ color: `${dim}.4)`, marginBottom: '1rem' }}>Capabilities</p>
+              <p className="t-caption" style={{ color: `${dim}.4)`, marginBottom: '1rem' }}>{t.footer.capabilities}</p>
               <ul className="list-none m-0 p-0 flex flex-col gap-2.5">
                 {featured.map(c => (
                   <li key={c.slug}>
@@ -103,18 +105,18 @@ export default function Footer() {
                   </li>
                 ))}
                 <li>
-                  <Link to="/capabilities" className="t-ui link-grow" style={{ color: '#E9C558' }}>All capabilities →</Link>
+                  <Link to="/capabilities" className="t-ui link-grow" style={{ color: '#E9C558' }}>{t.footer.allCapabilities}</Link>
                 </li>
               </ul>
             </nav>
 
             {/* Contact */}
             <div>
-              <p className="t-caption" style={{ color: `${dim}.4)`, marginBottom: '1rem' }}>Contact</p>
+              <p className="t-caption" style={{ color: `${dim}.4)`, marginBottom: '1rem' }}>{t.footer.contact}</p>
               <ul className="list-none m-0 p-0 flex flex-col gap-2.5">
-                <li><a href={`mailto:${company.newBusinessEmail}`} className="t-ui link-grow" style={{ color: `${dim}.7)` }}>New business</a></li>
-                <li><a href={`mailto:${company.email}`} className="t-ui link-grow" style={{ color: `${dim}.7)` }}>General</a></li>
-                <li><a href={`mailto:${company.pressEmail}`} className="t-ui link-grow" style={{ color: `${dim}.7)` }}>Press</a></li>
+                <li><a href={`mailto:${company.newBusinessEmail}`} className="t-ui link-grow" style={{ color: `${dim}.7)` }}>{t.footer.newBusiness}</a></li>
+                <li><a href={`mailto:${company.email}`} className="t-ui link-grow" style={{ color: `${dim}.7)` }}>{t.footer.general}</a></li>
+                <li><a href={`mailto:${company.pressEmail}`} className="t-ui link-grow" style={{ color: `${dim}.7)` }}>{t.footer.press}</a></li>
                 <li>
                   {company.phone ? (
                     <a href={`tel:${company.phone.replace(/[^+\d]/g, '')}`} className="t-ui link-grow" style={{ color: `${dim}.7)` }}>{company.phone}</a>
@@ -130,7 +132,7 @@ export default function Footer() {
 
             {/* Social + Studio address */}
             <div>
-              <p className="t-caption" style={{ color: `${dim}.4)`, marginBottom: '1rem' }}>Elsewhere</p>
+              <p className="t-caption" style={{ color: `${dim}.4)`, marginBottom: '1rem' }}>{t.footer.elsewhere}</p>
               <ul className="list-none m-0 p-0 flex flex-col gap-2.5">
                 {socials.map(s => (
                   <li key={s.label}>
@@ -162,10 +164,10 @@ export default function Footer() {
               <span className="t-caption" style={{ color: `${dim}.3)`, textTransform: 'none', letterSpacing: '0.02em', fontStyle: 'italic' }}>{company.registrationNote}</span>
             </div>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-1">
-              <Link to="/trainings" className="t-caption link-grow" style={{ color: `${dim}.45)` }}>Trainings</Link>
-              <Link to="/privacy" className="t-caption link-grow" style={{ color: `${dim}.45)` }}>Privacy</Link>
-              <Link to="/cookies" className="t-caption link-grow" style={{ color: `${dim}.45)` }}>Cookies</Link>
-              <Link to="/search" className="t-caption link-grow" style={{ color: `${dim}.45)` }}>Search</Link>
+              <Link to="/trainings" className="t-caption link-grow" style={{ color: `${dim}.45)` }}>{t.footer.trainings}</Link>
+              <Link to="/privacy" className="t-caption link-grow" style={{ color: `${dim}.45)` }}>{t.footer.privacy}</Link>
+              <Link to="/cookies" className="t-caption link-grow" style={{ color: `${dim}.45)` }}>{t.footer.cookies}</Link>
+              <Link to="/search" className="t-caption link-grow" style={{ color: `${dim}.45)` }}>{t.footer.search}</Link>
             </div>
           </div>
         </div>

@@ -1,7 +1,12 @@
 {
-  "description": "This platform showcases a premium editorial website for Not by Accident, emphasizing intelligent design, exceptional typography, and a human-centered approach.",
+  "title": "Not by Accident — We make companies wanted.",
+  "description": "Not by Accident is an independent creative company. We make companies wanted. Growth is what happens next.",
+  "language": "en",
   "robots": {
     "index": true
+  },
+  "openGraph": {
+    "image": "https://images.unsplash.com/photo-1764096534662-a194a348c4a0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1200"
   },
   "accessibility": {
     "addBypassLinks": false,

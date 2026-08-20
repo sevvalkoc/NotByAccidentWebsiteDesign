@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
+import Link from '@/components/LocalizedLink'
 import { useProjects, useNotes, useCapabilities } from '@/content'
 import Seo from '@/components/Seo'
+import { useT } from '@/i18n/ui'
+import { usePageSeo } from '@/i18n/pageSeo'
 
 type Entry = {
   title: string
@@ -11,38 +14,51 @@ type Entry = {
   terms: string
 }
 
-const staticPages: Entry[] = [
-  { title: 'Studio', kind: 'Page', to: '/studio', blurb: 'Who we are, how we think and the people behind the work.', terms: 'about studio team people founders history approach philosophy' },
-  { title: 'Work', kind: 'Page', to: '/work', blurb: 'A running index of projects, listed plainly.', terms: 'work projects portfolio index clients' },
-  { title: 'Capabilities', kind: 'Page', to: '/capabilities', blurb: 'The disciplines we practise and how they fit together.', terms: 'capabilities services disciplines offer expertise' },
-  { title: 'Contact', kind: 'Page', to: '/contact', blurb: 'Write to us about a project or a conversation.', terms: 'contact email enquiry get in touch brief' },
-  { title: 'Trainings', kind: 'Page', to: '/trainings', blurb: 'Workshops and training, coming soon.', terms: 'training workshops teaching learning courses education' },
+/* Search terms stay in English regardless of locale — they're internal
+   matching keywords, not visible copy. Titles/blurbs come from
+   t.search.indexEntries (in this exact order: Studio, Work, Capabilities,
+   Contact, Trainings). */
+const STATIC_PAGE_META: { to: string; pageLabel: 'Page'; terms: string }[] = [
+  { to: '/studio', pageLabel: 'Page', terms: 'about studio team people founders history approach philosophy' },
+  { to: '/work', pageLabel: 'Page', terms: 'work projects portfolio index clients' },
+  { to: '/capabilities', pageLabel: 'Page', terms: 'capabilities services disciplines offer expertise' },
+  { to: '/contact', pageLabel: 'Page', terms: 'contact email enquiry get in touch brief' },
+  { to: '/trainings', pageLabel: 'Page', terms: 'training workshops teaching learning courses education' },
 ]
 
 function buildIndex(
   capabilities: ReturnType<typeof useCapabilities>,
   projects: ReturnType<typeof useProjects>,
-  notes: ReturnType<typeof useNotes>
+  notes: ReturnType<typeof useNotes>,
+  t: ReturnType<typeof useT>
 ): Entry[] {
+  const staticPages: Entry[] = STATIC_PAGE_META.map((meta, i) => ({
+    title: t.search.indexEntries[i]?.title ?? '',
+    kind: t.search.pageLabel,
+    to: meta.to,
+    blurb: t.search.indexEntries[i]?.blurb ?? '',
+    terms: meta.terms,
+  }))
+
   return [
     ...staticPages,
     ...capabilities.map(c => ({
       title: c.name,
-      kind: 'Capability',
+      kind: t.search.capabilityLabel,
       to: `/capabilities/${c.slug}`,
       blurb: c.summary,
       terms: `${c.name} ${c.summary} ${c.category} ${c.queries.join(' ')} capability discipline service`,
     })),
     ...projects.map(p => ({
       title: p.name,
-      kind: 'Case Study',
+      kind: t.search.caseStudyLabel,
       to: `/case-studies/${p.slug}`,
       blurb: p.brief,
       terms: `${p.name} ${p.brief} ${p.narrative ? Object.values(p.narrative).join(' ') : ''} ${p.discipline} ${p.services.join(' ')} ${p.location} ${p.year}`,
     })),
     ...notes.map(n => ({
       title: n.title,
-      kind: 'Note',
+      kind: t.search.noteLabel,
       to: `/notes/${n.slug}`,
       blurb: n.subtitle,
       terms: `${n.title} ${n.subtitle} ${n.body} ${n.category}`,
@@ -58,10 +74,12 @@ export default function Search() {
   const capabilities = useCapabilities()
   const projects = useProjects()
   const notes = useNotes()
+  const t = useT()
+  const seo = usePageSeo('/search')
 
   const index = useMemo(
-    () => buildIndex(capabilities, projects, notes),
-    [capabilities, projects, notes]
+    () => buildIndex(capabilities, projects, notes, t),
+    [capabilities, projects, notes, t]
   )
 
   useEffect(() => {
@@ -99,7 +117,7 @@ export default function Search() {
 
   return (
     <main id="main" style={{ paddingTop: '56px', backgroundColor: '#F0EADA', minHeight: '100svh' }}>
-      <Seo title="Search" description="Search Not by Accident — work, capabilities and journal." path="/search" noindex />
+      <Seo title={seo.title} description={seo.description} path="/search" noindex />
       {/* Header + field */}
       <div
         style={{
@@ -109,15 +127,15 @@ export default function Search() {
         }}
       >
         <div className="page-grid">
-          <p className="t-caption mb-6" style={{ color: 'rgba(34,30,27,.45)' }}>Search</p>
+          <p className="t-caption mb-6" style={{ color: 'rgba(34,30,27,.45)' }}>{t.search.heading}</p>
           <div style={{ position: 'relative', maxWidth: '860px' }}>
             <input
               ref={inputRef}
               type="search"
               value={query}
               onChange={e => setQuery(e.target.value)}
-              aria-label="Search the site"
-              placeholder="Look for work, notes, a capability…"
+              aria-label={t.search.ariaLabel}
+              placeholder={t.search.placeholder}
               style={{
                 width: '100%',
                 background: 'transparent',
@@ -138,8 +156,8 @@ export default function Search() {
           </div>
           <p className="t-ui mt-6" style={{ color: 'rgba(34,30,27,.45)' }}>
             {trimmed
-              ? `${results.length} ${results.length === 1 ? 'result' : 'results'} for “${trimmed}”`
-              : 'Type to search across case studies, notes and capabilities.'}
+              ? t.search.resultsCount(results.length, trimmed)
+              : t.search.idleText}
           </p>
         </div>
       </div>
@@ -164,12 +182,12 @@ export default function Search() {
                 margin: '0 0 1.25rem',
               }}
             >
-              Nothing here matches that — yet.
+              {t.search.emptyHeading}
             </p>
             <p className="t-body" style={{ color: 'rgba(34,30,27,.6)' }}>
-              Try a broader word, or start from the{' '}
-              <Link to="/work" className="link-beetroot">work</Link> or{' '}
-              <Link to="/notes" className="link-beetroot">notes</Link>.
+              {t.search.emptyBodyPrefix}
+              <Link to="/work" className="link-beetroot">{t.search.workLink}</Link> or{' '}
+              <Link to="/notes" className="link-beetroot">{t.search.notesLink}</Link>.
             </p>
           </div>
         ) : (

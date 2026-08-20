@@ -1,9 +1,11 @@
 import { useEffect, useRef } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
+import Link from '@/components/LocalizedLink'
 import { categories } from '@/data'
 import { useCompany, useCapabilities, useProjects } from '@/content'
 import Seo from '@/components/Seo'
 import { useReveal } from '@/hooks/useReveal'
+import { useT } from '@/i18n/ui'
 
 export default function CapabilityDetail() {
   const { slug } = useParams()
@@ -12,6 +14,7 @@ export default function CapabilityDetail() {
   const capabilities = useCapabilities()
   const projects = useProjects()
   const cap = capabilities.find(c => c.slug === slug)
+  const t = useT()
   useReveal(ref, { threshold: 0.06 })
 
   useEffect(() => {
@@ -22,9 +25,9 @@ export default function CapabilityDetail() {
     return (
       <main id="main" style={{ paddingTop: '160px', paddingBottom: '160px', backgroundColor: '#F0EADA' }}>
         <div className="page-grid">
-          <p className="t-caption" style={{ color: '#6E2237' }}>404</p>
-          <h1 className="t-headline-lg" style={{ margin: '12px 0 24px' }}>That capability moved.</h1>
-          <Link to="/capabilities" className="btn-primary" style={{ textDecoration: 'none' }}>All capabilities</Link>
+          <p className="t-caption" style={{ color: '#6E2237' }}>{t.capabilityDetail.notFoundLabel}</p>
+          <h1 className="t-headline-lg" style={{ margin: '12px 0 24px' }}>{t.capabilityDetail.notFoundHeading}</h1>
+          <Link to="/capabilities" className="btn-primary" style={{ textDecoration: 'none' }}>{t.capabilityDetail.allCapabilitiesButton}</Link>
         </div>
       </main>
     )
@@ -48,7 +51,7 @@ export default function CapabilityDetail() {
       url: `https://notbyaccident.com/capabilities/${cap.slug}`,
       hasOfferCatalog: {
         '@type': 'OfferCatalog',
-        name: `${cap.name} — what's included`,
+        name: t.capabilityDetail.whatsIncludedSuffix(cap.name),
         itemListElement: cap.includes.map(i => ({ '@type': 'Offer', itemOffered: { '@type': 'Service', name: i } })),
       },
     },
@@ -58,12 +61,12 @@ export default function CapabilityDetail() {
       mainEntity: [
         {
           '@type': 'Question',
-          name: `What is ${cap.name.toLowerCase()}?`,
+          name: t.capabilityDetail.whatIsWrapper(cap.name),
           acceptedAnswer: { '@type': 'Answer', text: cap.lede },
         },
         {
           '@type': 'Question',
-          name: `What does ${cap.name.toLowerCase()} deliver?`,
+          name: t.capabilityDetail.whatDeliversWrapper(cap.name),
           acceptedAnswer: { '@type': 'Answer', text: cap.outcome },
         },
       ],
@@ -72,7 +75,7 @@ export default function CapabilityDetail() {
       '@context': 'https://schema.org',
       '@type': 'BreadcrumbList',
       itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Capabilities', item: 'https://notbyaccident.com/capabilities' },
+        { '@type': 'ListItem', position: 1, name: t.capabilityDetail.breadcrumbName, item: 'https://notbyaccident.com/capabilities' },
         { '@type': 'ListItem', position: 2, name: cap.name, item: `https://notbyaccident.com/capabilities/${cap.slug}` },
       ],
     },
@@ -90,9 +93,9 @@ export default function CapabilityDetail() {
       {/* Hero */}
       <div style={{ paddingTop: 'clamp(48px, 6vw, 96px)', paddingBottom: 'clamp(40px, 5vw, 72px)' }}>
         <div className="page-grid">
-          <nav aria-label="Breadcrumb" className="reveal mb-8">
+          <nav aria-label={t.capabilityDetail.breadcrumbNavLabel} className="reveal mb-8">
             <p className="t-caption m-0" style={{ color: 'rgba(34,30,27,.45)' }}>
-              <Link to="/capabilities" className="link-grow" style={{ color: 'rgba(34,30,27,.55)' }}>Capabilities</Link>
+              <Link to="/capabilities" className="link-grow" style={{ color: 'rgba(34,30,27,.55)' }}>{t.capabilityDetail.breadcrumbCapabilities}</Link>
               <span style={{ padding: '0 8px' }}>/</span>
               <span style={{ color: category.accent }}>{category.label}</span>
             </p>
@@ -111,13 +114,13 @@ export default function CapabilityDetail() {
         <div className="page-grid">
           <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr] gap-8 md:gap-16">
             <div className="reveal">
-              <p className="t-caption" style={{ color: 'rgba(240,234,218,.5)', marginBottom: '1rem' }}>The question this answers</p>
+              <p className="t-caption" style={{ color: 'rgba(240,234,218,.5)', marginBottom: '1rem' }}>{t.capabilityDetail.questionHeading}</p>
               <p style={{ fontFamily: 'Lora, Georgia, serif', fontStyle: 'italic', fontSize: 'clamp(22px, 2.6vw, 34px)', lineHeight: 1.14, color: '#F0EADA', margin: 0, maxWidth: '22ch' }}>
                 {cap.question}
               </p>
             </div>
             <div className="reveal reveal-delay-1 self-end">
-              <p className="t-caption" style={{ color: 'rgba(240,234,218,.5)', marginBottom: '1rem' }}>What you leave with</p>
+              <p className="t-caption" style={{ color: 'rgba(240,234,218,.5)', marginBottom: '1rem' }}>{t.capabilityDetail.outcomeHeading}</p>
               <p className="t-body m-0" style={{ color: '#F0EADA', maxWidth: '40ch' }}>{cap.outcome}</p>
             </div>
           </div>
@@ -128,7 +131,7 @@ export default function CapabilityDetail() {
       <div className="page-grid" style={{ paddingTop: 'clamp(56px, 7vw, 112px)', paddingBottom: 'clamp(56px, 7vw, 112px)' }}>
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-12 lg:gap-20">
           <div className="reveal">
-            <p className="t-caption mb-6" style={{ color: 'rgba(34,30,27,.45)' }}>What the engagement includes</p>
+            <p className="t-caption mb-6" style={{ color: 'rgba(34,30,27,.45)' }}>{t.capabilityDetail.includesHeading}</p>
             <ul className="list-none m-0 p-0">
               {cap.includes.map((item, i) => (
                 <li key={item} className="flex items-baseline gap-4" style={{ padding: '16px 0', borderTop: i === 0 ? 'none' : '1px solid rgba(34,30,27,.14)' }}>
@@ -140,7 +143,7 @@ export default function CapabilityDetail() {
           </div>
 
           <div className="reveal reveal-delay-1">
-            <p className="t-caption mb-6" style={{ color: 'rgba(34,30,27,.45)' }}>Seen in the work</p>
+            <p className="t-caption mb-6" style={{ color: 'rgba(34,30,27,.45)' }}>{t.capabilityDetail.seenInWorkHeading}</p>
             <div className="flex flex-col gap-4">
               {proof.map(p => (
                 <Link key={p.id} to={`/case-studies/${p.slug}`} className="work-tile no-underline bg-carbon block" style={{ aspectRatio: '16/8' }} aria-label={p.name}>
@@ -161,7 +164,7 @@ export default function CapabilityDetail() {
         <div style={{ backgroundColor: '#221E1B', paddingTop: 'clamp(48px, 6vw, 88px)', paddingBottom: 'clamp(48px, 6vw, 88px)' }}>
           <div className="page-grid">
             <p className="t-caption mb-6 reveal" style={{ color: 'rgba(240,234,218,.4)' }}>
-              More from {category.label}
+              {t.capabilityDetail.morePrefix}{category.label}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-10 reveal">
               {siblings.map(s => (
@@ -179,19 +182,19 @@ export default function CapabilityDetail() {
       <div className="page-grid" style={{ paddingTop: 'clamp(56px, 7vw, 96px)', paddingBottom: 'clamp(56px, 7vw, 112px)' }}>
         <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr] gap-12 items-start">
           <div className="reveal">
-            <h2 className="t-headline" style={{ maxWidth: '16ch' }}>Rarely one thing on its own.</h2>
+            <h2 className="t-headline" style={{ maxWidth: '16ch' }}>{t.capabilityDetail.rarelyOneThing}</h2>
             <p className="t-body" style={{ color: 'rgba(34,30,27,.65)', marginTop: '1rem', maxWidth: '42ch' }}>
-              {cap.name} usually travels with a few of these. We assemble the team the project needs.
+              {t.capabilityDetail.travelsWithSuffix(cap.name)}
             </p>
             <Link to="/contact" className="btn-primary" style={{ textDecoration: 'none', marginTop: '1.5rem' }}>
-              Talk to us about {cap.name.toLowerCase()}
+              {t.capabilityDetail.talkToUsAbout(cap.name)}
             </Link>
           </div>
           <div className="reveal reveal-delay-1 flex flex-wrap gap-2 content-start">
             {related.map(r => (
               <Link key={r.slug} to={`/capabilities/${r.slug}`} className="pill">{r.name}</Link>
             ))}
-            <Link to="/capabilities" className="pill" style={{ borderColor: '#221E1B', backgroundColor: '#221E1B', color: '#F0EADA' }}>All capabilities →</Link>
+            <Link to="/capabilities" className="pill" style={{ borderColor: '#221E1B', backgroundColor: '#221E1B', color: '#F0EADA' }}>{t.capabilityDetail.allCapabilitiesLink}</Link>
           </div>
         </div>
       </div>

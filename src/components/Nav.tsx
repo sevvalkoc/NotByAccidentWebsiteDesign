@@ -1,12 +1,40 @@
 import { useState, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link as RouterLink, useLocation } from 'react-router-dom'
+import Link from '@/components/LocalizedLink'
 import { useNav } from '@/content'
+import { useT } from '@/i18n/ui'
+import { LOCALES, LOCALE_LABELS, localizePath, stripLocalePrefix, useLocale } from '@/i18n/locale'
 import nickSymbol from '@/imports/NBA_Symbol_Ink_RGB.png'
+
+function LanguageSwitcher({ className }: { className?: string }) {
+  const locale = useLocale()
+  const location = useLocation()
+  const { path: canonicalPath } = stripLocalePrefix(location.pathname)
+
+  return (
+    <div className={className} aria-label="Language" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      {LOCALES.map((l, i) => (
+        <span key={l} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {i > 0 && <span aria-hidden="true" style={{ color: 'rgba(34,30,27,.25)' }}>/</span>}
+          <RouterLink
+            to={localizePath(canonicalPath, l)}
+            aria-current={l === locale ? 'true' : undefined}
+            className="t-caption no-underline"
+            style={{ color: '#221E1B', opacity: l === locale ? 1 : 0.5, letterSpacing: '0.04em' }}
+          >
+            {LOCALE_LABELS[l]}
+          </RouterLink>
+        </span>
+      ))}
+    </div>
+  )
+}
 
 export default function Nav() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const location = useLocation()
+  const t = useT()
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 48)
@@ -29,13 +57,13 @@ export default function Nav() {
         borderBottom: scrolled ? '1px solid rgba(34,30,27,.1)' : '1px solid transparent',
       }}
     >
-      <a href="#main" className="skip-link">Skip to content</a>
+      <a href="#main" className="skip-link">{t.nav.skipToContent}</a>
       <div className="page-grid">
         <nav className="flex items-center justify-between h-14" aria-label="Main navigation">
           <Link
             to="/"
             className="flex items-center gap-2.5 no-underline"
-            aria-label="Not by Accident — Home"
+            aria-label={t.nav.homeAriaLabel}
           >
             <img
               src={nickSymbol}
@@ -59,7 +87,8 @@ export default function Nav() {
           </Link>
 
           {/* Desktop navigation */}
-          <ul className="hidden md:flex items-center gap-8 list-none m-0 p-0">
+          <div className="hidden md:flex items-center gap-8">
+          <ul className="flex items-center gap-8 list-none m-0 p-0">
             {navLinks.map(link => (
               <li key={link.to}>
                 <Link
@@ -77,7 +106,7 @@ export default function Nav() {
                   {link.label}
                   {link.soon && (
                     <sup style={{ marginLeft: '5px', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', color: '#6E2237', fontWeight: 600, verticalAlign: 'super' }}>
-                      Soon
+                      {t.nav.soon}
                     </sup>
                   )}
                 </Link>
@@ -85,11 +114,14 @@ export default function Nav() {
             ))}
           </ul>
 
+          <LanguageSwitcher />
+          </div>
+
           {/* Mobile menu button */}
           <button
             className="md:hidden flex flex-col justify-center items-center gap-1.5 w-10 h-10 bg-transparent border-none cursor-pointer p-0"
             onClick={() => setMenuOpen(o => !o)}
-            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            aria-label={menuOpen ? t.nav.closeMenu : t.nav.openMenu}
             aria-expanded={menuOpen}
           >
             <span
@@ -121,7 +153,7 @@ export default function Nav() {
       <div
         className="md:hidden overflow-hidden transition-all duration-400"
         style={{
-          maxHeight: menuOpen ? '280px' : '0',
+          maxHeight: menuOpen ? '340px' : '0',
           borderTop: menuOpen ? '1px solid rgba(34,30,27,.1)' : '1px solid transparent',
         }}
       >
@@ -137,13 +169,14 @@ export default function Nav() {
                   {link.label}
                   {link.soon && (
                     <sup style={{ marginLeft: '6px', fontSize: '10px', letterSpacing: '0.08em', textTransform: 'uppercase', color: '#6E2237', fontWeight: 600, fontFamily: 'DM Sans, sans-serif' }}>
-                      Soon
+                      {t.nav.soon}
                     </sup>
                   )}
                 </Link>
               </li>
             ))}
           </ul>
+          <LanguageSwitcher className="pt-4 mt-3" />
         </div>
       </div>
     </header>

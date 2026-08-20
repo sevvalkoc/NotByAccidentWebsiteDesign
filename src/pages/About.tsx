@@ -2,8 +2,11 @@ import { useRef, useState } from 'react'
 import Seo from '@/components/Seo'
 import { submitLead, useTeam, useStudio } from '@/content'
 import { useReveal } from '@/hooks/useReveal'
+import { useT } from '@/i18n/ui'
+import { usePageSeo } from '@/i18n/pageSeo'
 
 function AboutSignup() {
+  const t = useT()
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
@@ -11,7 +14,7 @@ function AboutSignup() {
   if (sent) {
     return (
       <p className="t-subhead reveal" style={{ color: '#6E2237', margin: 0 }}>
-        Thank you — we’ll be in touch.
+        {t.studio.thankYou}
       </p>
     )
   }
@@ -24,7 +27,7 @@ function AboutSignup() {
         setError('')
         const res = await submitLead({ email, source: 'footer' })
         if (!res.ok) {
-          setError(res.error ?? 'Something went wrong — please try again.')
+          setError(res.error ?? t.studio.formError)
           return
         }
         setSent(true)
@@ -32,18 +35,18 @@ function AboutSignup() {
       className="flex flex-col sm:flex-row gap-3 reveal reveal-delay-1"
       style={{ maxWidth: '440px', width: '100%' }}
     >
-      <label htmlFor="about-email" className="sr-only">Email address</label>
+      <label htmlFor="about-email" className="sr-only">{t.studio.emailLabel}</label>
       <input
         id="about-email"
         type="email"
         required
         value={email}
         onChange={e => setEmail(e.target.value)}
-        placeholder="Leave your email"
+        placeholder={t.studio.emailPlaceholder}
         className="input-field"
         autoComplete="email"
       />
-      <button type="submit" className="btn-primary shrink-0">Send</button>
+      <button type="submit" className="btn-primary shrink-0">{t.studio.send}</button>
       {error && (
         <p className="t-caption" style={{ color: '#6E2237', width: '100%' }}>{error}</p>
       )}
@@ -55,11 +58,13 @@ export default function About() {
   const ref = useRef<HTMLElement>(null)
   const team = useTeam()
   const studio = useStudio()
+  const t = useT()
+  const seo = usePageSeo('/studio')
   useReveal(ref, { threshold: 0.06 })
 
   return (
     <main id="main" ref={ref} style={{ paddingTop: '56px', backgroundColor: '#F0EADA' }}>
-      <Seo title="Studio" description="Not by Accident is an independent creative company in Amsterdam. Small on purpose, senior in the room, commercial by instinct — brand and demand thinking in one team." path="/studio" />
+      <Seo title={seo.title} description={seo.description} path="/studio" />
 
       {/* Opening — large statement */}
       <div
@@ -110,13 +115,13 @@ export default function About() {
           <div className="work-tile img-crosshair" style={{ overflow: 'hidden', width: '100%', aspectRatio: '4/5', backgroundColor: '#3a3530' }}>
             <img
               src="https://images.unsplash.com/photo-1649414744605-3bfa4f1870fc?w=720&h=900&fit=crop&auto=format"
-              alt="A crowd gathered at a technology conference in Amsterdam"
+              alt={t.studio.crowdAlt}
               className="w-full h-full object-cover"
               loading="lazy"
             />
           </div>
           <figcaption className="t-caption" style={{ color: 'rgba(34,30,27,.35)', marginTop: '12px' }}>
-            Amsterdam, August 2026. A few minutes from TNW.
+            {t.studio.caption}
           </figcaption>
         </figure>
       </div>
@@ -181,7 +186,7 @@ export default function About() {
         >
           <div className="page-grid">
             <p className="t-caption mb-8 reveal" style={{ color: 'rgba(34,30,27,.45)' }}>
-              The people
+              {t.studio.peopleHeading}
             </p>
             <div
               style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 'clamp(32px, 4vw, 56px)' }}

@@ -276,6 +276,9 @@ type PageSectionRow = {
   title: string | null
   subtitle: string | null
   body: string | null
+  cta_label: string | null
+  cta_url: string | null
+  sort_order: number
   extra: {
     words?: string[]
     imageOffsetX?: number
@@ -284,12 +287,14 @@ type PageSectionRow = {
     body2?: string
     waitingListNote?: string
     lastUpdated?: string
+    buttons?: { label: string; url: string }[]
   } | null
   image: MediaRef
 }
 
 /** Shared by every page's section-fetcher below — one page lookup, one
- *  section-rows query, reused instead of repeated per page. */
+ *  section-rows query, reused instead of repeated per page. Ordered by
+ *  sort_order since Home.tsx renders homepage sections in this order. */
 async function fetchPageSectionRows(slug: string): Promise<PageSectionRow[] | null> {
   if (!supabase) return null
   const { data: page } = await supabase.from('pages').select('id').eq('slug', slug).maybeSingle()
@@ -297,16 +302,21 @@ async function fetchPageSectionRows(slug: string): Promise<PageSectionRow[] | nu
   const { data, error } = await supabase
     .from('page_sections')
     .select(
-      `section_key, eyebrow, title, subtitle, body, extra,
+      `section_key, eyebrow, title, subtitle, body, cta_label, cta_url, sort_order, extra,
        image:media!image_media_id ( bucket, storage_path )`
     )
     .eq('page_id', (page as { id: string }).id)
     .eq('is_visible', true)
+    .order('sort_order', { ascending: true })
   if (error || !data) return null
   return data as unknown as PageSectionRow[]
 }
 
-export async function fetchHomeSections(): Promise<{ hero: Partial<Hero>; homepage: Partial<Homepage> } | null> {
+export async function fetchHomeSections(): Promise<{
+  hero: Partial<Hero>
+  homepage: Partial<Homepage>
+  sections: string[]
+} | null> {
   const rows = await fetchPageSectionRows('home')
   if (!rows) return null
 
@@ -322,10 +332,12 @@ export async function fetchHomeSections(): Promise<{ hero: Partial<Hero>; homepa
         if (row.image) hero.image = mediaUrl(row.image)
         if (typeof row.extra?.imageOffsetX === 'number') hero.imageOffsetX = row.extra.imageOffsetX
         if (typeof row.extra?.imageOffsetY === 'number') hero.imageOffsetY = row.extra.imageOffsetY
+        if (row.extra?.buttons?.length) hero.buttons = row.extra.buttons
         break
       case 'capabilities':
         if (row.eyebrow) homepage.capabilitiesEyebrow = row.eyebrow
         if (row.title) homepage.capabilitiesHeading = row.title
+        if (row.image) homepage.capabilitiesImage = mediaUrl(row.image)
         break
       case 'notes':
         if (row.eyebrow) homepage.notesEyebrow = row.eyebrow
@@ -339,10 +351,17 @@ export async function fetchHomeSections(): Promise<{ hero: Partial<Hero>; homepa
         if (row.eyebrow) homepage.ctaEyebrow = row.eyebrow
         if (row.title) homepage.ctaHeading = row.title
         if (row.body) homepage.ctaBody = row.body
+        if (row.cta_label) homepage.ctaButtonLabel = row.cta_label
+        if (row.cta_url) homepage.ctaButtonUrl = row.cta_url
+        if (row.image) homepage.finalCtaImage = mediaUrl(row.image)
         break
     }
   }
-  return { hero, homepage }
+  // rows is already ordered by sort_order (see fetchPageSectionRows) and
+  // only contains visible sections (is_visible filter) — the exact order
+  // Home.tsx should render in.
+  const sections = rows.map(r => r.section_key)
+  return { hero, homepage, sections }
 }
 
 export async function fetchStudioSections(): Promise<Partial<Studio> | null> {

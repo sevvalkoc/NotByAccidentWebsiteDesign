@@ -1,8 +1,10 @@
 import { useRef } from 'react'
-import { useParams, Link, Navigate } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
+import Link, { Navigate } from '@/components/LocalizedLink'
 import { useCompany, useProjects, useCapabilities } from '@/content'
 import Seo from '@/components/Seo'
 import { useReveal } from '@/hooks/useReveal'
+import { useT } from '@/i18n/ui'
 
 export default function CaseStudy() {
   const { slug } = useParams<{ slug: string }>()
@@ -11,6 +13,7 @@ export default function CaseStudy() {
   const capabilities = useCapabilities()
   const project = projects.find(p => p.slug === slug)
   const ref = useRef<HTMLElement>(null)
+  const t = useT()
   useReveal(ref, { threshold: 0.08 })
 
   if (!project) return <Navigate to="/case-studies" replace />
@@ -37,7 +40,7 @@ export default function CaseStudy() {
       '@context': 'https://schema.org',
       '@type': 'BreadcrumbList',
       itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Case Studies', item: 'https://notbyaccident.com/case-studies' },
+        { '@type': 'ListItem', position: 1, name: t.caseStudy.breadcrumbCaseStudies, item: 'https://notbyaccident.com/case-studies' },
         { '@type': 'ListItem', position: 2, name: project.name, item: `https://notbyaccident.com/case-studies/${project.slug}` },
       ],
     },
@@ -49,7 +52,7 @@ export default function CaseStudy() {
       ref={ref}
       style={{ paddingTop: '56px', backgroundColor: '#F0EADA' }}
     >
-      <Seo title={`${project.name} — Case Study`} description={project.brief} path={`/case-studies/${project.slug}`} image={project.heroImg} jsonLd={caseSchema} />
+      <Seo title={`${project.name}${t.caseStudy.titleSuffix}`} description={project.brief} path={`/case-studies/${project.slug}`} image={project.heroImg} jsonLd={caseSchema} />
 
       {/* Hero image — full bleed */}
       <div
@@ -83,13 +86,13 @@ export default function CaseStudy() {
           className="md:grid-cols-[60%_35%]"
         >
           <div>
-            <nav className="mb-4" aria-label="Breadcrumb">
+            <nav className="mb-4" aria-label={t.caseStudy.breadcrumbNavLabel}>
               <Link
                 to="/case-studies"
                 className="t-caption no-underline hover:opacity-70 transition-opacity"
                 style={{ color: 'rgba(34,30,27,.45)' }}
               >
-                ← Case Studies
+                {t.caseStudy.back}
               </Link>
             </nav>
             <h1 className="t-headline-lg reveal" style={{ margin: '0 0 12px' }}>
@@ -127,9 +130,9 @@ export default function CaseStudy() {
               }}
             >
               {[
-                { term: 'Discipline', desc: project.discipline },
-                { term: 'Location', desc: project.location },
-                { term: 'Year', desc: project.year },
+                { term: t.caseStudy.discipline, desc: project.discipline },
+                { term: t.caseStudy.location, desc: project.location },
+                { term: t.caseStudy.year, desc: project.year },
               ].map(item => (
                 <div key={item.term}>
                   <dt className="t-caption mb-1" style={{ color: 'rgba(34,30,27,.4)' }}>
@@ -156,19 +159,19 @@ export default function CaseStudy() {
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-12">
             {([
-              ['Problem', project.narrative.problem, '#6E2237'],
-              ['Insight', project.narrative.insight, '#7F8B3E'],
-              ['Intervention', project.narrative.intervention, '#6A6383'],
-              ['Outcome', project.narrative.outcome, '#C08A1E'],
-            ] as const).map(([label, text, accent], i) => (
-              <div key={label} className="reveal" style={{ transitionDelay: `${i * 60}ms`, borderTop: `2px solid ${accent}`, paddingTop: '18px' }}>
+              ['problem', t.caseStudy.problem, project.narrative.problem, '#6E2237'],
+              ['insight', t.caseStudy.insight, project.narrative.insight, '#7F8B3E'],
+              ['intervention', t.caseStudy.intervention, project.narrative.intervention, '#6A6383'],
+              ['outcome', t.caseStudy.outcome, project.narrative.outcome, '#C08A1E'],
+            ] as const).map(([key, label, text, accent], i) => (
+              <div key={key} className="reveal" style={{ transitionDelay: `${i * 60}ms`, borderTop: `2px solid ${accent}`, paddingTop: '18px' }}>
                 <p className="t-caption mb-3" style={{ color: accent }}>{label}</p>
                 <p
                   style={{
-                    fontFamily: label === 'Outcome' ? 'Lora, Georgia, serif' : 'DM Sans, system-ui, sans-serif',
-                    fontStyle: label === 'Outcome' ? 'italic' : 'normal',
-                    fontSize: label === 'Outcome' ? '20px' : '17px',
-                    lineHeight: label === 'Outcome' ? 1.35 : 1.6,
+                    fontFamily: key === 'outcome' ? 'Lora, Georgia, serif' : 'DM Sans, system-ui, sans-serif',
+                    fontStyle: key === 'outcome' ? 'italic' : 'normal',
+                    fontSize: key === 'outcome' ? '20px' : '17px',
+                    lineHeight: key === 'outcome' ? 1.35 : 1.6,
                     color: '#221E1B',
                     maxWidth: '46ch',
                     margin: 0,
@@ -190,7 +193,7 @@ export default function CaseStudy() {
         >
           <img
             src={project.img}
-            alt={`${project.name} — additional view`}
+            alt={t.caseStudy.additionalViewAlt(project.name)}
             className="w-full h-full object-cover"
             loading="lazy"
           />
@@ -209,7 +212,7 @@ export default function CaseStudy() {
         }}
       >
         <p className="t-caption mb-6" style={{ color: 'rgba(34,30,27,.45)' }}>
-          Capabilities behind this work
+          {t.caseStudy.capabilitiesHeading}
         </p>
         <ul
           className="list-none m-0 p-0"
@@ -250,12 +253,12 @@ export default function CaseStudy() {
         }}
       >
         <p className="t-caption mb-6 reveal" style={{ color: 'rgba(34,30,27,.45)' }}>
-          Next project
+          {t.caseStudy.nextProject}
         </p>
         <Link
           to={`/case-studies/${next.slug}`}
           className="block no-underline group reveal"
-          aria-label={`Next: ${next.name}`}
+          aria-label={t.caseStudy.nextAriaLabel(next.name)}
         >
           <div
             style={{

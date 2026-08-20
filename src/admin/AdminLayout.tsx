@@ -7,6 +7,7 @@ const NAV: { to: string; label: string }[] = [
   { to: '/admin/dashboard', label: 'Dashboard' },
   { to: '/admin/pages', label: 'Pages' },
   { to: '/admin/work', label: 'Work' },
+  { to: '/admin/capabilities', label: 'Capabilities' },
   { to: '/admin/notes', label: 'Blog / Notes' },
   { to: '/admin/trainings', label: 'Trainings' },
   { to: '/admin/reports', label: 'Reports' },
