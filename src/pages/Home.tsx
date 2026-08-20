@@ -16,27 +16,47 @@ import Seo from '@/components/Seo'
 import LogoMarquee from '@/components/LogoMarquee'
 import nbaSymbol from '@/imports/NBA_Symbol_Ink_RGB.png'
 
+/* Content that starts from the static seed and is later swapped for live
+   Supabase data (Notes, Case Studies…) remounts its DOM nodes when that
+   swap happens, because the live rows carry different ids/keys than the
+   seed. A one-shot querySelectorAll would miss anything that mounts after
+   that first scan and leave it stuck at opacity:0 forever — invisible, but
+   still taking up layout space. A MutationObserver keeps watching and picks
+   up newly-mounted .reveal elements too. */
 function useReveal(ref: React.RefObject<HTMLElement | null>) {
   useEffect(() => {
     if (!ref.current) return
-    const els = ref.current.querySelectorAll('.reveal')
-    const observer = new IntersectionObserver(
+    const seen = new WeakSet<Element>()
+    const io = new IntersectionObserver(
       entries =>
         entries.forEach(e => {
           if (e.isIntersecting) {
             e.target.classList.add('in-view')
-            observer.unobserve(e.target)
+            io.unobserve(e.target)
           }
         }),
       { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
     )
-    els.forEach(el => observer.observe(el))
-    return () => observer.disconnect()
+    function scan(root: Element) {
+      root.querySelectorAll('.reveal').forEach(el => {
+        if (!seen.has(el)) {
+          seen.add(el)
+          io.observe(el)
+        }
+      })
+    }
+    scan(ref.current)
+    const mo = new MutationObserver(() => ref.current && scan(ref.current))
+    mo.observe(ref.current, { childList: true, subtree: true })
+    return () => {
+      io.disconnect()
+      mo.disconnect()
+    }
   }, [ref])
 }
 
 /* Section order is fixed by brief: Hero → Capabilities → Testimonials →
-   Clients → Notes → Partners → Case Studies → Final CTA (+ Footer, rendered
+   Clients → Partners → Notes → Case Studies → Final CTA (+ Footer, rendered
    by App.tsx). No project index sits before or between these. */
 export default function Home() {
   const mainRef = useRef<HTMLElement>(null)
@@ -104,8 +124,8 @@ export default function Home() {
       <CapabilitiesIndex />
       <Testimonials />
       <ClientsSlider />
-      <Notes />
       <PartnersSlider />
+      <Notes />
       <CaseStudiesTeaser />
       <FinalCta />
     </main>
@@ -133,7 +153,7 @@ function Hero() {
     >
       <div className="page-grid" style={{ paddingTop: 'clamp(28px, 4vw, 56px)', paddingBottom: 'clamp(40px, 5vw, 72px)' }}>
         <div
-          style={{ gap: 'clamp(40px, 5vw, 64px)', alignItems: 'stretch' }}
+          style={{ gap: 'clamp(40px, 5vw, 64px)', alignItems: 'start' }}
           className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr]"
         >
           {/* The argument */}
@@ -193,7 +213,6 @@ function Hero() {
             className="reveal"
             style={{
               position: 'relative',
-              minHeight: '320px',
               transform: `translate(${hero.imageOffsetX}px, ${hero.imageOffsetY}px)`,
             }}
           >
@@ -201,7 +220,10 @@ function Hero() {
               aria-hidden="true"
               style={{ position: 'absolute', top: 0, bottom: 0, left: 0, width: '6px', backgroundColor: '#7F8B3E', zIndex: 1 }}
             />
-            <div className="work-tile img-crosshair" style={{ width: '100%', height: '100%', minHeight: '320px', overflow: 'hidden', backgroundColor: '#3a3530' }}>
+            <div
+              className="work-tile img-crosshair"
+              style={{ width: '100%', aspectRatio: '4 / 5', maxHeight: 'clamp(360px, 44vw, 560px)', overflow: 'hidden', backgroundColor: '#3a3530' }}
+            >
               <img
                 src={hero.image}
                 alt="Materials and notes from a Not by Accident strategy session"
