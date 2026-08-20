@@ -325,6 +325,7 @@ export const en: UiStrings = {
     viewCaseStudy: 'View case study',
   },
   caseStudy: {
+    breadcrumbNavLabel: 'Breadcrumb',
     back: '← Case Studies',
     discipline: 'Discipline',
     location: 'Location',
@@ -348,6 +349,7 @@ export const en: UiStrings = {
     breadcrumbCapabilities: 'Capabilities',
   },
   capabilityDetail: {
+    breadcrumbNavLabel: 'Breadcrumb',
     notFoundLabel: '404',
     notFoundHeading: 'That capability moved.',
     allCapabilitiesButton: 'All capabilities',
@@ -388,6 +390,7 @@ export const en: UiStrings = {
     schemaDescription: 'Essays and notes on brand strategy, positioning, design and commercial growth.',
   },
   blogPost: {
+    breadcrumbNavLabel: 'Breadcrumb',
     embeddedVideo: 'Embedded video',
     back: '← Notes',
     readSuffix: ' read',

@@ -86,7 +86,7 @@ export default function CaseStudy() {
           className="md:grid-cols-[60%_35%]"
         >
           <div>
-            <nav className="mb-4" aria-label="Breadcrumb">
+            <nav className="mb-4" aria-label={t.caseStudy.breadcrumbNavLabel}>
               <Link
                 to="/case-studies"
                 className="t-caption no-underline hover:opacity-70 transition-opacity"

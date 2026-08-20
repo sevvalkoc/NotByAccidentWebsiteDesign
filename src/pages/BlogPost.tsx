@@ -129,7 +129,7 @@ export default function BlogPost() {
           borderBottom: '1px solid rgba(34,30,27,.1)',
         }}
       >
-        <nav className="mb-6 reveal" aria-label="Breadcrumb">
+        <nav className="mb-6 reveal" aria-label={t.blogPost.breadcrumbNavLabel}>
           <Link
             to="/notes"
             className="t-caption no-underline hover:opacity-70 transition-opacity"

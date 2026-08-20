@@ -93,7 +93,7 @@ export default function CapabilityDetail() {
       {/* Hero */}
       <div style={{ paddingTop: 'clamp(48px, 6vw, 96px)', paddingBottom: 'clamp(40px, 5vw, 72px)' }}>
         <div className="page-grid">
-          <nav aria-label="Breadcrumb" className="reveal mb-8">
+          <nav aria-label={t.capabilityDetail.breadcrumbNavLabel} className="reveal mb-8">
             <p className="t-caption m-0" style={{ color: 'rgba(34,30,27,.45)' }}>
               <Link to="/capabilities" className="link-grow" style={{ color: 'rgba(34,30,27,.55)' }}>{t.capabilityDetail.breadcrumbCapabilities}</Link>
               <span style={{ padding: '0 8px' }}>/</span>
