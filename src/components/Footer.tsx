@@ -89,7 +89,14 @@ export default function Footer() {
               <ul className="list-none m-0 p-0 flex flex-col gap-2.5">
                 {footerNav.map(l => (
                   <li key={l.to}>
-                    <Link to={l.to} className="t-ui link-grow" style={{ color: `${dim}.7)` }}>{l.label}</Link>
+                    <Link to={l.to} className="t-ui link-grow" style={{ color: `${dim}.7)` }}>
+                      {l.label}
+                      {l.soon && (
+                        <sup style={{ marginLeft: '5px', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', color: '#E9C558', fontWeight: 600, verticalAlign: 'super' }}>
+                          {t.nav.soon}
+                        </sup>
+                      )}
+                    </Link>
                   </li>
                 ))}
               </ul>

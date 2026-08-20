@@ -13,6 +13,7 @@ import {
   partnerLogos,
   projects,
   capabilities,
+  categories,
   team,
 } from '@/data.nl'
 
@@ -59,6 +60,7 @@ export const site: Site = {
     heading: 'Wij maken bedrijven gewild.',
     subhead: 'Groei is wat daarna gebeurt. Gewild, met opzet.',
     body: 'Not by Accident is een onafhankelijk creatief bedrijf dat werkt aan merk, product en vraag. Merkdenken en commercieel denken zitten hier niet in aparte kamers.',
+    openingImage: 'https://images.unsplash.com/photo-1649414744605-3bfa4f1870fc?w=720&h=900&fit=crop&auto=format',
     principlesEyebrow: 'Hoe we denken',
     principles: [
       { title: 'Specifiek', body: 'Noem het materiaal, de maand, het getal, de straat. Een reeks mogelijkheden is geen beschrijving. Het is het ontwijken van een beschrijving.' },
@@ -114,6 +116,7 @@ export const site: Site = {
     eyebrow: 'Privacy',
     heading: 'Wat we bewaren, en waarom.',
     subhead: 'We verzamelen heel weinig en gaan er nuchter mee om. Deze verklaring legt precies uit hoe, in taal waarvoor je geen jurist nodig hebt.',
+    headerImage: 'https://images.unsplash.com/photo-1755375551130-cf278d391d99?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=640',
     lastUpdated: '8 augustus 2026',
     sections: [
       {
@@ -205,5 +208,9 @@ export const site: Site = {
   notes,
   projects,
   capabilities,
+  categories,
   team,
+  // Sections an editor adds via Admin → Pages are typed in English with no
+  // translation mechanism — they simply don't appear on the nl/fr site.
+  customSections: {},
 }

@@ -1,14 +1,16 @@
 import { useRef } from 'react'
 import Link from '@/components/LocalizedLink'
-import { useProjects, useCaseStudiesCopy } from '@/content'
+import { useProjects, useCaseStudiesCopy, useCustomSections } from '@/content'
 import Seo from '@/components/Seo'
 import { useReveal } from '@/hooks/useReveal'
 import { usePageSeo } from '@/i18n/pageSeo'
+import CustomSectionBlock from '@/components/CustomSectionBlock'
 
 export default function CaseStudies() {
   const ref = useRef<HTMLElement>(null)
   const projects = useProjects()
   const copy = useCaseStudiesCopy()
+  const customSections = useCustomSections('case-studies')
   const seo = usePageSeo('/case-studies')
   useReveal(ref, { threshold: 0.08 })
 
@@ -166,6 +168,9 @@ export default function CaseStudies() {
           ))}
         </div>
       </div>
+      {customSections.map(cs => (
+        <CustomSectionBlock key={cs.key} section={cs} />
+      ))}
     </main>
   )
 }

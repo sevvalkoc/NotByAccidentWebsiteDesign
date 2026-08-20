@@ -1,31 +1,56 @@
 import { useState, useEffect } from 'react'
-import { Link as RouterLink, useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import Link from '@/components/LocalizedLink'
 import { useNav } from '@/content'
 import { useT } from '@/i18n/ui'
-import { LOCALES, LOCALE_LABELS, localizePath, stripLocalePrefix, useLocale } from '@/i18n/locale'
+import { LOCALES, LOCALE_LABELS, LOCALE_NAMES, localizePath, stripLocalePrefix, useLocale, type Locale } from '@/i18n/locale'
 import nickSymbol from '@/imports/NBA_Symbol_Ink_RGB.png'
 
 function LanguageSwitcher({ className }: { className?: string }) {
   const locale = useLocale()
   const location = useLocation()
+  const navigate = useNavigate()
   const { path: canonicalPath } = stripLocalePrefix(location.pathname)
 
   return (
-    <div className={className} aria-label="Language" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-      {LOCALES.map((l, i) => (
-        <span key={l} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {i > 0 && <span aria-hidden="true" style={{ color: 'rgba(34,30,27,.25)' }}>/</span>}
-          <RouterLink
-            to={localizePath(canonicalPath, l)}
-            aria-current={l === locale ? 'true' : undefined}
-            className="t-caption no-underline"
-            style={{ color: '#221E1B', opacity: l === locale ? 1 : 0.5, letterSpacing: '0.04em' }}
-          >
-            {LOCALE_LABELS[l]}
-          </RouterLink>
-        </span>
-      ))}
+    <div className={className} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+      <select
+        aria-label="Language"
+        value={locale}
+        onChange={e => navigate(localizePath(canonicalPath, e.target.value as Locale))}
+        className="t-caption"
+        style={{
+          appearance: 'none',
+          WebkitAppearance: 'none',
+          background: 'transparent',
+          border: '1px solid rgba(34,30,27,.25)',
+          borderRadius: '2px',
+          color: '#221E1B',
+          letterSpacing: '0.04em',
+          padding: '6px 26px 6px 10px',
+          cursor: 'pointer',
+        }}
+      >
+        {LOCALES.map(l => (
+          <option key={l} value={l}>
+            {LOCALE_LABELS[l]} — {LOCALE_NAMES[l]}
+          </option>
+        ))}
+      </select>
+      <span
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          right: '9px',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          pointerEvents: 'none',
+          fontSize: '9px',
+          color: 'rgba(34,30,27,.5)',
+        }}
+      >
+        ▾
+      </span>
     </div>
   )
 }

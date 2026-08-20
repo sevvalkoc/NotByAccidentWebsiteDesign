@@ -1,15 +1,17 @@
 import { useRef } from 'react'
 import Link from '@/components/LocalizedLink'
-import { useProjects, useWorkCopy } from '@/content'
+import { useProjects, useWorkCopy, useCustomSections } from '@/content'
 import Seo from '@/components/Seo'
 import { useReveal } from '@/hooks/useReveal'
 import { useT } from '@/i18n/ui'
 import { usePageSeo } from '@/i18n/pageSeo'
+import CustomSectionBlock from '@/components/CustomSectionBlock'
 
 export default function Work() {
   const ref = useRef<HTMLElement>(null)
   const projects = useProjects()
   const copy = useWorkCopy()
+  const customSections = useCustomSections('work')
   const t = useT()
   const seo = usePageSeo('/work')
   useReveal(ref, { threshold: 0.08 })
@@ -151,6 +153,9 @@ export default function Work() {
           ))}
         </div>
       </section>
+      {customSections.map(cs => (
+        <CustomSectionBlock key={cs.key} section={cs} />
+      ))}
     </main>
   )
 }

@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from '@/components/LocalizedLink'
-import { categories } from '@/data'
 import {
   useNotes,
   useHero,
@@ -12,9 +11,12 @@ import {
   usePartners,
   useProjects,
   useCapabilities,
+  useCategories,
+  useCustomSections,
 } from '@/content'
 import Seo from '@/components/Seo'
 import LogoMarquee from '@/components/LogoMarquee'
+import CustomSectionBlock from '@/components/CustomSectionBlock'
 import nbaSymbol from '@/imports/NBA_Symbol_Ink_RGB.png'
 import { useReveal } from '@/hooks/useReveal'
 import { useT } from '@/i18n/ui'
@@ -41,6 +43,8 @@ export default function Home() {
   useReveal(mainRef)
   const company = useCompany()
   const capabilities = useCapabilities()
+  const categories = useCategories()
+  const customSections = useCustomSections('home')
   const sectionOrder = useHomeSections()
   const t = useT()
   const seo = usePageSeo('/')
@@ -105,7 +109,9 @@ export default function Home() {
       />
       {sectionOrder.map(key => {
         const Section = SECTION_COMPONENTS[key]
-        return Section ? <Section key={key} /> : null
+        if (Section) return <Section key={key} />
+        const custom = customSections.find(c => c.key === key)
+        return custom ? <CustomSectionBlock key={key} section={custom} /> : null
       })}
     </main>
   )
@@ -235,6 +241,7 @@ function Hero() {
 function CapabilitiesIndex() {
   const hp = useHomepage()
   const capabilities = useCapabilities()
+  const categories = useCategories()
   const t = useT()
   const [openCat, setOpenCat] = useState<string>(categories[0].key)
 

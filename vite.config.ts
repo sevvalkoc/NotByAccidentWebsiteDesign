@@ -125,28 +125,23 @@ function figmaSiteConfiguration(config: FigmaSiteConfiguration): Plugin {
         result = replaceHtmlCommentSlot(result, 'figma:body-start', bodyStart)
         result = replaceHtmlCommentSlot(result, 'figma:body-end', bodyEnd)
 
+        /* Note: title/description/og/twitter meta tags are deliberately
+           NOT injected here even though site.json carries values for them —
+           src/components/Seo.tsx already renders a complete, correct,
+           per-page version of every one of these (with its own fallback to
+           the CMS-editable site-wide description) on every route. Injecting
+           a second, generic copy here at a fixed head position would create
+           duplicate tags that appear before React's, and most crawlers
+           (including social-share bots that don't run JS) take the first
+           tag in document order — so every page would show the homepage's
+           generic description instead of its own. Keep this block to only
+           what Seo.tsx doesn't already cover. */
         const tags: HtmlTagDescriptor[] = []
-        if (description) {
-          tags.push({ tag: 'meta', attrs: { name: 'description', content: description }, injectTo: 'head' })
-        }
         if (config.robots?.index === false) {
           tags.push({ tag: 'meta', attrs: { name: 'robots', content: 'noindex, nofollow' }, injectTo: 'head' })
         }
         if (favicon) {
           tags.push({ tag: 'link', attrs: { rel: 'icon', href: favicon }, injectTo: 'head' })
-        }
-        if (title) {
-          tags.push({ tag: 'meta', attrs: { property: 'og:title', content: title }, injectTo: 'head' })
-        }
-        if (description) {
-          tags.push({ tag: 'meta', attrs: { property: 'og:description', content: description }, injectTo: 'head' })
-        }
-        if (socialImage) {
-          tags.push(
-            { tag: 'meta', attrs: { property: 'og:image', content: socialImage }, injectTo: 'head' },
-            { tag: 'meta', attrs: { name: 'twitter:card', content: 'summary_large_image' }, injectTo: 'head' },
-            { tag: 'meta', attrs: { name: 'twitter:image', content: socialImage }, injectTo: 'head' },
-          )
         }
 
         if (googleAnalyticsId) {

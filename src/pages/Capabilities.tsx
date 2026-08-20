@@ -1,17 +1,19 @@
 import { useRef } from 'react'
 import Link from '@/components/LocalizedLink'
-import { categories } from '@/data'
-import { useCapabilities, useCapabilitiesCopy } from '@/content'
+import { useCapabilities, useCapabilitiesCopy, useCategories, useCustomSections } from '@/content'
 import Seo from '@/components/Seo'
 import { useReveal } from '@/hooks/useReveal'
 import { useT } from '@/i18n/ui'
 import { usePageSeo, capabilitiesDescription } from '@/i18n/pageSeo'
 import { useLocale } from '@/i18n/locale'
+import CustomSectionBlock from '@/components/CustomSectionBlock'
 
 export default function Capabilities() {
   const ref = useRef<HTMLElement>(null)
   const capabilities = useCapabilities()
+  const categories = useCategories()
   const copy = useCapabilitiesCopy()
+  const customSections = useCustomSections('capabilities')
   const t = useT()
   const seo = usePageSeo('/capabilities')
   const locale = useLocale()
@@ -125,6 +127,9 @@ export default function Capabilities() {
           </div>
         </div>
       </div>
+      {customSections.map(cs => (
+        <CustomSectionBlock key={cs.key} section={cs} />
+      ))}
     </main>
   )
 }

@@ -16,11 +16,13 @@ import {
   partnerLogos as seedPartners,
   projects as seedProjects,
   capabilities as seedCapabilities,
+  categories as seedCategories,
   team as seedTeam,
   type Note,
   type Project,
   type Capability,
   type TeamMember,
+  type Category,
 } from '@/data'
 import { supabase, supabaseReady } from '@/lib/supabase'
 import { useLocale } from '@/i18n/locale'
@@ -46,7 +48,32 @@ import {
   fetchCapabilitiesPageSections,
   fetchPrivacySections,
   fetchCookiesSections,
+  fetchCategoryMeta,
+  fetchAllCustomSections,
 } from '@/lib/cms'
+
+/** A section an editor added from Admin → Pages beyond the page's built-in
+ *  ones (its section_key is prefixed "custom-"). Every field is generic —
+ *  eyebrow/heading/subhead/body/image/CTA — the same shape every built-in
+ *  section already stores, just with no bespoke public-side layout of its
+ *  own; CustomSectionBlock renders it identically wherever it appears. */
+export interface CustomSection {
+  key: string
+  eyebrow: string
+  heading: string
+  subhead: string
+  body: string
+  image: string
+  ctaLabel: string
+  ctaUrl: string
+}
+
+export interface CategoryMeta {
+  key: Category
+  label: string
+  blurb: string
+  accent: string
+}
 
 export interface Testimonial {
   quote: string
@@ -119,6 +146,8 @@ export interface LegalCopy {
   eyebrow: string
   heading: string
   subhead: string
+  /** Optional decorative sidebar photo — empty string means "not set". */
+  headerImage: string
   lastUpdated: string
   sections: StudioListItem[]
 }
@@ -137,6 +166,8 @@ export interface Studio {
   heading: string
   subhead: string
   body: string
+  /** Optional editorial photo on the opening statement — empty string means "not set". */
+  openingImage: string
   principlesEyebrow: string
   principles: StudioListItem[]
   cultureEyebrow: string
@@ -223,7 +254,10 @@ export interface Site {
   notes: Note[]
   projects: Project[]
   capabilities: Capability[]
+  categories: CategoryMeta[]
   team: TeamMember[]
+  /** Editor-added sections beyond a page's built-in ones, keyed by page slug. */
+  customSections: Record<string, CustomSection[]>
 }
 
 /* Hero image and homepage section headings are not yet wired to a live CMS
@@ -284,6 +318,7 @@ const seedStudio: Studio = {
   heading: 'We make companies wanted.',
   subhead: 'Growth is what happens next. Wanted, on purpose.',
   body: 'Not by Accident is an independent creative company working across brand, product and demand. Brand thinking and commercial thinking do not sit in separate rooms.',
+  openingImage: 'https://images.unsplash.com/photo-1649414744605-3bfa4f1870fc?w=720&h=900&fit=crop&auto=format',
   principlesEyebrow: 'How we think',
   principles: [
     { title: 'Specific', body: 'Name the material, the month, the number, the street. A range of possibilities is not a description. It is an avoidance of one.' },
@@ -339,6 +374,7 @@ const seedPrivacyCopy: LegalCopy = {
   eyebrow: 'Privacy',
   heading: 'What we hold, and why.',
   subhead: 'We collect very little and we treat it plainly. This notice explains exactly how, in language you should not need a lawyer to follow.',
+  headerImage: 'https://images.unsplash.com/photo-1755375551130-cf278d391d99?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=640',
   lastUpdated: '8 August 2026',
   sections: [
     {
@@ -436,7 +472,9 @@ const seed: Site = {
   notes: seedNotes,
   projects: seedProjects,
   capabilities: seedCapabilities,
+  categories: seedCategories,
   team: seedTeam,
+  customSections: {},
 }
 
 let cache: Site = seed
@@ -468,6 +506,8 @@ function loadLiveContent() {
   void Promise.allSettled([
     fetchProjects().then(v => v && write({ projects: v })),
     fetchCapabilities().then(v => v && write({ capabilities: v })),
+    fetchCategoryMeta().then(v => v && write({ categories: v })),
+    fetchAllCustomSections().then(v => v && write({ customSections: v })),
     fetchNotes().then(v => v && write({ notes: v })),
     fetchTestimonials().then(v => v && write({ testimonials: v })),
     fetchClients().then(v => v && write({ clients: v })),
@@ -524,6 +564,12 @@ export function useProjects(): Project[] {
 }
 export function useCapabilities(): Capability[] {
   return useSite().capabilities
+}
+export function useCategories(): CategoryMeta[] {
+  return useSite().categories
+}
+export function useCustomSections(pageSlug: string): CustomSection[] {
+  return useSite().customSections[pageSlug] ?? []
 }
 export function useTeam(): TeamMember[] {
   return useSite().team

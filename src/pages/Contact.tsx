@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react'
 import Seo from '@/components/Seo'
-import { submitLead, useCompany, useContactCopy } from '@/content'
+import { submitLead, useCompany, useContactCopy, useCustomSections } from '@/content'
 import { useReveal } from '@/hooks/useReveal'
 import { useT } from '@/i18n/ui'
 import { usePageSeo } from '@/i18n/pageSeo'
+import CustomSectionBlock from '@/components/CustomSectionBlock'
 
 export default function Contact() {
   const ref = useRef<HTMLElement>(null)
@@ -11,6 +12,7 @@ export default function Contact() {
   const [formError, setFormError] = useState('')
   const company = useCompany()
   const copy = useContactCopy()
+  const customSections = useCustomSections('contact')
   const t = useT()
   const seo = usePageSeo('/contact')
   useReveal(ref, { threshold: 0.08 })
@@ -257,6 +259,9 @@ export default function Contact() {
           )}
         </div>
       </div>
+      {customSections.map(cs => (
+        <CustomSectionBlock key={cs.key} section={cs} />
+      ))}
     </main>
   )
 }

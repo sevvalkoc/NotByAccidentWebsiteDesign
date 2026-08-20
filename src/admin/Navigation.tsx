@@ -38,6 +38,7 @@ export default function Navigation() {
             { key: 'url', label: 'URL', type: 'text', required: true },
             { key: 'is_internal', label: 'Internal link', type: 'checkbox', default: true },
             { key: 'open_new_tab', label: 'Open in new tab', type: 'checkbox' },
+            { key: 'soon', label: '"Soon" badge', type: 'checkbox' },
           ],
         }}
       />

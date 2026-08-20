@@ -24,6 +24,8 @@ import type {
   NavLink,
   Seo,
   Trainings,
+  CategoryMeta,
+  CustomSection,
 } from '@/content'
 import type { ArticleBlock } from '@/lib/database.types'
 
@@ -98,6 +100,16 @@ export async function fetchProjects(): Promise<Project[] | null> {
       featured: row.featured,
     }
   })
+}
+
+export async function fetchCategoryMeta(): Promise<CategoryMeta[] | null> {
+  if (!supabase) return null
+  const { data, error } = await supabase
+    .from('category_meta')
+    .select('key, label, blurb, accent')
+    .order('sort_order', { ascending: true })
+  if (error || !data) return null
+  return data as CategoryMeta[]
 }
 
 export async function fetchCapabilities(): Promise<Capability[] | null> {
@@ -312,6 +324,57 @@ async function fetchPageSectionRows(slug: string): Promise<PageSectionRow[] | nu
   return data as unknown as PageSectionRow[]
 }
 
+/** Sections an editor added from Admin → Pages beyond a page's built-in
+ *  ones (created with a "custom-" prefixed section_key — see
+ *  src/admin/Pages.tsx's addCustomSection). One query for the whole site,
+ *  grouped by page slug, so every page's public component can just ask for
+ *  its own list via useCustomSections(slug). */
+export async function fetchAllCustomSections(): Promise<Record<string, CustomSection[]> | null> {
+  if (!supabase) return null
+  const { data: pages, error: pagesError } = await supabase.from('pages').select('id, slug')
+  if (pagesError || !pages) return null
+  const slugById = new Map((pages as { id: string; slug: string }[]).map(p => [p.id, p.slug]))
+
+  const { data, error } = await supabase
+    .from('page_sections')
+    .select(
+      `page_id, section_key, eyebrow, title, subtitle, body, cta_label, cta_url, sort_order,
+       image:media!image_media_id ( bucket, storage_path )`
+    )
+    .like('section_key', 'custom-%')
+    .eq('is_visible', true)
+    .order('sort_order', { ascending: true })
+  if (error || !data) return null
+
+  type Row = {
+    page_id: string
+    section_key: string
+    eyebrow: string | null
+    title: string | null
+    subtitle: string | null
+    body: string | null
+    cta_label: string | null
+    cta_url: string | null
+    image: MediaRef
+  }
+  const bySlug: Record<string, CustomSection[]> = {}
+  for (const row of data as unknown as Row[]) {
+    const slug = slugById.get(row.page_id)
+    if (!slug) continue
+    ;(bySlug[slug] ??= []).push({
+      key: row.section_key,
+      eyebrow: row.eyebrow ?? '',
+      heading: row.title ?? '',
+      subhead: row.subtitle ?? '',
+      body: row.body ?? '',
+      image: mediaUrl(row.image),
+      ctaLabel: row.cta_label ?? '',
+      ctaUrl: row.cta_url ?? '',
+    })
+  }
+  return bySlug
+}
+
 export async function fetchHomeSections(): Promise<{
   hero: Partial<Hero>
   homepage: Partial<Homepage>
@@ -376,6 +439,7 @@ export async function fetchStudioSections(): Promise<Partial<Studio> | null> {
         if (row.title) studio.heading = row.title
         if (row.subtitle) studio.subhead = row.subtitle
         if (row.body) studio.body = row.body
+        if (row.image) studio.openingImage = mediaUrl(row.image)
         break
       case 'principles':
         if (row.eyebrow) studio.principlesEyebrow = row.eyebrow
@@ -466,6 +530,7 @@ export async function fetchPrivacySections(): Promise<Partial<LegalCopy> | null>
   if (header?.eyebrow) p.eyebrow = header.eyebrow
   if (header?.title) p.heading = header.title
   if (header?.subtitle) p.subhead = header.subtitle
+  if (header?.image) p.headerImage = mediaUrl(header.image)
   if (typeof header?.extra?.lastUpdated === 'string') p.lastUpdated = header.extra.lastUpdated
   if (legal?.extra?.items?.length) p.sections = legal.extra.items
   return p
@@ -543,12 +608,12 @@ export async function fetchNavigation(location: 'header' | 'footer' = 'header'):
   if (!supabase) return null
   const { data, error } = await supabase
     .from('navigation_items')
-    .select('label, url')
+    .select('label, url, soon')
     .eq('location', location)
     .eq('is_visible', true)
     .order('sort_order', { ascending: true })
   if (error || !data) return null
-  return (data as { label: string; url: string }[]).map(row => ({ to: row.url, label: row.label }))
+  return (data as { label: string; url: string; soon: boolean }[]).map(row => ({ to: row.url, label: row.label, soon: row.soon || undefined }))
 }
 
 /* Hero / homepage section copy and the Trainings "coming soon" copy live as

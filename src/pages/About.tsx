@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react'
 import Seo from '@/components/Seo'
-import { submitLead, useTeam, useStudio } from '@/content'
+import { submitLead, useTeam, useStudio, useCustomSections } from '@/content'
 import { useReveal } from '@/hooks/useReveal'
 import { useT } from '@/i18n/ui'
 import { usePageSeo } from '@/i18n/pageSeo'
+import CustomSectionBlock from '@/components/CustomSectionBlock'
 
 function AboutSignup() {
   const t = useT()
@@ -58,6 +59,7 @@ export default function About() {
   const ref = useRef<HTMLElement>(null)
   const team = useTeam()
   const studio = useStudio()
+  const customSections = useCustomSections('studio')
   const t = useT()
   const seo = usePageSeo('/studio')
   useReveal(ref, { threshold: 0.06 })
@@ -110,21 +112,23 @@ export default function About() {
       </div>
 
       {/* Small editorial image, left-aligned */}
-      <div className="page-grid" style={{ paddingTop: 'clamp(40px, 5vw, 72px)', paddingBottom: 'clamp(56px, 7vw, 96px)' }}>
-        <figure className="reveal m-0" style={{ maxWidth: '360px' }}>
-          <div className="work-tile img-crosshair" style={{ overflow: 'hidden', width: '100%', aspectRatio: '4/5', backgroundColor: '#3a3530' }}>
-            <img
-              src="https://images.unsplash.com/photo-1649414744605-3bfa4f1870fc?w=720&h=900&fit=crop&auto=format"
-              alt={t.studio.crowdAlt}
-              className="w-full h-full object-cover"
-              loading="lazy"
-            />
-          </div>
-          <figcaption className="t-caption" style={{ color: 'rgba(34,30,27,.35)', marginTop: '12px' }}>
-            {t.studio.caption}
-          </figcaption>
-        </figure>
-      </div>
+      {studio.openingImage && (
+        <div className="page-grid" style={{ paddingTop: 'clamp(40px, 5vw, 72px)', paddingBottom: 'clamp(56px, 7vw, 96px)' }}>
+          <figure className="reveal m-0" style={{ maxWidth: '360px' }}>
+            <div className="work-tile img-crosshair" style={{ overflow: 'hidden', width: '100%', aspectRatio: '4/5', backgroundColor: '#3a3530' }}>
+              <img
+                src={studio.openingImage}
+                alt={t.studio.crowdAlt}
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+            </div>
+            <figcaption className="t-caption" style={{ color: 'rgba(34,30,27,.35)', marginTop: '12px' }}>
+              {t.studio.caption}
+            </figcaption>
+          </figure>
+        </div>
+      )}
 
       {/* Principles */}
       <div
@@ -254,6 +258,9 @@ export default function About() {
           <AboutSignup />
         </div>
       </div>
+      {customSections.map(cs => (
+        <CustomSectionBlock key={cs.key} section={cs} />
+      ))}
     </main>
   )
 }

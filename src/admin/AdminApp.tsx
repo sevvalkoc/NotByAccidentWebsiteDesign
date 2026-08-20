@@ -12,6 +12,7 @@ import Pages from '@/admin/Pages'
 import WorkList from '@/admin/WorkList'
 import WorkEditor from '@/admin/WorkEditor'
 import Capabilities from '@/admin/Capabilities'
+import Categories from '@/admin/Categories'
 import NotesList from '@/admin/NotesList'
 import NotesEditor from '@/admin/NotesEditor'
 import { TrainingsList, TrainingEditor } from '@/admin/Trainings'
@@ -60,6 +61,7 @@ function AdminShell({ profile }: { profile: Profile | null }) {
         <Route path="work" element={<WorkList />} />
         <Route path="work/:id" element={<WorkEditor />} />
         <Route path="capabilities" element={<Capabilities />} />
+        <Route path="categories" element={<Categories />} />
         <Route path="notes" element={<NotesList />} />
         <Route path="notes/:id" element={<NotesEditor />} />
         <Route path="trainings" element={<TrainingsList />} />
