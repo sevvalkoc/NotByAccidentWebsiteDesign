@@ -37,12 +37,6 @@ export default function LogoMarquee({
         borderColor: `${ink}0.12)`,
       }}
     >
-      <span
-        className="t-caption shrink-0 self-center hidden sm:block"
-        style={{ color: `${ink}0.4)`, paddingRight: '2rem', paddingLeft: '2px' }}
-      >
-        {label}
-      </span>
       <div
         className="relative flex-1 overflow-hidden self-center"
         style={{

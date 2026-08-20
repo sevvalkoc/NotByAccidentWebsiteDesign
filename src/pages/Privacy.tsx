@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import Seo from '@/components/Seo'
+import { useReveal } from '@/hooks/useReveal'
 
 const sections = [
   {
@@ -46,19 +47,7 @@ const sections = [
 
 export default function Privacy() {
   const ref = useRef<HTMLElement>(null)
-
-  useEffect(() => {
-    if (!ref.current) return
-    const els = ref.current.querySelectorAll('.reveal')
-    const observer = new IntersectionObserver(
-      entries => entries.forEach(e => {
-        if (e.isIntersecting) { e.target.classList.add('in-view'); observer.unobserve(e.target) }
-      }),
-      { threshold: 0.08 }
-    )
-    els.forEach(el => observer.observe(el))
-    return () => observer.disconnect()
-  }, [])
+  useReveal(ref, { threshold: 0.08 })
 
   return (
     <main id="main" ref={ref} style={{ paddingTop: '56px', backgroundColor: '#F0EADA' }}>

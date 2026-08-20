@@ -34,6 +34,7 @@ import {
   fetchSiteSettings,
   fetchNavigation,
   fetchHomeSections,
+  fetchStudioSections,
 } from '@/lib/cms'
 
 export interface Testimonial {
@@ -75,6 +76,24 @@ export interface Trainings {
   format: TrainingRow[]
 }
 
+export interface StudioListItem {
+  title: string
+  body: string
+}
+
+export interface Studio {
+  eyebrow: string
+  heading: string
+  subhead: string
+  body: string
+  principlesEyebrow: string
+  principles: StudioListItem[]
+  cultureEyebrow: string
+  cultureHeading: string
+  cultureItems: StudioListItem[]
+  ctaHeading: string
+}
+
 export interface Homepage {
   featuredEyebrow: string
   featuredHeading: string
@@ -112,6 +131,7 @@ export interface Site {
   company: Company
   hero: Hero
   homepage: Homepage
+  studio: Studio
   nav: NavLink[]
   footerNav: NavLink[]
   socials: Social[]
@@ -168,6 +188,30 @@ const seedTrainings: Trainings = {
   ],
 }
 
+const seedStudio: Studio = {
+  eyebrow: 'Studio',
+  heading: 'We make companies wanted.',
+  subhead: 'Growth is what happens next. Wanted, on purpose.',
+  body: 'Not by Accident is an independent creative company working across brand, product and demand. Brand thinking and commercial thinking do not sit in separate rooms.',
+  principlesEyebrow: 'How we think',
+  principles: [
+    { title: 'Specific', body: 'Name the material, the month, the number, the street. A range of possibilities is not a description. It is an avoidance of one.' },
+    { title: 'Decided', body: 'Present decisions as decisions. Two routes, never three. The recommendation comes first, not last. We are paid to have a view.' },
+    { title: 'Warm, not soft', body: 'People, hands, imperfection and humour. The work stays sharp. Warmth and rigour are not in tension. Softness is just politeness at the cost of truth.' },
+    { title: 'Culturally awake', body: 'References from outside design, credited always and never explained. We do not borrow from culture without knowing where we borrowed from.' },
+    { title: 'Quietly funny', body: 'One human moment per communication. In the last line, never the headline. Funny because it is true, not because it is trying.' },
+    { title: 'Commercially literate', body: 'Every soft attribute shows up one step downstream as a hard number. We do not separate aesthetic decisions from commercial ones.' },
+  ],
+  cultureEyebrow: 'The culture',
+  cultureHeading: 'Small on purpose. Senior in the room. Commercial by instinct.',
+  cultureItems: [
+    { title: 'One room', body: 'Strategy, design and demand sit together from day one — no relay races, no telephone game between departments.' },
+    { title: 'Senior hands', body: 'The people who win the work do the work. We stay small so the standard never gets diluted downstream.' },
+    { title: 'Commercial first', body: 'Every decision traces back to a number a client can actually move. Beauty is the method, not the goal.' },
+  ],
+  ctaHeading: 'If you would like to work with us, leave your email.',
+}
+
 const seedHomepage: Homepage = {
   featuredEyebrow: 'Selected work',
   featuredHeading: 'Proof that the brand decision was the commercial one.',
@@ -203,6 +247,7 @@ const seed: Site = {
   company: seedCompany,
   hero: seedHero,
   homepage: seedHomepage,
+  studio: seedStudio,
   nav: seedNav,
   footerNav: seedFooterNav,
   socials: seedSocials as Social[],
@@ -261,6 +306,7 @@ function loadLiveContent() {
         homepage: { ...cache.homepage, ...v.homepage },
       })
     }),
+    fetchStudioSections().then(v => v && write({ studio: { ...cache.studio, ...v } })),
   ])
 }
 loadLiveContent()
@@ -299,6 +345,9 @@ export function useHero(): Hero {
 }
 export function useHomepage(): Homepage {
   return useSite().homepage
+}
+export function useStudio(): Studio {
+  return useSite().studio
 }
 export function useNav(): NavLink[] {
   return useSite().nav

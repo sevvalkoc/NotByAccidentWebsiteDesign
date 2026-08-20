@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { categories } from '@/data'
 import { useCompany, useCapabilities, useProjects } from '@/content'
 import Seo from '@/components/Seo'
+import { useReveal } from '@/hooks/useReveal'
 
 export default function CapabilityDetail() {
   const { slug } = useParams()
@@ -11,23 +12,10 @@ export default function CapabilityDetail() {
   const capabilities = useCapabilities()
   const projects = useProjects()
   const cap = capabilities.find(c => c.slug === slug)
+  useReveal(ref, { threshold: 0.06 })
 
   useEffect(() => {
     window.scrollTo(0, 0)
-    if (!ref.current) return
-    const els = ref.current.querySelectorAll('.reveal')
-    const observer = new IntersectionObserver(
-      entries =>
-        entries.forEach(e => {
-          if (e.isIntersecting) {
-            e.target.classList.add('in-view')
-            observer.unobserve(e.target)
-          }
-        }),
-      { threshold: 0.06 }
-    )
-    els.forEach(el => observer.observe(el))
-    return () => observer.disconnect()
   }, [slug])
 
   if (!cap) {

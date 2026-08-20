@@ -1,29 +1,14 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { categories } from '@/data'
 import { useCapabilities } from '@/content'
 import Seo from '@/components/Seo'
+import { useReveal } from '@/hooks/useReveal'
 
 export default function Capabilities() {
   const ref = useRef<HTMLElement>(null)
   const capabilities = useCapabilities()
-
-  useEffect(() => {
-    if (!ref.current) return
-    const els = ref.current.querySelectorAll('.reveal')
-    const observer = new IntersectionObserver(
-      entries =>
-        entries.forEach(e => {
-          if (e.isIntersecting) {
-            e.target.classList.add('in-view')
-            observer.unobserve(e.target)
-          }
-        }),
-      { threshold: 0.06 }
-    )
-    els.forEach(el => observer.observe(el))
-    return () => observer.disconnect()
-  }, [])
+  useReveal(ref, { threshold: 0.06 })
 
   const schema = {
     '@context': 'https://schema.org',

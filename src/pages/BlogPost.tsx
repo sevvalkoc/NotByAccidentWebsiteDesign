@@ -1,8 +1,9 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { useParams, Link, Navigate } from 'react-router-dom'
 import { useNotes, useCompany } from '@/content'
 import type { NoteBlock } from '@/data'
 import Seo from '@/components/Seo'
+import { useReveal } from '@/hooks/useReveal'
 
 const bodyText: React.CSSProperties = {
   fontFamily: 'DM Sans, system-ui, sans-serif',
@@ -89,19 +90,7 @@ export default function BlogPost() {
   const company = useCompany()
   const note = notes.find(n => n.slug === slug)
   const ref = useRef<HTMLElement>(null)
-
-  useEffect(() => {
-    if (!ref.current) return
-    const els = ref.current.querySelectorAll('.reveal')
-    const observer = new IntersectionObserver(
-      entries => entries.forEach(e => {
-        if (e.isIntersecting) { e.target.classList.add('in-view'); observer.unobserve(e.target) }
-      }),
-      { threshold: 0.06 }
-    )
-    els.forEach(el => observer.observe(el))
-    return () => observer.disconnect()
-  }, [])
+  useReveal(ref, { threshold: 0.06 })
 
   if (!note) return <Navigate to="/notes" replace />
 

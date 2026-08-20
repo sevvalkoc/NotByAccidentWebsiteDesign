@@ -6,7 +6,7 @@
    from "couldn't ask" and fall back to the static seed data accordingly. */
 import { supabase, supabaseReady, publicMediaUrl } from '@/lib/supabase'
 import type { Project, ProjectNarrative, Note, NoteBlock, Capability, Category, TeamMember } from '@/data'
-import type { Testimonial, Wordmark, Social, Company, Hero, Homepage, NavLink, Seo, Trainings } from '@/content'
+import type { Testimonial, Wordmark, Social, Company, Hero, Homepage, Studio, StudioListItem, NavLink, Seo, Trainings } from '@/content'
 import type { ArticleBlock } from '@/lib/database.types'
 
 type MediaRef = { bucket: string; storage_path: string } | null
@@ -252,9 +252,21 @@ export async function fetchTeam(): Promise<TeamMember[] | null> {
    rows seeded by supabase/migrations/0005_homepage_sections.sql. Returns only
    the fields present in the DB; content.ts merges this over the static seed
    so a section that hasn't been edited yet just keeps its seed value. */
-export async function fetchHomeSections(): Promise<{ hero: Partial<Hero>; homepage: Partial<Homepage> } | null> {
+type PageSectionRow = {
+  section_key: string
+  eyebrow: string | null
+  title: string | null
+  subtitle: string | null
+  body: string | null
+  extra: { words?: string[]; imageOffsetX?: number; imageOffsetY?: number; items?: StudioListItem[] } | null
+  image: MediaRef
+}
+
+/** Shared by every page's section-fetcher below — one page lookup, one
+ *  section-rows query, reused instead of repeated per page. */
+async function fetchPageSectionRows(slug: string): Promise<PageSectionRow[] | null> {
   if (!supabase) return null
-  const { data: page } = await supabase.from('pages').select('id').eq('slug', 'home').maybeSingle()
+  const { data: page } = await supabase.from('pages').select('id').eq('slug', slug).maybeSingle()
   if (!page) return null
   const { data, error } = await supabase
     .from('page_sections')
@@ -265,20 +277,17 @@ export async function fetchHomeSections(): Promise<{ hero: Partial<Hero>; homepa
     .eq('page_id', (page as { id: string }).id)
     .eq('is_visible', true)
   if (error || !data) return null
+  return data as unknown as PageSectionRow[]
+}
 
-  type Row = {
-    section_key: string
-    eyebrow: string | null
-    title: string | null
-    subtitle: string | null
-    body: string | null
-    extra: { words?: string[]; imageOffsetX?: number; imageOffsetY?: number } | null
-    image: MediaRef
-  }
+export async function fetchHomeSections(): Promise<{ hero: Partial<Hero>; homepage: Partial<Homepage> } | null> {
+  const rows = await fetchPageSectionRows('home')
+  if (!rows) return null
+
   const hero: Partial<Hero> = {}
   const homepage: Partial<Homepage> = {}
 
-  for (const row of data as unknown as Row[]) {
+  for (const row of rows) {
     switch (row.section_key) {
       case 'hero':
         if (row.extra?.words?.length) hero.words = row.extra.words
@@ -308,6 +317,36 @@ export async function fetchHomeSections(): Promise<{ hero: Partial<Hero>; homepa
     }
   }
   return { hero, homepage }
+}
+
+export async function fetchStudioSections(): Promise<Partial<Studio> | null> {
+  const rows = await fetchPageSectionRows('studio')
+  if (!rows) return null
+
+  const studio: Partial<Studio> = {}
+  for (const row of rows) {
+    switch (row.section_key) {
+      case 'opening':
+        if (row.eyebrow) studio.eyebrow = row.eyebrow
+        if (row.title) studio.heading = row.title
+        if (row.subtitle) studio.subhead = row.subtitle
+        if (row.body) studio.body = row.body
+        break
+      case 'principles':
+        if (row.eyebrow) studio.principlesEyebrow = row.eyebrow
+        if (row.extra?.items?.length) studio.principles = row.extra.items
+        break
+      case 'culture':
+        if (row.eyebrow) studio.cultureEyebrow = row.eyebrow
+        if (row.title) studio.cultureHeading = row.title
+        if (row.extra?.items?.length) studio.cultureItems = row.extra.items
+        break
+      case 'cta':
+        if (row.title) studio.ctaHeading = row.title
+        break
+    }
+  }
+  return studio
 }
 
 export async function fetchSiteSettings(): Promise<{ company: Company; socials: Social[]; seo: Seo } | null> {
