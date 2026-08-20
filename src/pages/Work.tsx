@@ -3,16 +3,20 @@ import Link from '@/components/LocalizedLink'
 import { useProjects, useWorkCopy } from '@/content'
 import Seo from '@/components/Seo'
 import { useReveal } from '@/hooks/useReveal'
+import { useT } from '@/i18n/ui'
+import { usePageSeo } from '@/i18n/pageSeo'
 
 export default function Work() {
   const ref = useRef<HTMLElement>(null)
   const projects = useProjects()
   const copy = useWorkCopy()
+  const t = useT()
+  const seo = usePageSeo('/work')
   useReveal(ref, { threshold: 0.08 })
 
   return (
     <main id="main" ref={ref} style={{ paddingTop: '56px' }}>
-      <Seo title="Work" description="Selected work from Not by Accident — brand strategy, identity, digital products and demand for founders and creative teams." path="/work" />
+      <Seo title={seo.title} description={seo.description} path="/work" />
       {/* Page header */}
       <div
         style={{
@@ -121,13 +125,13 @@ export default function Work() {
                       }}
                     >
                       <div>
-                        <p className="t-caption mb-1" style={{ color: 'rgba(34,30,27,.35)' }}>Discipline</p>
+                        <p className="t-caption mb-1" style={{ color: 'rgba(34,30,27,.35)' }}>{t.work.discipline}</p>
                         <p className="t-ui m-0" style={{ color: 'rgba(34,30,27,.7)', fontWeight: 400 }}>
                           {project.discipline}
                         </p>
                       </div>
                       <div>
-                        <p className="t-caption mb-1" style={{ color: 'rgba(34,30,27,.35)' }}>Year</p>
+                        <p className="t-caption mb-1" style={{ color: 'rgba(34,30,27,.35)' }}>{t.work.year}</p>
                         <p className="t-ui m-0" style={{ color: 'rgba(34,30,27,.7)', fontWeight: 400 }}>
                           {project.year}
                         </p>
@@ -138,7 +142,7 @@ export default function Work() {
                       className="btn-ghost"
                       style={{ textDecoration: 'none', display: 'inline-flex' }}
                     >
-                      View case study
+                      {t.work.viewCaseStudy}
                     </Link>
                   </div>
                 </div>

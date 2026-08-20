@@ -116,6 +116,7 @@ export default function Home() {
    colour tab stands in for decoration, not a giant block of it. */
 function Hero() {
   const hero = useHero()
+  const t = useT()
   const heroWords = hero.words.length ? hero.words : ['wanted']
   const [wordIdx, setWordIdx] = useState(0)
   const word = heroWords[wordIdx % heroWords.length]
@@ -127,7 +128,7 @@ function Hero() {
 
   return (
     <section
-      aria-label="Not by Accident — independent creative company"
+      aria-label={t.home.heroAriaLabel}
       style={{ backgroundColor: '#F0EADA', paddingTop: '56px' }}
     >
       <div className="page-grid" style={{ paddingTop: 'clamp(28px, 4vw, 56px)', paddingBottom: 'clamp(40px, 5vw, 72px)' }}>
@@ -139,13 +140,13 @@ function Hero() {
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <img
               src={nbaSymbol}
-              alt="Not by Accident brand symbol"
+              alt={t.home.heroSymbolAlt}
               width={44}
               height={44}
               style={{ width: '40px', height: 'auto', marginBottom: '1.5rem', display: 'block' }}
             />
             <p className="t-caption" style={{ color: '#6E2237', marginBottom: '1.25rem' }}>
-              Independent creative company · Amsterdam · Est. 2019
+              {t.home.heroEyebrow}
             </p>
             <h1
               style={{
@@ -159,7 +160,7 @@ function Hero() {
                 maxWidth: '13ch',
               }}
             >
-              We make companies{' '}
+              {t.home.heroPrefix}
               <em
                 key={word}
                 style={{ fontStyle: 'italic', color: '#6E2237', animation: 'testimonial-in 400ms var(--ease-brand)', display: 'inline-block' }}
@@ -204,7 +205,7 @@ function Hero() {
             >
               <img
                 src={hero.image}
-                alt="Materials and notes from a Not by Accident strategy session"
+                alt={t.home.heroPhotoAlt}
                 loading="eager"
                 fetchPriority="high"
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
@@ -218,7 +219,7 @@ function Hero() {
                 textShadow: '0 1px 6px rgba(34,30,27,.6)',
               }}
             >
-              Wanted, on purpose — the working method, not the tagline.
+              {t.home.heroCaption}
             </p>
           </div>
         </div>
@@ -234,11 +235,12 @@ function Hero() {
 function CapabilitiesIndex() {
   const hp = useHomepage()
   const capabilities = useCapabilities()
+  const t = useT()
   const [openCat, setOpenCat] = useState<string>(categories[0].key)
 
   return (
     <section
-      aria-label="Capabilities"
+      aria-label={t.home.capabilitiesAriaLabel}
       style={{ backgroundColor: '#F0EADA', paddingTop: 'clamp(56px, 7vw, 104px)', paddingBottom: 'clamp(56px, 7vw, 104px)', borderTop: '1px solid rgba(34,30,27,.12)' }}
     >
       <div className="page-grid">
@@ -259,8 +261,7 @@ function CapabilitiesIndex() {
               </div>
             )}
             <p className="t-body" style={{ color: 'rgba(34,30,27,.6)', maxWidth: '34ch', fontSize: '15px' }}>
-              Five groups, {capabilities.length} capabilities. Take one, or the whole sequence — each has its own team, method
-              and page.
+              {t.home.capabilitiesIntro(capabilities.length)}
             </p>
           </div>
         </div>
@@ -335,7 +336,7 @@ function CapabilitiesIndex() {
           }}
         >
           <span style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 'clamp(20px, 2.4vw, 32px)', color: '#221E1B', lineHeight: 1 }}>
-            See all {capabilities.length} capabilities
+            {t.home.seeAllCapabilities(capabilities.length)}
           </span>
           <span
             aria-hidden="true"
@@ -363,6 +364,7 @@ function CapabilitiesIndex() {
    else. No logo wall underneath. */
 function Testimonials() {
   const testimonials = useTestimonials()
+  const ui = useT()
   const [active, setActive] = useState(0)
 
   useEffect(() => {
@@ -375,9 +377,9 @@ function Testimonials() {
   if (!t) return null
 
   return (
-    <section aria-label="Client testimonials" style={{ backgroundColor: '#6E2237', paddingTop: 'clamp(32px, 4vw, 56px)', paddingBottom: 'clamp(32px, 4vw, 56px)' }}>
+    <section aria-label={ui.home.testimonialsAriaLabel} style={{ backgroundColor: '#6E2237', paddingTop: 'clamp(32px, 4vw, 56px)', paddingBottom: 'clamp(32px, 4vw, 56px)' }}>
       <div className="page-grid">
-        <p className="t-caption mb-10 reveal" style={{ color: 'rgba(240,234,218,.5)' }}>In their words</p>
+        <p className="t-caption mb-10 reveal" style={{ color: 'rgba(240,234,218,.5)' }}>{ui.home.testimonialsEyebrow}</p>
         <div>
           <blockquote className="m-0 p-0 reveal reveal-delay-1">
             <p
@@ -409,7 +411,7 @@ function Testimonials() {
                   <button
                     key={i}
                     onClick={() => setActive(i)}
-                    aria-label={`Show quote from ${item.name}`}
+                    aria-label={ui.home.showQuoteFrom(item.name)}
                     aria-pressed={i === active}
                     style={{
                       width: i === active ? '28px' : '10px',
@@ -435,12 +437,13 @@ function Testimonials() {
    Dedicated, visual-only, slow continuous slider. No cards, no arrows. */
 function PartnersSlider() {
   const partnerLogos = usePartners()
+  const t = useT()
   return (
-    <section aria-label="Partners" style={{ backgroundColor: '#F0EADA', paddingTop: 'clamp(40px, 5vw, 64px)', paddingBottom: 'clamp(40px, 5vw, 64px)' }}>
+    <section aria-label={t.home.partnersAriaLabel} style={{ backgroundColor: '#F0EADA', paddingTop: 'clamp(40px, 5vw, 64px)', paddingBottom: 'clamp(40px, 5vw, 64px)' }}>
       <div className="page-grid">
-        <p className="t-caption reveal" style={{ color: 'rgba(34,30,27,.4)', marginBottom: '20px' }}>Partners</p>
+        <p className="t-caption reveal" style={{ color: 'rgba(34,30,27,.4)', marginBottom: '20px' }}>{t.home.partnersEyebrow}</p>
       </div>
-      <LogoMarquee items={partnerLogos} label="Partners & collaborators" speed={64} />
+      <LogoMarquee items={partnerLogos} label={t.home.partnersLabel} speed={64} />
     </section>
   )
 }
@@ -451,19 +454,20 @@ function PartnersSlider() {
 function Notes() {
   const notes = useNotes()
   const hp = useHomepage()
+  const t = useT()
   const [feature, second, third, fourth] = notes
 
   if (!feature) return null
 
   return (
-    <section aria-label="Notes" style={{ backgroundColor: '#F0EADA', paddingTop: 'clamp(56px, 7vw, 104px)', paddingBottom: 'clamp(56px, 7vw, 104px)', borderTop: '1px solid rgba(34,30,27,.12)' }}>
+    <section aria-label={t.home.notesAriaLabel} style={{ backgroundColor: '#F0EADA', paddingTop: 'clamp(56px, 7vw, 104px)', paddingBottom: 'clamp(56px, 7vw, 104px)', borderTop: '1px solid rgba(34,30,27,.12)' }}>
       <div className="page-grid">
         <div className="flex items-end justify-between mb-10 reveal" style={{ flexWrap: 'wrap', gap: '1rem' }}>
           <div>
             <p className="t-caption" style={{ color: 'rgba(34,30,27,.45)', marginBottom: '10px' }}>{hp.notesEyebrow}</p>
             <h2 className="t-headline-lg" style={{ maxWidth: '16ch' }}>{hp.journalHeading}</h2>
           </div>
-          <Link to="/notes" className="t-ui link-grow" style={{ color: '#221E1B' }}>Read Notes →</Link>
+          <Link to="/notes" className="t-ui link-grow" style={{ color: '#221E1B' }}>{t.home.readNotes}</Link>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-10 lg:gap-16">
@@ -473,7 +477,7 @@ function Notes() {
               {feature.img && <img src={feature.img} alt={feature.title} loading="lazy" />}
             </Link>
             <p className="t-caption" style={{ color: '#6E2237', marginTop: '16px' }}>
-              {feature.category} · {feature.readTime} read · {feature.date}
+              {feature.category} · {feature.readTime}{t.home.readSuffix} · {feature.date}
             </p>
             <h3 className="m-0" style={{ marginTop: '10px' }}>
               <Link to={`/notes/${feature.slug}`} className="link-grow" style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 'clamp(24px, 2.6vw, 36px)', fontWeight: 400, lineHeight: 1.06, letterSpacing: '-0.015em', color: '#221E1B' }}>
@@ -487,11 +491,11 @@ function Notes() {
           <div className="flex flex-col gap-6">
             {second && (
               <Link to={`/notes/${second.slug}`} className="no-underline reveal reveal-delay-1 block" style={{ backgroundColor: '#6A6383', color: '#F0EADA', padding: 'clamp(22px, 2.6vw, 32px)' }}>
-                <p className="t-caption" style={{ color: 'rgba(240,234,218,.7)', marginBottom: '0.75rem' }}>{second.category} · {second.readTime} read</p>
+                <p className="t-caption" style={{ color: 'rgba(240,234,218,.7)', marginBottom: '0.75rem' }}>{second.category} · {second.readTime}{t.home.readSuffix}</p>
                 <p className="m-0" style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 'clamp(20px, 2.2vw, 27px)', fontWeight: 400, lineHeight: 1.1, color: '#F0EADA' }}>
                   {second.title}
                 </p>
-                <p className="t-caption" style={{ color: 'rgba(240,234,218,.55)', marginTop: '1rem' }}>Read the essay →</p>
+                <p className="t-caption" style={{ color: 'rgba(240,234,218,.55)', marginTop: '1rem' }}>{t.home.readEssay}</p>
               </Link>
             )}
 
@@ -519,12 +523,13 @@ function Notes() {
    A second, separate slider — understated, real logos only. */
 function ClientsSlider() {
   const clientLogos = useClients()
+  const t = useT()
   return (
-    <section aria-label="Clients" style={{ backgroundColor: '#F0EADA', paddingTop: 'clamp(40px, 5vw, 64px)', paddingBottom: 'clamp(40px, 5vw, 64px)', borderTop: '1px solid rgba(34,30,27,.12)' }}>
+    <section aria-label={t.home.clientsAriaLabel} style={{ backgroundColor: '#F0EADA', paddingTop: 'clamp(40px, 5vw, 64px)', paddingBottom: 'clamp(40px, 5vw, 64px)', borderTop: '1px solid rgba(34,30,27,.12)' }}>
       <div className="page-grid">
-        <p className="t-caption reveal" style={{ color: 'rgba(34,30,27,.4)', marginBottom: '20px' }}>Clients</p>
+        <p className="t-caption reveal" style={{ color: 'rgba(34,30,27,.4)', marginBottom: '20px' }}>{t.home.clientsEyebrow}</p>
       </div>
-      <LogoMarquee items={clientLogos} label="Selected clients" reverse speed={70} />
+      <LogoMarquee items={clientLogos} label={t.home.clientsLabel} reverse speed={70} />
     </section>
   )
 }
@@ -535,10 +540,11 @@ function ClientsSlider() {
 function CaseStudiesTeaser() {
   const hp = useHomepage()
   const projects = useProjects()
+  const t = useT()
   const tiles = projects.filter(p => p.narrative).slice(0, 3)
 
   return (
-    <section aria-label="Case studies" style={{ backgroundColor: '#221E1B', paddingTop: 'clamp(56px, 7vw, 104px)', paddingBottom: 'clamp(56px, 7vw, 104px)' }}>
+    <section aria-label={t.home.caseStudiesAriaLabel} style={{ backgroundColor: '#221E1B', paddingTop: 'clamp(56px, 7vw, 104px)', paddingBottom: 'clamp(56px, 7vw, 104px)' }}>
       <div className="page-grid">
         <div className="flex items-end justify-between mb-10 reveal" style={{ flexWrap: 'wrap', gap: '1rem' }}>
           <div>
@@ -548,7 +554,7 @@ function CaseStudiesTeaser() {
             </h2>
           </div>
           <Link to="/case-studies" className="t-ui link-grow" style={{ color: '#F0EADA' }}>
-            All case studies →
+            {t.home.allCaseStudies}
           </Link>
         </div>
 
@@ -575,11 +581,11 @@ function CaseStudiesTeaser() {
                   {p.narrative && (
                     <dl className="m-0" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       <div>
-                        <dt className="t-caption m-0" style={{ color: 'rgba(240,234,218,.45)' }}>Problem</dt>
+                        <dt className="t-caption m-0" style={{ color: 'rgba(240,234,218,.45)' }}>{t.home.problem}</dt>
                         <dd className="t-body m-0" style={{ color: 'rgba(240,234,218,.75)', fontSize: '15px', maxWidth: '46ch' }}>{p.narrative.problem}</dd>
                       </div>
                       <div>
-                        <dt className="t-caption m-0" style={{ color: 'rgba(240,234,218,.45)' }}>Outcome</dt>
+                        <dt className="t-caption m-0" style={{ color: 'rgba(240,234,218,.45)' }}>{t.home.outcome}</dt>
                         <dd className="t-body m-0" style={{ color: '#E9C558', fontSize: '15px', maxWidth: '46ch' }}>{p.narrative.outcome}</dd>
                       </div>
                     </dl>
@@ -600,8 +606,9 @@ function CaseStudiesTeaser() {
 function FinalCta() {
   const company = useCompany()
   const hp = useHomepage()
+  const t = useT()
   return (
-    <section aria-label="Work with us" style={{ backgroundColor: '#221E1B', paddingTop: 'clamp(72px, 9vw, 140px)', paddingBottom: 'clamp(72px, 9vw, 140px)', borderTop: '1px solid rgba(240,234,218,.1)' }}>
+    <section aria-label={t.home.workWithUsAriaLabel} style={{ backgroundColor: '#221E1B', paddingTop: 'clamp(72px, 9vw, 140px)', paddingBottom: 'clamp(72px, 9vw, 140px)', borderTop: '1px solid rgba(240,234,218,.1)' }}>
       <div className="page-grid">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-16 items-center">
           <div className="reveal md:order-2">

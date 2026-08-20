@@ -4,27 +4,33 @@ import { categories } from '@/data'
 import { useCapabilities, useCapabilitiesCopy } from '@/content'
 import Seo from '@/components/Seo'
 import { useReveal } from '@/hooks/useReveal'
+import { useT } from '@/i18n/ui'
+import { usePageSeo, capabilitiesDescription } from '@/i18n/pageSeo'
+import { useLocale } from '@/i18n/locale'
 
 export default function Capabilities() {
   const ref = useRef<HTMLElement>(null)
   const capabilities = useCapabilities()
   const copy = useCapabilitiesCopy()
+  const t = useT()
+  const seo = usePageSeo('/capabilities')
+  const locale = useLocale()
   useReveal(ref, { threshold: 0.06 })
 
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://notbyaccident.com/' },
-      { '@type': 'ListItem', position: 2, name: 'Capabilities', item: 'https://notbyaccident.com/capabilities' },
+      { '@type': 'ListItem', position: 1, name: t.capabilitiesIndex.breadcrumbHome, item: 'https://notbyaccident.com/' },
+      { '@type': 'ListItem', position: 2, name: t.capabilitiesIndex.breadcrumbCapabilities, item: 'https://notbyaccident.com/capabilities' },
     ],
   }
 
   return (
     <main id="main" ref={ref} style={{ paddingTop: '56px', backgroundColor: '#F0EADA' }}>
       <Seo
-        title="Capabilities"
-        description={`${capabilities.length} capabilities across Brand & Identity, Digital & Product, Growth & Demand, Market & Expansion and Experiences — brand strategy, identity, website design, SEO, performance marketing, market research and more.`}
+        title={seo.title}
+        description={capabilitiesDescription(locale, capabilities.length)}
         path="/capabilities"
         jsonLd={schema}
       />
@@ -110,11 +116,11 @@ export default function Capabilities() {
       <div style={{ backgroundColor: '#221E1B' }}>
         <div className="page-grid" style={{ paddingTop: 'clamp(56px, 7vw, 96px)', paddingBottom: 'clamp(56px, 7vw, 96px)', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           <p className="reveal" style={{ fontFamily: 'Lora, Georgia, serif', fontStyle: 'italic', fontSize: 'clamp(22px, 3vw, 40px)', fontWeight: 400, lineHeight: 1.2, letterSpacing: '-0.01em', color: '#F0EADA', margin: 0, maxWidth: '28ch' }}>
-            “Not sure which you need? That is the first thing we work out together.”
+            “{t.capabilitiesIndex.notSureText}”
           </p>
           <div>
             <Link to="/contact" className="btn-milk reveal reveal-delay-1" style={{ textDecoration: 'none', display: 'inline-flex' }}>
-              Start a conversation
+              {t.capabilitiesIndex.startConversation}
             </Link>
           </div>
         </div>
