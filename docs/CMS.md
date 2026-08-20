@@ -126,7 +126,7 @@ dashboard is not linked from the public site and is set to `noindex`. See
 4. **Services** and **Related capability slugs** are comma-separated —
    e.g. `Brand Strategy, Creative Direction` and `brand-strategy,
    creative-direction`. The capability slugs must match a real capability
-   (see the Capabilities list on the public site's `/capabilities` page
+   (see **Capabilities** in the sidebar, or the public `/capabilities` page,
    for the exact slugs) — they're what makes "Capabilities behind this
    work" link correctly on the case study page.
 5. Under **Images**, upload a hero image and thumbnail, then save once
@@ -141,6 +141,29 @@ If you ever change a published project's **slug**, the system automatically
 creates a redirect from the old URL to the new one — so old links and
 search results don't break. You can see and manage all redirects under
 **SEO**.
+
+---
+
+## Managing Capabilities
+
+**Capabilities** in the sidebar is the full list behind `/capabilities` and
+each capability's own SEO landing page (`/capabilities/[slug]`) — the same
+list Work items and case studies link back to via their "Related capability
+slugs" field, above.
+
+- **Slug** must be unique and is what appears in the URL — keep it
+  lowercase-with-hyphens (`brand-strategy`, not `Brand Strategy`).
+- **Category** controls which of the five groups (Brand & Identity, Digital
+  & Product, Growth & Demand, Market & Expansion, Experiences) it's filed
+  under on the index page.
+- **Summary** is the short line shown on listing cards; **Lede** is the
+  longer opening statement at the top of the capability's own page.
+- **What it includes** and **Search queries it should rank for** are both
+  comma-separated lists — the first shows publicly on the capability page,
+  the second is SEO-only and never displayed.
+- Use ↑/↓ to reorder, and toggle "Visible on the public site" to hide a
+  capability without deleting it (existing Work items referencing it by
+  slug are unaffected either way).
 
 ---
 
