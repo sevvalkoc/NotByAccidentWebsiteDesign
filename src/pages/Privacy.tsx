@@ -3,6 +3,8 @@ import Link from '@/components/LocalizedLink'
 import Seo from '@/components/Seo'
 import { useReveal } from '@/hooks/useReveal'
 import { usePrivacyCopy } from '@/content'
+import { useT } from '@/i18n/ui'
+import { usePageSeo } from '@/i18n/pageSeo'
 
 /* Fixed anchor ids for the "On this page" nav — kept independent of the
    (editable, via Admin → Pages) section heading text, positional so they
@@ -12,12 +14,14 @@ const SECTION_IDS = ['who-we-are', 'what-we-collect', 'why-we-hold-it', 'who-see
 export default function Privacy() {
   const ref = useRef<HTMLElement>(null)
   const copy = usePrivacyCopy()
+  const t = useT()
+  const seo = usePageSeo('/privacy')
   const sections = copy.sections.map((s, i) => ({ id: SECTION_IDS[i] ?? `section-${i}`, heading: s.title, body: s.body.split('\n\n') }))
   useReveal(ref, { threshold: 0.08 })
 
   return (
     <main id="main" ref={ref} style={{ paddingTop: '56px', backgroundColor: '#F0EADA' }}>
-      <Seo title="Privacy" description="How Not by Accident collects, uses and protects your personal data." path="/privacy" />
+      <Seo title={seo.title} description={seo.description} path="/privacy" />
       {/* Header */}
       <div
         style={{
@@ -38,7 +42,7 @@ export default function Privacy() {
             {copy.subhead}
           </p>
           <p className="t-caption mt-8 reveal reveal-delay-3" style={{ color: 'rgba(34,30,27,.4)' }}>
-            Last updated · {copy.lastUpdated}
+            {t.privacy.lastUpdatedPrefix}{copy.lastUpdated}
           </p>
         </div>
       </div>
@@ -56,7 +60,7 @@ export default function Privacy() {
           className="md:grid-cols-[26%_1fr]"
         >
           {/* Contents */}
-          <nav aria-label="On this page" className="reveal" style={{ alignSelf: 'start', position: 'sticky', top: '96px' }}>
+          <nav aria-label={t.privacy.onThisPage} className="reveal" style={{ alignSelf: 'start', position: 'sticky', top: '96px' }}>
             <img
               src="https://images.unsplash.com/photo-1755375551130-cf278d391d99?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=640"
               alt=""
@@ -72,7 +76,7 @@ export default function Privacy() {
                 filter: 'grayscale(0.15)',
               }}
             />
-            <p className="t-caption mb-4" style={{ color: 'rgba(34,30,27,.4)' }}>On this page</p>
+            <p className="t-caption mb-4" style={{ color: 'rgba(34,30,27,.4)' }}>{t.privacy.onThisPage}</p>
             <ul className="list-none m-0 p-0 flex flex-col gap-2.5">
               {sections.map(s => (
                 <li key={s.id}>
@@ -118,9 +122,9 @@ export default function Privacy() {
             ))}
 
             <p className="t-body reveal" style={{ color: 'rgba(34,30,27,.6)' }}>
-              Questions about any of this? Write to{' '}
+              {t.privacy.questionsPrefix}{' '}
               <a href="mailto:hello@notbyaccident.com" className="link-beetroot">hello@notbyaccident.com</a>, or read our{' '}
-              <Link to="/cookies" className="link-beetroot">cookie notice</Link>.
+              <Link to="/cookies" className="link-beetroot">{t.privacy.cookieNoticeLink}</Link>.
             </p>
           </div>
         </div>

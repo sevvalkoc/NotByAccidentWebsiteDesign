@@ -90,6 +90,7 @@ export interface UiStrings {
     viewCaseStudy: string
   }
   caseStudy: {
+    breadcrumbNavLabel: string
     back: string
     discipline: string
     location: string
@@ -113,6 +114,7 @@ export interface UiStrings {
     breadcrumbCapabilities: string
   }
   capabilityDetail: {
+    breadcrumbNavLabel: string
     notFoundLabel: string
     notFoundHeading: string
     allCapabilitiesButton: string
@@ -153,6 +155,7 @@ export interface UiStrings {
     schemaDescription: string
   }
   blogPost: {
+    breadcrumbNavLabel: string
     embeddedVideo: string
     back: string
     readSuffix: string
