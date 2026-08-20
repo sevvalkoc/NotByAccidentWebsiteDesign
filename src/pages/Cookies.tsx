@@ -2,14 +2,16 @@ import { useRef } from 'react'
 import Link from '@/components/LocalizedLink'
 import Seo from '@/components/Seo'
 import { useReveal } from '@/hooks/useReveal'
-import { useCookiesCopy, useCompany } from '@/content'
+import { useCookiesCopy, useCompany, useCustomSections } from '@/content'
 import { useT } from '@/i18n/ui'
 import { usePageSeo } from '@/i18n/pageSeo'
+import CustomSectionBlock from '@/components/CustomSectionBlock'
 
 export default function Cookies() {
   const ref = useRef<HTMLElement>(null)
   const copy = useCookiesCopy()
   const company = useCompany()
+  const customSections = useCustomSections('cookies')
   const t = useT()
   const seo = usePageSeo('/cookies')
   const rows = copy.rows.map(r => ({ name: r.title, purpose: r.body, life: r.meta ?? '' }))
@@ -129,6 +131,9 @@ export default function Cookies() {
           </p>
         </div>
       </div>
+      {customSections.map(cs => (
+        <CustomSectionBlock key={cs.key} section={cs} />
+      ))}
     </main>
   )
 }

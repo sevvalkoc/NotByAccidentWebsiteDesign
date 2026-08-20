@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react'
 import Seo from '@/components/Seo'
-import { submitLead, useTeam, useStudio } from '@/content'
+import { submitLead, useTeam, useStudio, useCustomSections } from '@/content'
 import { useReveal } from '@/hooks/useReveal'
 import { useT } from '@/i18n/ui'
 import { usePageSeo } from '@/i18n/pageSeo'
+import CustomSectionBlock from '@/components/CustomSectionBlock'
 
 function AboutSignup() {
   const t = useT()
@@ -58,6 +59,7 @@ export default function About() {
   const ref = useRef<HTMLElement>(null)
   const team = useTeam()
   const studio = useStudio()
+  const customSections = useCustomSections('studio')
   const t = useT()
   const seo = usePageSeo('/studio')
   useReveal(ref, { threshold: 0.06 })
@@ -256,6 +258,9 @@ export default function About() {
           <AboutSignup />
         </div>
       </div>
+      {customSections.map(cs => (
+        <CustomSectionBlock key={cs.key} section={cs} />
+      ))}
     </main>
   )
 }

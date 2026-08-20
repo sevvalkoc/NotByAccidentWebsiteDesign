@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import Link from '@/components/LocalizedLink'
 import Seo from '@/components/Seo'
-import { useCompany, useReportsCopy, submitLead } from '@/content'
+import { useCompany, useReportsCopy, submitLead, useCustomSections } from '@/content'
 import { useT } from '@/i18n/ui'
 import { usePageSeo } from '@/i18n/pageSeo'
+import CustomSectionBlock from '@/components/CustomSectionBlock'
 
 export default function Reports() {
   const company = useCompany()
   const copy = useReportsCopy()
+  const customSections = useCustomSections('reports')
   const t = useT()
   const seo = usePageSeo('/reports')
   const [email, setEmail] = useState('')
@@ -107,6 +109,9 @@ export default function Reports() {
           </p>
         </div>
       </div>
+      {customSections.map(cs => (
+        <CustomSectionBlock key={cs.key} section={cs} />
+      ))}
     </main>
   )
 }

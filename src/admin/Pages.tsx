@@ -201,6 +201,51 @@ export default function Pages() {
     await load(activePage)
   }
 
+  /* Every page can grow beyond its built-in sections — "custom-" prefixed
+   *  section_keys are picked up generically by src/lib/cms.ts's
+   *  fetchAllCustomSections() and rendered by CustomSectionBlock wherever
+   *  a page appends its useCustomSections(slug) list (Home interleaves them
+   *  by sort_order via SECTION_COMPONENTS' fallback; every other page just
+   *  appends them at the end). Full eyebrow/heading/subhead/body/image/CTA
+   *  — see the isCustom override in SectionCard below. */
+  async function addCustomSection() {
+    if (!supabase) return
+    const { data: page, error: pageError } = await supabase.from('pages').select('id').eq('slug', activePage).maybeSingle()
+    if (pageError || !page) {
+      setError(pageError?.message ?? `No '${activePage}' page row found.`)
+      return
+    }
+    const maxSort = rows && rows.length ? Math.max(...rows.map(r => r.sort_order)) : 0
+    const key = `custom-${crypto.randomUUID().slice(0, 8)}`
+    const { error } = await supabase.from('page_sections').insert({
+      page_id: (page as { id: string }).id,
+      section_key: key,
+      sort_order: maxSort + 1,
+      is_visible: true,
+      eyebrow: '',
+      title: 'New section',
+      extra: {},
+    })
+    if (error) {
+      setError(error.message)
+      return
+    }
+    refreshSite()
+    await load(activePage)
+  }
+
+  async function deleteCustomSection(row: SectionRow) {
+    if (!supabase) return
+    if (!window.confirm('Delete this section? This cannot be undone.')) return
+    const { error } = await supabase.from('page_sections').delete().eq('id', row.id)
+    if (error) {
+      setError(error.message)
+      return
+    }
+    refreshSite()
+    await load(activePage)
+  }
+
   if (!supabase) {
     return (
       <div>
@@ -236,6 +281,7 @@ export default function Pages() {
       ) : (
         <div className="flex flex-col gap-6 max-w-2xl">
           {rows.map((row, idx) => {
+            const isCustom = row.section_key.startsWith('custom-')
             const props = { row, onChange: (patch: Partial<SectionRow>) => patchRow(row.id, patch), onSave: () => saveRow(row) }
             const card = ORDER_ONLY_SECTIONS.has(row.section_key) ? (
               <OrderOnlyCard key={row.id} row={row} />
@@ -245,12 +291,12 @@ export default function Pages() {
               <TrainingsHeaderCard key={row.id} {...props} />
             ) : activePage === 'cookies' && row.section_key === 'table' ? (
               <CookiesTableCard key={row.id} {...props} />
-            ) : LIST_SECTIONS.has(row.section_key) ? (
+            ) : !isCustom && LIST_SECTIONS.has(row.section_key) ? (
               <ListCard key={row.id} {...props} />
             ) : (
               <SectionCard key={row.id} {...props} pageSlug={activePage} />
             )
-            if (activePage !== 'home') return card
+            if (activePage !== 'home' && !isCustom) return card
             return (
               <div key={row.id}>
                 <div className="flex items-center gap-3 mb-2 px-1">
@@ -274,13 +320,31 @@ export default function Pages() {
                   </button>
                   <label className="flex items-center gap-1.5 text-xs text-gray-500">
                     <input type="checkbox" checked={row.is_visible} onChange={() => toggleVisible(row)} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                    Visible on homepage
+                    {activePage === 'home' ? 'Visible on homepage' : 'Visible'}
                   </label>
+                  {isCustom && (
+                    <button
+                      type="button"
+                      className="text-sm text-red-400 hover:text-red-600 ml-auto"
+                      onClick={() => deleteCustomSection(row)}
+                    >
+                      Delete section
+                    </button>
+                  )}
                 </div>
                 {card}
               </div>
             )
           })}
+          <div>
+            <AdminButton type="button" variant="secondary" onClick={addCustomSection}>
+              + Add section
+            </AdminButton>
+            <p className="text-xs text-gray-400 mt-2">
+              Adds a new, blank section to the end of this page — eyebrow, heading, subhead, body, image and a button, all
+              optional. Reorder it with the arrows once it appears below.
+            </p>
+          </div>
         </div>
       )}
     </div>
@@ -322,8 +386,11 @@ function SectionCard({
   onSave: () => void
   pageSlug: PageSlug
 }) {
-  const fields = SECTION_FIELDS[`${pageSlug}:${row.section_key}`] ?? {}
-  const label = SECTION_LABELS[row.section_key] ?? row.section_key
+  const isCustom = row.section_key.startsWith('custom-')
+  const fields = isCustom
+    ? { subtitle: true, body: true, ctaFields: true, imageField: true }
+    : (SECTION_FIELDS[`${pageSlug}:${row.section_key}`] ?? {})
+  const label = isCustom ? 'Custom section' : (SECTION_LABELS[row.section_key] ?? row.section_key)
   return (
     <AdminCard className="p-6">
       <h2 className="text-sm font-semibold text-gray-900 mb-4">{label}</h2>

@@ -1,12 +1,14 @@
 import { useRef, useState } from 'react'
 import Seo from '@/components/Seo'
-import { useTrainings, submitLead } from '@/content'
+import { useTrainings, submitLead, useCustomSections } from '@/content'
 import { useReveal } from '@/hooks/useReveal'
 import { useT } from '@/i18n/ui'
 import { usePageSeo } from '@/i18n/pageSeo'
+import CustomSectionBlock from '@/components/CustomSectionBlock'
 
 export default function Trainings() {
   const t = useTrainings()
+  const customSections = useCustomSections('trainings')
   const ui = useT()
   const seo = usePageSeo('/trainings')
   const ref = useRef<HTMLElement>(null)
@@ -198,6 +200,9 @@ export default function Trainings() {
           </div>
         </div>
       </div>
+      {customSections.map(cs => (
+        <CustomSectionBlock key={cs.key} section={cs} />
+      ))}
     </main>
   )
 }

@@ -25,6 +25,7 @@ import type {
   Seo,
   Trainings,
   CategoryMeta,
+  CustomSection,
 } from '@/content'
 import type { ArticleBlock } from '@/lib/database.types'
 
@@ -321,6 +322,57 @@ async function fetchPageSectionRows(slug: string): Promise<PageSectionRow[] | nu
     .order('sort_order', { ascending: true })
   if (error || !data) return null
   return data as unknown as PageSectionRow[]
+}
+
+/** Sections an editor added from Admin → Pages beyond a page's built-in
+ *  ones (created with a "custom-" prefixed section_key — see
+ *  src/admin/Pages.tsx's addCustomSection). One query for the whole site,
+ *  grouped by page slug, so every page's public component can just ask for
+ *  its own list via useCustomSections(slug). */
+export async function fetchAllCustomSections(): Promise<Record<string, CustomSection[]> | null> {
+  if (!supabase) return null
+  const { data: pages, error: pagesError } = await supabase.from('pages').select('id, slug')
+  if (pagesError || !pages) return null
+  const slugById = new Map((pages as { id: string; slug: string }[]).map(p => [p.id, p.slug]))
+
+  const { data, error } = await supabase
+    .from('page_sections')
+    .select(
+      `page_id, section_key, eyebrow, title, subtitle, body, cta_label, cta_url, sort_order,
+       image:media!image_media_id ( bucket, storage_path )`
+    )
+    .like('section_key', 'custom-%')
+    .eq('is_visible', true)
+    .order('sort_order', { ascending: true })
+  if (error || !data) return null
+
+  type Row = {
+    page_id: string
+    section_key: string
+    eyebrow: string | null
+    title: string | null
+    subtitle: string | null
+    body: string | null
+    cta_label: string | null
+    cta_url: string | null
+    image: MediaRef
+  }
+  const bySlug: Record<string, CustomSection[]> = {}
+  for (const row of data as unknown as Row[]) {
+    const slug = slugById.get(row.page_id)
+    if (!slug) continue
+    ;(bySlug[slug] ??= []).push({
+      key: row.section_key,
+      eyebrow: row.eyebrow ?? '',
+      heading: row.title ?? '',
+      subhead: row.subtitle ?? '',
+      body: row.body ?? '',
+      image: mediaUrl(row.image),
+      ctaLabel: row.cta_label ?? '',
+      ctaUrl: row.cta_url ?? '',
+    })
+  }
+  return bySlug
 }
 
 export async function fetchHomeSections(): Promise<{

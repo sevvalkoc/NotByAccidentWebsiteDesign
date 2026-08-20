@@ -2,9 +2,10 @@ import { useRef } from 'react'
 import Link from '@/components/LocalizedLink'
 import Seo from '@/components/Seo'
 import { useReveal } from '@/hooks/useReveal'
-import { usePrivacyCopy, useCompany } from '@/content'
+import { usePrivacyCopy, useCompany, useCustomSections } from '@/content'
 import { useT } from '@/i18n/ui'
 import { usePageSeo } from '@/i18n/pageSeo'
+import CustomSectionBlock from '@/components/CustomSectionBlock'
 
 /* Fixed anchor ids for the "On this page" nav — kept independent of the
    (editable, via Admin → Pages) section heading text, positional so they
@@ -15,6 +16,7 @@ export default function Privacy() {
   const ref = useRef<HTMLElement>(null)
   const copy = usePrivacyCopy()
   const company = useCompany()
+  const customSections = useCustomSections('privacy')
   const t = useT()
   const seo = usePageSeo('/privacy')
   const sections = copy.sections.map((s, i) => ({ id: SECTION_IDS[i] ?? `section-${i}`, heading: s.title, body: s.body.split('\n\n') }))
@@ -132,6 +134,9 @@ export default function Privacy() {
           </div>
         </div>
       </div>
+      {customSections.map(cs => (
+        <CustomSectionBlock key={cs.key} section={cs} />
+      ))}
     </main>
   )
 }

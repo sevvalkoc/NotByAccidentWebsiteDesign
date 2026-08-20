@@ -210,4 +210,7 @@ export const site: Site = {
   capabilities,
   categories,
   team,
+  // Sections an editor adds via Admin → Pages are typed in English with no
+  // translation mechanism — they simply don't appear on the nl/fr site.
+  customSections: {},
 }

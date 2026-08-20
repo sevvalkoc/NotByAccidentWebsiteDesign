@@ -12,9 +12,11 @@ import {
   useProjects,
   useCapabilities,
   useCategories,
+  useCustomSections,
 } from '@/content'
 import Seo from '@/components/Seo'
 import LogoMarquee from '@/components/LogoMarquee'
+import CustomSectionBlock from '@/components/CustomSectionBlock'
 import nbaSymbol from '@/imports/NBA_Symbol_Ink_RGB.png'
 import { useReveal } from '@/hooks/useReveal'
 import { useT } from '@/i18n/ui'
@@ -42,6 +44,7 @@ export default function Home() {
   const company = useCompany()
   const capabilities = useCapabilities()
   const categories = useCategories()
+  const customSections = useCustomSections('home')
   const sectionOrder = useHomeSections()
   const t = useT()
   const seo = usePageSeo('/')
@@ -106,7 +109,9 @@ export default function Home() {
       />
       {sectionOrder.map(key => {
         const Section = SECTION_COMPONENTS[key]
-        return Section ? <Section key={key} /> : null
+        if (Section) return <Section key={key} />
+        const custom = customSections.find(c => c.key === key)
+        return custom ? <CustomSectionBlock key={key} section={custom} /> : null
       })}
     </main>
   )
