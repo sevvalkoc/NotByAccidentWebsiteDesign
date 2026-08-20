@@ -87,12 +87,20 @@ const SECTION_LABELS: Record<string, string> = {
  *  'header') means different things, with different fields, on different pages. */
 const SECTION_FIELDS: Record<
   string,
-  { subtitle?: boolean; body?: boolean; titleHint?: string; lastUpdatedField?: boolean; ctaFields?: boolean; imageField?: boolean }
+  {
+    subtitle?: boolean
+    body?: boolean
+    body2Field?: string
+    titleHint?: string
+    lastUpdatedField?: boolean
+    ctaFields?: boolean
+    imageField?: boolean
+  }
 > = {
   'home:final_cta': { body: true, ctaFields: true, imageField: true },
   'home:capabilities': { imageField: true },
-  'studio:opening': { subtitle: true, body: true },
-  'contact:header': { subtitle: true, body: true },
+  'studio:opening': { subtitle: true, body: true, imageField: true },
+  'contact:header': { subtitle: true, body: true, body2Field: 'Second paragraph' },
   'reports:header': { subtitle: true },
   'work:header': { subtitle: true },
   'case-studies:header': { subtitle: true },
@@ -100,7 +108,7 @@ const SECTION_FIELDS: Record<
     subtitle: true,
     titleHint: 'Appears after the live capability count, e.g. "42 capabilities, in the order…" — only type the part after the number.',
   },
-  'privacy:header': { subtitle: true, lastUpdatedField: true },
+  'privacy:header': { subtitle: true, lastUpdatedField: true, imageField: true },
   'cookies:header': { subtitle: true },
   'cookies:managing': { body: true },
 }
@@ -335,6 +343,15 @@ function SectionCard({
       {fields.body && (
         <AdminField label="Body">
           <AdminTextarea value={row.body ?? ''} onChange={e => onChange({ body: e.target.value })} rows={3} />
+        </AdminField>
+      )}
+      {fields.body2Field && (
+        <AdminField label={fields.body2Field}>
+          <AdminTextarea
+            value={row.extra.body2 ?? ''}
+            onChange={e => onChange({ extra: { ...row.extra, body2: e.target.value } })}
+            rows={3}
+          />
         </AdminField>
       )}
       {fields.lastUpdatedField && (

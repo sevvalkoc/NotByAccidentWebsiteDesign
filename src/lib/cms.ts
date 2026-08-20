@@ -24,6 +24,7 @@ import type {
   NavLink,
   Seo,
   Trainings,
+  CategoryMeta,
 } from '@/content'
 import type { ArticleBlock } from '@/lib/database.types'
 
@@ -98,6 +99,16 @@ export async function fetchProjects(): Promise<Project[] | null> {
       featured: row.featured,
     }
   })
+}
+
+export async function fetchCategoryMeta(): Promise<CategoryMeta[] | null> {
+  if (!supabase) return null
+  const { data, error } = await supabase
+    .from('category_meta')
+    .select('key, label, blurb, accent')
+    .order('sort_order', { ascending: true })
+  if (error || !data) return null
+  return data as CategoryMeta[]
 }
 
 export async function fetchCapabilities(): Promise<Capability[] | null> {
@@ -376,6 +387,7 @@ export async function fetchStudioSections(): Promise<Partial<Studio> | null> {
         if (row.title) studio.heading = row.title
         if (row.subtitle) studio.subhead = row.subtitle
         if (row.body) studio.body = row.body
+        if (row.image) studio.openingImage = mediaUrl(row.image)
         break
       case 'principles':
         if (row.eyebrow) studio.principlesEyebrow = row.eyebrow
@@ -466,6 +478,7 @@ export async function fetchPrivacySections(): Promise<Partial<LegalCopy> | null>
   if (header?.eyebrow) p.eyebrow = header.eyebrow
   if (header?.title) p.heading = header.title
   if (header?.subtitle) p.subhead = header.subtitle
+  if (header?.image) p.headerImage = mediaUrl(header.image)
   if (typeof header?.extra?.lastUpdated === 'string') p.lastUpdated = header.extra.lastUpdated
   if (legal?.extra?.items?.length) p.sections = legal.extra.items
   return p

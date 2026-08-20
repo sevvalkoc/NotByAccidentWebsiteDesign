@@ -2,13 +2,14 @@ import { useRef } from 'react'
 import Link from '@/components/LocalizedLink'
 import Seo from '@/components/Seo'
 import { useReveal } from '@/hooks/useReveal'
-import { useCookiesCopy } from '@/content'
+import { useCookiesCopy, useCompany } from '@/content'
 import { useT } from '@/i18n/ui'
 import { usePageSeo } from '@/i18n/pageSeo'
 
 export default function Cookies() {
   const ref = useRef<HTMLElement>(null)
   const copy = useCookiesCopy()
+  const company = useCompany()
   const t = useT()
   const seo = usePageSeo('/cookies')
   const rows = copy.rows.map(r => ({ name: r.title, purpose: r.body, life: r.meta ?? '' }))
@@ -124,7 +125,7 @@ export default function Cookies() {
           <p className="t-body" style={{ color: 'rgba(34,30,27,.72)' }}>
             {t.cookies.fullerPicturePrefix}{' '}
             <Link to="/privacy" className="link-beetroot">{t.cookies.privacyNoticeLink}</Link>. {t.cookies.unclearPrefix}{' '}
-            <a href="mailto:hello@notbyaccident.com" className="link-beetroot">hello@notbyaccident.com</a>.
+            <a href={`mailto:${company.email}`} className="link-beetroot">{company.email}</a>.
           </p>
         </div>
       </div>

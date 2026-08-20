@@ -1,7 +1,6 @@
 import { useRef } from 'react'
 import Link from '@/components/LocalizedLink'
-import { categories } from '@/data'
-import { useCapabilities, useCapabilitiesCopy } from '@/content'
+import { useCapabilities, useCapabilitiesCopy, useCategories } from '@/content'
 import Seo from '@/components/Seo'
 import { useReveal } from '@/hooks/useReveal'
 import { useT } from '@/i18n/ui'
@@ -11,6 +10,7 @@ import { useLocale } from '@/i18n/locale'
 export default function Capabilities() {
   const ref = useRef<HTMLElement>(null)
   const capabilities = useCapabilities()
+  const categories = useCategories()
   const copy = useCapabilitiesCopy()
   const t = useT()
   const seo = usePageSeo('/capabilities')

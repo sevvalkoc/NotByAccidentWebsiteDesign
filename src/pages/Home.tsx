@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from '@/components/LocalizedLink'
-import { categories } from '@/data'
 import {
   useNotes,
   useHero,
@@ -12,6 +11,7 @@ import {
   usePartners,
   useProjects,
   useCapabilities,
+  useCategories,
 } from '@/content'
 import Seo from '@/components/Seo'
 import LogoMarquee from '@/components/LogoMarquee'
@@ -41,6 +41,7 @@ export default function Home() {
   useReveal(mainRef)
   const company = useCompany()
   const capabilities = useCapabilities()
+  const categories = useCategories()
   const sectionOrder = useHomeSections()
   const t = useT()
   const seo = usePageSeo('/')
@@ -235,6 +236,7 @@ function Hero() {
 function CapabilitiesIndex() {
   const hp = useHomepage()
   const capabilities = useCapabilities()
+  const categories = useCategories()
   const t = useT()
   const [openCat, setOpenCat] = useState<string>(categories[0].key)
 

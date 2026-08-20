@@ -2,7 +2,7 @@ import { useRef } from 'react'
 import Link from '@/components/LocalizedLink'
 import Seo from '@/components/Seo'
 import { useReveal } from '@/hooks/useReveal'
-import { usePrivacyCopy } from '@/content'
+import { usePrivacyCopy, useCompany } from '@/content'
 import { useT } from '@/i18n/ui'
 import { usePageSeo } from '@/i18n/pageSeo'
 
@@ -14,6 +14,7 @@ const SECTION_IDS = ['who-we-are', 'what-we-collect', 'why-we-hold-it', 'who-see
 export default function Privacy() {
   const ref = useRef<HTMLElement>(null)
   const copy = usePrivacyCopy()
+  const company = useCompany()
   const t = useT()
   const seo = usePageSeo('/privacy')
   const sections = copy.sections.map((s, i) => ({ id: SECTION_IDS[i] ?? `section-${i}`, heading: s.title, body: s.body.split('\n\n') }))
@@ -61,21 +62,23 @@ export default function Privacy() {
         >
           {/* Contents */}
           <nav aria-label={t.privacy.onThisPage} className="reveal" style={{ alignSelf: 'start', position: 'sticky', top: '96px' }}>
-            <img
-              src="https://images.unsplash.com/photo-1755375551130-cf278d391d99?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=640"
-              alt=""
-              aria-hidden="true"
-              loading="lazy"
-              style={{
-                width: '100%',
-                maxWidth: '132px',
-                aspectRatio: '4 / 5',
-                objectFit: 'cover',
-                display: 'block',
-                marginBottom: '1.5rem',
-                filter: 'grayscale(0.15)',
-              }}
-            />
+            {copy.headerImage && (
+              <img
+                src={copy.headerImage}
+                alt=""
+                aria-hidden="true"
+                loading="lazy"
+                style={{
+                  width: '100%',
+                  maxWidth: '132px',
+                  aspectRatio: '4 / 5',
+                  objectFit: 'cover',
+                  display: 'block',
+                  marginBottom: '1.5rem',
+                  filter: 'grayscale(0.15)',
+                }}
+              />
+            )}
             <p className="t-caption mb-4" style={{ color: 'rgba(34,30,27,.4)' }}>{t.privacy.onThisPage}</p>
             <ul className="list-none m-0 p-0 flex flex-col gap-2.5">
               {sections.map(s => (
@@ -123,7 +126,7 @@ export default function Privacy() {
 
             <p className="t-body reveal" style={{ color: 'rgba(34,30,27,.6)' }}>
               {t.privacy.questionsPrefix}{' '}
-              <a href="mailto:hello@notbyaccident.com" className="link-beetroot">hello@notbyaccident.com</a>, or read our{' '}
+              <a href={`mailto:${company.email}`} className="link-beetroot">{company.email}</a>, or read our{' '}
               <Link to="/cookies" className="link-beetroot">{t.privacy.cookieNoticeLink}</Link>.
             </p>
           </div>

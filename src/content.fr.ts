@@ -16,6 +16,7 @@ import {
   partnerLogos,
   projects,
   capabilities,
+  categories,
   team,
 } from '@/data.fr'
 
@@ -62,6 +63,7 @@ export const site: Site = {
     heading: 'Nous rendons les entreprises désirables.',
     subhead: 'La croissance vient ensuite. Désirables, jamais par hasard.',
     body: "Not by Accident est une entreprise créative indépendante qui travaille la marque, le produit et la demande. Pensée de marque et pensée commerciale ne siègent pas dans deux pièces séparées.",
+    openingImage: 'https://images.unsplash.com/photo-1649414744605-3bfa4f1870fc?w=720&h=900&fit=crop&auto=format',
     principlesEyebrow: 'Notre façon de penser',
     principles: [
       {
@@ -144,6 +146,7 @@ export const site: Site = {
     eyebrow: 'Confidentialité',
     heading: 'Ce que nous conservons, et pourquoi.',
     subhead: "Nous collectons très peu de choses et nous les traitons simplement. Cette notice explique exactement comment, dans une langue qui ne devrait pas exiger un avocat.",
+    headerImage: 'https://images.unsplash.com/photo-1755375551130-cf278d391d99?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=640',
     lastUpdated: '8 août 2026',
     sections: [
       {
@@ -247,5 +250,6 @@ export const site: Site = {
   notes,
   projects,
   capabilities,
+  categories,
   team,
 }
