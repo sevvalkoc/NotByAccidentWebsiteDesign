@@ -3,6 +3,8 @@ import { useSearchParams } from 'react-router-dom'
 import Link from '@/components/LocalizedLink'
 import { useProjects, useNotes, useCapabilities } from '@/content'
 import Seo from '@/components/Seo'
+import { useT } from '@/i18n/ui'
+import { usePageSeo } from '@/i18n/pageSeo'
 
 type Entry = {
   title: string
@@ -12,12 +14,16 @@ type Entry = {
   terms: string
 }
 
-const staticPages: Entry[] = [
-  { title: 'Studio', kind: 'Page', to: '/studio', blurb: 'Who we are, how we think and the people behind the work.', terms: 'about studio team people founders history approach philosophy' },
-  { title: 'Work', kind: 'Page', to: '/work', blurb: 'A running index of projects, listed plainly.', terms: 'work projects portfolio index clients' },
-  { title: 'Capabilities', kind: 'Page', to: '/capabilities', blurb: 'The disciplines we practise and how they fit together.', terms: 'capabilities services disciplines offer expertise' },
-  { title: 'Contact', kind: 'Page', to: '/contact', blurb: 'Write to us about a project or a conversation.', terms: 'contact email enquiry get in touch brief' },
-  { title: 'Trainings', kind: 'Page', to: '/trainings', blurb: 'Workshops and training, coming soon.', terms: 'training workshops teaching learning courses education' },
+/* Search terms stay in English regardless of locale — they're internal
+   matching keywords, not visible copy. Titles/blurbs come from
+   t.search.indexEntries (in this exact order: Studio, Work, Capabilities,
+   Contact, Trainings). */
+const STATIC_PAGE_META: { to: string; pageLabel: 'Page'; terms: string }[] = [
+  { to: '/studio', pageLabel: 'Page', terms: 'about studio team people founders history approach philosophy' },
+  { to: '/work', pageLabel: 'Page', terms: 'work projects portfolio index clients' },
+  { to: '/capabilities', pageLabel: 'Page', terms: 'capabilities services disciplines offer expertise' },
+  { to: '/contact', pageLabel: 'Page', terms: 'contact email enquiry get in touch brief' },
+  { to: '/trainings', pageLabel: 'Page', terms: 'training workshops teaching learning courses education' },
 ]
 
 function buildIndex(

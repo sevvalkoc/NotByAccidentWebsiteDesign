@@ -2,9 +2,13 @@ import { useRef, useState } from 'react'
 import Seo from '@/components/Seo'
 import { useTrainings, submitLead } from '@/content'
 import { useReveal } from '@/hooks/useReveal'
+import { useT } from '@/i18n/ui'
+import { usePageSeo } from '@/i18n/pageSeo'
 
 export default function Trainings() {
   const t = useTrainings()
+  const ui = useT()
+  const seo = usePageSeo('/trainings')
   const ref = useRef<HTMLElement>(null)
   const [email, setEmail] = useState('')
   const [joined, setJoined] = useState(false)
@@ -23,7 +27,7 @@ export default function Trainings() {
         flexDirection: 'column',
       }}
     >
-      <Seo title="Events & Workshops" description="Brand and strategy workshops, events and practical training from Not by Accident — experiences worth gathering people for." path="/trainings" />
+      <Seo title={seo.title} description={seo.description} path="/trainings" />
       {/* Main content */}
       <div
         className="page-grid flex-1"
@@ -107,7 +111,7 @@ export default function Trainings() {
               className="t-caption mb-6 reveal"
               style={{ color: 'rgba(240,234,218,.5)', letterSpacing: '0.06em' }}
             >
-              Waiting list
+              {ui.trainings.waitingList}
             </p>
             <p
               className="t-body reveal reveal-delay-1"
@@ -117,7 +121,7 @@ export default function Trainings() {
             </p>
             {joined ? (
               <p className="t-subhead reveal reveal-delay-2" style={{ color: '#E9C558', margin: 0, maxWidth: '40ch' }}>
-                You&rsquo;re on the list — we&rsquo;ll write the moment dates are set.
+                {ui.trainings.thankYou}
               </p>
             ) : (
               <form
@@ -127,14 +131,14 @@ export default function Trainings() {
                   setError('')
                   const res = await submitLead({ email, source: 'newsletter', message: 'Trainings waiting list' })
                   if (!res.ok) {
-                    setError(res.error ?? 'Something went wrong — please try again.')
+                    setError(res.error ?? ui.trainings.formError)
                     return
                   }
                   setJoined(true)
                   setEmail('')
                 }}
                 className="reveal reveal-delay-2"
-                aria-label="Training waiting list"
+                aria-label={ui.trainings.formAriaLabel}
                 style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: '440px' }}
               >
                 <label
@@ -142,7 +146,7 @@ export default function Trainings() {
                   className="t-caption"
                   style={{ color: 'rgba(240,234,218,.5)', letterSpacing: '0.06em' }}
                 >
-                  Email address
+                  {ui.trainings.emailLabel}
                 </label>
                 <input
                   id="trainings-email"
@@ -150,12 +154,12 @@ export default function Trainings() {
                   required
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  placeholder="your@email.com"
+                  placeholder={ui.trainings.emailPlaceholder}
                   className="input-field-milk"
                   autoComplete="email"
                 />
                 <button type="submit" className="btn-milk" style={{ alignSelf: 'flex-start' }}>
-                  Join the waiting list
+                  {ui.trainings.join}
                 </button>
                 {error && <p className="t-caption" style={{ color: '#E9C558' }}>{error}</p>}
               </form>
@@ -168,7 +172,7 @@ export default function Trainings() {
               className="t-caption mb-6"
               style={{ color: 'rgba(240,234,218,.5)', letterSpacing: '0.06em' }}
             >
-              Format
+              {ui.trainings.format}
             </p>
             <ul className="list-none m-0 p-0" style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
               {t.format.map(item => (

@@ -3,20 +3,24 @@ import Link from '@/components/LocalizedLink'
 import { useNotes } from '@/content'
 import Seo from '@/components/Seo'
 import { useReveal } from '@/hooks/useReveal'
+import { useT } from '@/i18n/ui'
+import { usePageSeo } from '@/i18n/pageSeo'
 
 export default function Blog() {
   const ref = useRef<HTMLElement>(null)
   useReveal(ref, { threshold: 0.08 })
 
   const notes = useNotes()
+  const t = useT()
+  const seo = usePageSeo('/notes')
   const [lead, second, third, fourth] = notes
   const categories = Array.from(new Set(notes.map(n => n.category)))
 
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'Blog',
-    name: 'The Journal — Not by Accident',
-    description: 'Essays and notes on brand strategy, positioning, design and commercial growth.',
+    name: t.blog.schemaName,
+    description: t.blog.schemaDescription,
     url: 'https://notbyaccident.com/notes',
     blogPost: notes.map(n => ({
       '@type': 'BlogPosting',
@@ -30,8 +34,8 @@ export default function Blog() {
   return (
     <main id="main" ref={ref} style={{ paddingTop: '56px', backgroundColor: '#F0EADA' }}>
       <Seo
-        title="The Journal"
-        description="Essays and notes from Not by Accident on brand strategy, positioning, naming, design and commercial growth — an independent point of view, published irregularly."
+        title={seo.title}
+        description={seo.description}
         path="/notes"
         jsonLd={schema}
       />
@@ -42,12 +46,12 @@ export default function Blog() {
           <div className="flex items-end justify-between reveal" style={{ borderBottom: '2px solid #221E1B', paddingBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div className="flex items-baseline gap-4">
               <h1 style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 'clamp(40px, 6vw, 96px)', fontWeight: 400, letterSpacing: '-0.02em', lineHeight: 0.9, margin: 0 }}>
-                The Journal
+                {t.blog.title}
               </h1>
-              <span className="t-caption hidden md:block" style={{ color: 'rgba(34,30,27,.5)' }}>Vol. 01</span>
+              <span className="t-caption hidden md:block" style={{ color: 'rgba(34,30,27,.5)' }}>{t.blog.volTag}</span>
             </div>
             <p className="t-body m-0" style={{ color: 'rgba(34,30,27,.6)', maxWidth: '32ch', fontSize: '15px' }}>
-              An independent point of view on brand, strategy and the businesses we find interesting. Published irregularly, never automated.
+              {t.blog.body}
             </p>
           </div>
           <div className="flex flex-wrap gap-2 reveal reveal-delay-1" style={{ marginTop: '1.25rem' }}>
@@ -66,7 +70,7 @@ export default function Blog() {
             {lead.img && <img src={lead.img} alt={lead.title} loading="eager" />}
             <div className="absolute left-0 right-0 bottom-0 p-5 md:p-10" style={{ background: 'linear-gradient(to top, rgba(34,30,27,.82), transparent)' }}>
               <p className="t-caption" style={{ color: '#E9C558', marginBottom: '10px' }}>
-                Feature · {lead.category} · {lead.readTime} read
+                {t.blog.featurePrefix}{lead.category} · {lead.readTime}{t.blog.readSuffix}
               </p>
               <h2 style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 'clamp(26px, 4vw, 60px)', fontWeight: 400, lineHeight: 1.0, letterSpacing: '-0.02em', color: '#F0EADA', margin: 0, maxWidth: '20ch' }}>
                 {lead.title}
@@ -100,14 +104,14 @@ export default function Blog() {
           {/* Right: text-led, no image — pure editorial */}
           {third && (
             <article className="reveal reveal-delay-1 flex flex-col justify-center" style={{ backgroundColor: '#221E1B', color: '#F0EADA', padding: 'clamp(28px, 3vw, 44px)' }}>
-              <p className="t-caption" style={{ color: '#E9C558', marginBottom: '1rem' }}>{third.category} · {third.readTime} read</p>
+              <p className="t-caption" style={{ color: '#E9C558', marginBottom: '1rem' }}>{third.category} · {third.readTime}{t.blog.readSuffix}</p>
               <h3 className="m-0">
                 <Link to={`/notes/${third.slug}`} className="link-grow" style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 'clamp(24px, 2.8vw, 38px)', fontWeight: 400, lineHeight: 1.06, color: '#F0EADA', backgroundImage: 'linear-gradient(#E9C558,#E9C558)' }}>
                   {third.title}
                 </Link>
               </h3>
               <p className="t-body" style={{ color: 'rgba(240,234,218,.75)', marginTop: '14px', maxWidth: '40ch' }}>{third.subtitle}</p>
-              <p className="t-caption" style={{ color: 'rgba(240,234,218,.5)', marginTop: '2rem' }}>Read the essay →</p>
+              <p className="t-caption" style={{ color: 'rgba(240,234,218,.5)', marginTop: '2rem' }}>{t.blog.readEssay}</p>
             </article>
           )}
         </div>
@@ -116,7 +120,7 @@ export default function Blog() {
       {/* Text-led index — the rest */}
       {fourth && (
         <div className="page-grid" style={{ paddingBottom: 'clamp(64px, 8vw, 128px)' }}>
-          <p className="t-caption mb-2 reveal" style={{ color: 'rgba(34,30,27,.45)' }}>More from the Journal</p>
+          <p className="t-caption mb-2 reveal" style={{ color: 'rgba(34,30,27,.45)' }}>{t.blog.moreFromJournal}</p>
           {[fourth].concat(notes.slice(4)).map((note, i) => (
             <Link
               key={note.id}

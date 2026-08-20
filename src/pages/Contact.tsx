@@ -2,6 +2,8 @@ import { useRef, useState } from 'react'
 import Seo from '@/components/Seo'
 import { submitLead, useCompany, useContactCopy } from '@/content'
 import { useReveal } from '@/hooks/useReveal'
+import { useT } from '@/i18n/ui'
+import { usePageSeo } from '@/i18n/pageSeo'
 
 export default function Contact() {
   const ref = useRef<HTMLElement>(null)
@@ -9,11 +11,13 @@ export default function Contact() {
   const [formError, setFormError] = useState('')
   const company = useCompany()
   const copy = useContactCopy()
+  const t = useT()
+  const seo = usePageSeo('/contact')
   useReveal(ref, { threshold: 0.08 })
 
   return (
     <main id="main" ref={ref} style={{ paddingTop: '56px', backgroundColor: '#F0EADA' }}>
-      <Seo title="Contact" description="Start a project with Not by Accident. Tell us the company you want to become — first reply within one working day, from a person, not a form." path="/contact" />
+      <Seo title={seo.title} description={seo.description} path="/contact" />
 
       {/* Header */}
       <div
@@ -69,7 +73,7 @@ export default function Contact() {
 
             <div className="reveal reveal-delay-1">
               <p className="t-caption mb-2" style={{ color: 'rgba(34,30,27,.4)' }}>
-                Email
+                {t.contact.email}
               </p>
               <a
                 href={`mailto:${company.email}`}
@@ -79,10 +83,10 @@ export default function Contact() {
               </a>
 
               <p className="t-caption mb-2" style={{ color: 'rgba(34,30,27,.4)' }}>
-                Response time
+                {t.contact.responseTime}
               </p>
               <p className="t-body m-0" style={{ color: 'rgba(34,30,27,.65)', fontSize: '15px' }}>
-                Usually within one working day.
+                {t.contact.responseBody}
               </p>
             </div>
 
@@ -123,10 +127,10 @@ export default function Contact() {
                   maxWidth: '24ch',
                 }}
               >
-                Thank you. We will be in touch shortly.
+                {t.contact.thankYouHeading}
               </p>
               <p className="t-body m-0" style={{ color: 'rgba(34,30,27,.6)' }}>
-                We typically respond within one working day.
+                {t.contact.thankYouBody}
               </p>
             </div>
           ) : (
@@ -141,13 +145,13 @@ export default function Contact() {
                 setFormError('')
                 const res = await submitLead({ email, name, message, source: 'contact' })
                 if (!res.ok) {
-                  setFormError(res.error ?? 'Something went wrong — please try again.')
+                  setFormError(res.error ?? t.contact.formError)
                   return
                 }
                 setSubmitted(true)
               }}
               className="reveal"
-              aria-label="Contact form"
+              aria-label={t.contact.formAriaLabel}
               style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
             >
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
@@ -157,14 +161,14 @@ export default function Contact() {
                     className="t-caption"
                     style={{ color: 'rgba(34,30,27,.5)', textTransform: 'none', letterSpacing: '0.02em', fontSize: '13px' }}
                   >
-                    Name
+                    {t.contact.name}
                   </label>
                   <input
                     id="c-name"
                     type="text"
                     required
                     className="input-field"
-                    placeholder="Your name"
+                    placeholder={t.contact.namePlaceholder}
                     autoComplete="name"
                   />
                 </div>
@@ -174,13 +178,13 @@ export default function Contact() {
                     className="t-caption"
                     style={{ color: 'rgba(34,30,27,.5)', textTransform: 'none', letterSpacing: '0.02em', fontSize: '13px' }}
                   >
-                    Company
+                    {t.contact.company}
                   </label>
                   <input
                     id="c-company"
                     type="text"
                     className="input-field"
-                    placeholder="Company name"
+                    placeholder={t.contact.companyPlaceholder}
                     autoComplete="organization"
                   />
                 </div>
@@ -192,14 +196,14 @@ export default function Contact() {
                   className="t-caption"
                   style={{ color: 'rgba(34,30,27,.5)', textTransform: 'none', letterSpacing: '0.02em', fontSize: '13px' }}
                 >
-                  Email
+                  {t.contact.emailLabel}
                 </label>
                 <input
                   id="c-email"
                   type="email"
                   required
                   className="input-field"
-                  placeholder="your@email.com"
+                  placeholder={t.contact.emailPlaceholder}
                   autoComplete="email"
                 />
               </div>
@@ -210,7 +214,7 @@ export default function Contact() {
                   className="t-caption"
                   style={{ color: 'rgba(34,30,27,.5)', textTransform: 'none', letterSpacing: '0.02em', fontSize: '13px' }}
                 >
-                  Approximate budget
+                  {t.contact.budget}
                 </label>
                 <select
                   id="c-budget"
@@ -218,13 +222,10 @@ export default function Contact() {
                   defaultValue=""
                   style={{ cursor: 'pointer' }}
                 >
-                  <option value="" disabled>Select a range</option>
-                  <option>Under £25,000</option>
-                  <option>£25,000–£75,000</option>
-                  <option>£75,000–£150,000</option>
-                  <option>£150,000–£300,000</option>
-                  <option>Over £300,000</option>
-                  <option>Not sure yet</option>
+                  <option value="" disabled>{t.contact.selectRange}</option>
+                  {t.contact.budgetOptions.map(opt => (
+                    <option key={opt}>{opt}</option>
+                  ))}
                 </select>
               </div>
 
@@ -234,19 +235,19 @@ export default function Contact() {
                   className="t-caption"
                   style={{ color: 'rgba(34,30,27,.5)', textTransform: 'none', letterSpacing: '0.02em', fontSize: '13px' }}
                 >
-                  What are you working on?
+                  {t.contact.whatWorking}
                 </label>
                 <textarea
                   id="c-message"
                   required
                   className="textarea-field"
-                  placeholder="Tell us about your company and what you are trying to achieve. The more specific you are, the better."
+                  placeholder={t.contact.whatWorkingPlaceholder}
                 />
               </div>
 
               <div>
                 <button type="submit" className="btn-primary">
-                  Send message
+                  {t.contact.send}
                 </button>
                 {formError && (
                   <p className="t-caption" style={{ color: '#6E2237', marginTop: '0.75rem' }}>{formError}</p>

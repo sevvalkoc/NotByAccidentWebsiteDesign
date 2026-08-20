@@ -186,7 +186,7 @@ export default function About() {
         >
           <div className="page-grid">
             <p className="t-caption mb-8 reveal" style={{ color: 'rgba(34,30,27,.45)' }}>
-              The people
+              {t.studio.peopleHeading}
             </p>
             <div
               style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 'clamp(32px, 4vw, 56px)' }}

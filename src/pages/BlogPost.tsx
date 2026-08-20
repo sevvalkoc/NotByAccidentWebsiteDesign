@@ -5,6 +5,7 @@ import { useNotes, useCompany } from '@/content'
 import type { NoteBlock } from '@/data'
 import Seo from '@/components/Seo'
 import { useReveal } from '@/hooks/useReveal'
+import { useT } from '@/i18n/ui'
 
 const bodyText: React.CSSProperties = {
   fontFamily: 'DM Sans, system-ui, sans-serif',
@@ -20,6 +21,7 @@ const bodyText: React.CSSProperties = {
    choices, so this is the one place that decides what each block type
    looks like. */
 function ArticleBody({ blocks }: { blocks: NoteBlock[] }) {
+  const t = useT()
   return (
     <>
       {blocks.map((block, i) => {
@@ -72,7 +74,7 @@ function ArticleBody({ blocks }: { blocks: NoteBlock[] }) {
           case 'embed':
             return (
               <div key={i} style={{ margin: '1.6em 0', aspectRatio: '16/9', backgroundColor: '#221E1B' }}>
-                <iframe src={block.url} title="Embedded video" loading="lazy" style={{ width: '100%', height: '100%', border: 'none' }} allowFullScreen />
+                <iframe src={block.url} title={t.blogPost.embeddedVideo} loading="lazy" style={{ width: '100%', height: '100%', border: 'none' }} allowFullScreen />
               </div>
             )
           case 'divider':
@@ -91,6 +93,7 @@ export default function BlogPost() {
   const company = useCompany()
   const note = notes.find(n => n.slug === slug)
   const ref = useRef<HTMLElement>(null)
+  const t = useT()
   useReveal(ref, { threshold: 0.06 })
 
   if (!note) return <Navigate to="/notes" replace />
@@ -132,7 +135,7 @@ export default function BlogPost() {
             className="t-caption no-underline hover:opacity-70 transition-opacity"
             style={{ color: 'rgba(34,30,27,.45)' }}
           >
-            ← Notes
+            {t.blogPost.back}
           </Link>
         </nav>
         <div
@@ -180,7 +183,7 @@ export default function BlogPost() {
               {note.subtitle}
             </p>
             <p className="t-caption m-0" style={{ color: 'rgba(34,30,27,.4)' }}>
-              {note.date} · {note.readTime} read
+              {note.date} · {note.readTime}{t.blogPost.readSuffix}
             </p>
           </div>
         </div>
@@ -250,12 +253,12 @@ export default function BlogPost() {
       >
         <div className="page-grid">
           <p className="t-caption mb-6 reveal" style={{ color: 'rgba(34,30,27,.45)' }}>
-            Next
+            {t.blogPost.next}
           </p>
           <Link
             to={`/notes/${next.slug}`}
             className="block no-underline group reveal"
-            aria-label={`Next: ${next.title}`}
+            aria-label={t.blogPost.nextAriaLabel(next.title)}
           >
             <div
               style={{
