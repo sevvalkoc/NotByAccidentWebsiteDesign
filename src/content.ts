@@ -398,7 +398,7 @@ const seedNav: NavLink[] = [
   { to: '/work', label: 'Work' },
   { to: '/notes', label: 'Notes' },
   { to: '/studio', label: 'Studio' },
-  { to: '/trainings', label: 'Trainings' },
+  { to: '/trainings', label: 'Trainings', soon: true },
   { to: '/reports', label: 'Reports', soon: true },
   { to: '/contact', label: 'Contact' },
 ]

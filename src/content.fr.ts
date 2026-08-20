@@ -198,7 +198,7 @@ export const site: Site = {
     { to: '/work', label: 'Réalisations' },
     { to: '/notes', label: 'Notes' },
     { to: '/studio', label: 'Studio' },
-    { to: '/trainings', label: 'Formations' },
+    { to: '/trainings', label: 'Formations', soon: true },
     { to: '/reports', label: 'Rapports', soon: true },
     { to: '/contact', label: 'Contact' },
   ],
