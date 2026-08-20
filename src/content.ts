@@ -23,6 +23,9 @@ import {
   type TeamMember,
 } from '@/data'
 import { supabase, supabaseReady } from '@/lib/supabase'
+import { useLocale } from '@/i18n/locale'
+import { site as nlSite } from '@/content.nl'
+import { site as frSite } from '@/content.fr'
 import {
   fetchProjects,
   fetchCapabilities,
@@ -502,8 +505,16 @@ export function refreshSite() {
 }
 
 /* ── Public hooks ─────────────────────────────────────────────────────────── */
+/* Dutch and French are static translations (src/content.nl.ts, src/content.fr.ts)
+   that never touch Supabase or the admin panel — only the English site is
+   CMS-editable. Every hook below reads through useSite(), so this single
+   switch is enough to localize the whole public site. */
 export function useSite(): Site {
-  return useSyncExternalStore(subscribe, read, () => seed)
+  const en = useSyncExternalStore(subscribe, read, () => seed)
+  const locale = useLocale()
+  if (locale === 'nl') return nlSite
+  if (locale === 'fr') return frSite
+  return en
 }
 export function useNotes(): Note[] {
   return useSite().notes

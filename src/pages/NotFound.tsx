@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
+import Link from '@/components/LocalizedLink'
 import Seo from '@/components/Seo'
 import { supabase } from '@/lib/supabase'
 

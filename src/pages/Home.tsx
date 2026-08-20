@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import Link from '@/components/LocalizedLink'
 import { categories } from '@/data'
 import {
   useNotes,
@@ -17,6 +17,8 @@ import Seo from '@/components/Seo'
 import LogoMarquee from '@/components/LogoMarquee'
 import nbaSymbol from '@/imports/NBA_Symbol_Ink_RGB.png'
 import { useReveal } from '@/hooks/useReveal'
+import { useT } from '@/i18n/ui'
+import { usePageSeo } from '@/i18n/pageSeo'
 
 /* Default section order: Hero → Capabilities → Testimonials → Clients →
    Partners → Notes → Case Studies → Final CTA (+ Footer, rendered by
@@ -40,6 +42,8 @@ export default function Home() {
   const company = useCompany()
   const capabilities = useCapabilities()
   const sectionOrder = useHomeSections()
+  const t = useT()
+  const seo = usePageSeo('/')
 
   const homeSchema = [
     {
@@ -56,7 +60,7 @@ export default function Home() {
     {
       '@context': 'https://schema.org',
       '@type': 'ItemList',
-      name: 'Capabilities',
+      name: t.home.itemListName,
       itemListElement: capabilities.map((c, i) => ({
         '@type': 'ListItem',
         position: i + 1,
@@ -70,20 +74,22 @@ export default function Home() {
       mainEntity: [
         {
           '@type': 'Question',
-          name: 'What does Not by Accident do?',
+          name: t.home.faqQuestion,
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Not by Accident is an independent creative company working across brand and identity, digital and product, growth and demand, market and expansion, and experiences. We make companies wanted, so that growth becomes easier to earn.',
+            text: t.home.faqAnswer,
           },
         },
         {
           '@type': 'Question',
-          name: 'What services does Not by Accident offer?',
+          name: t.home.faqServicesQuestion,
           acceptedAnswer: {
             '@type': 'Answer',
-            text: categories
-              .map(cat => `${cat.label} (${capabilities.filter(c => c.category === cat.key).map(c => c.name).join(', ')})`)
-              .join('; '),
+            text: t.home.faqServicesAnswer(
+              categories
+                .map(cat => `${cat.label} (${capabilities.filter(c => c.category === cat.key).map(c => c.name).join(', ')})`)
+                .join('; ')
+            ),
           },
         },
       ],
@@ -93,7 +99,7 @@ export default function Home() {
   return (
     <main id="main" ref={mainRef}>
       <Seo
-        title="Independent creative company, Amsterdam"
+        title={seo.title}
         path="/"
         jsonLd={homeSchema}
       />

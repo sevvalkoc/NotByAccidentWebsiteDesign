@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { Link } from 'react-router-dom'
+import Link from '@/components/LocalizedLink'
 import { categories } from '@/data'
 import { useCapabilities, useCapabilitiesCopy } from '@/content'
 import Seo from '@/components/Seo'

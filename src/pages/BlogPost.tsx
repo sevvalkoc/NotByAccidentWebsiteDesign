@@ -1,5 +1,6 @@
 import { useRef } from 'react'
-import { useParams, Link, Navigate } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
+import Link, { Navigate } from '@/components/LocalizedLink'
 import { useNotes, useCompany } from '@/content'
 import type { NoteBlock } from '@/data'
 import Seo from '@/components/Seo'

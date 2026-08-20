@@ -19,6 +19,7 @@ import Search from '@/pages/Search'
 import Privacy from '@/pages/Privacy'
 import Cookies from '@/pages/Cookies'
 import NotFound from '@/pages/NotFound'
+import { LocaleProvider, type Locale } from '@/i18n/locale'
 
 /* The admin dashboard is a separate application in every sense but the
    deployment — code-split so public visitors never download its JS. */
@@ -32,17 +33,15 @@ function ScrollToTop() {
   return null
 }
 
-/* The admin dashboard is a private operating tool, not part of the public
-   brand experience — it deliberately skips the public Nav/Footer/newsletter
-   popup and gets its own layout (see src/admin/AdminApp.tsx). */
-function AppShell() {
-  const location = useLocation()
-  const isAdmin = location.pathname.startsWith('/admin')
-
+/* One public route tree, reused for English (unprefixed), Dutch (/nl) and
+   French (/fr) — each mount wraps it in a LocaleProvider so every hook and
+   <Link> underneath resolves copy and paths for that language. Translations
+   are static (src/data.nl.ts, src/data.fr.ts, src/content.nl.ts,
+   src/content.fr.ts) and never touch the CMS/admin panel. */
+function PublicShell({ locale }: { locale: Locale }) {
   return (
-    <>
-      <ScrollToTop />
-      {!isAdmin && <Nav />}
+    <LocaleProvider value={locale}>
+      <Nav />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/work" element={<Work />} />
@@ -59,6 +58,22 @@ function AppShell() {
         <Route path="/search" element={<Search />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/cookies" element={<Cookies />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      <Footer />
+      <NewsletterPopup />
+    </LocaleProvider>
+  )
+}
+
+/* The admin dashboard is a private operating tool, not part of the public
+   brand experience — it deliberately skips the public Nav/Footer/newsletter
+   popup, locale routing and gets its own layout (see src/admin/AdminApp.tsx). */
+function AppShell() {
+  return (
+    <>
+      <ScrollToTop />
+      <Routes>
         <Route
           path="/admin/*"
           element={
@@ -67,10 +82,10 @@ function AppShell() {
             </Suspense>
           }
         />
-        <Route path="*" element={<NotFound />} />
+        <Route path="/nl/*" element={<PublicShell locale="nl" />} />
+        <Route path="/fr/*" element={<PublicShell locale="fr" />} />
+        <Route path="/*" element={<PublicShell locale="en" />} />
       </Routes>
-      {!isAdmin && <Footer />}
-      {!isAdmin && <NewsletterPopup />}
     </>
   )
 }

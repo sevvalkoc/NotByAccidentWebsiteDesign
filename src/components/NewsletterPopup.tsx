@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { submitLead } from '@/content'
+import { useT } from '@/i18n/ui'
 
 const DISMISS_KEY = 'nba.newsletter.popup.v1'
 const SHOW_DELAY_MS = 18000 // ~18s of genuine interest before we interrupt
@@ -10,6 +11,7 @@ const SHOW_DELAY_MS = 18000 // ~18s of genuine interest before we interrupt
    key and reduced-motion. Submissions are captured via submitLead(). */
 export default function NewsletterPopup() {
   const { pathname } = useLocation()
+  const t = useT()
   const [open, setOpen] = useState(false)
   const [email, setEmail] = useState('')
   const [done, setDone] = useState(false)
@@ -75,7 +77,7 @@ export default function NewsletterPopup() {
     setError('')
     const res = await submitLead({ email, source: 'newsletter-popup' })
     if (!res.ok) {
-      setError(res.error ?? 'Something went wrong — please try again.')
+      setError(res.error ?? t.newsletterPopup.formError)
       return
     }
     setDone(true)
@@ -122,7 +124,7 @@ export default function NewsletterPopup() {
         <button
           type="button"
           onClick={close}
-          aria-label="Close"
+          aria-label={t.newsletterPopup.close}
           style={{
             position: 'absolute',
             top: '14px',
@@ -141,39 +143,38 @@ export default function NewsletterPopup() {
 
         {done ? (
           <div>
-            <p className="t-caption" style={{ color: '#6E2237', marginBottom: '1rem' }}>You&rsquo;re on the list</p>
+            <p className="t-caption" style={{ color: '#6E2237', marginBottom: '1rem' }}>{t.newsletterPopup.doneEyebrow}</p>
             <p
               style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 'clamp(24px, 3.5vw, 34px)', fontWeight: 400, lineHeight: 1.08, letterSpacing: '-0.015em', margin: 0 }}
             >
-              Thank you. We&rsquo;ll be in touch — not often, and only when it&rsquo;s worth it.
+              {t.newsletterPopup.doneBody}
             </p>
           </div>
         ) : (
           <>
-            <p className="t-caption" style={{ color: '#6E2237', marginBottom: '1rem' }}>The Journal, by email</p>
+            <p className="t-caption" style={{ color: '#6E2237', marginBottom: '1rem' }}>{t.newsletterPopup.eyebrow}</p>
             <h2
               id="nl-popup-title"
               style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 'clamp(26px, 4vw, 38px)', fontWeight: 400, lineHeight: 1.04, letterSpacing: '-0.02em', margin: '0 0 0.85rem', maxWidth: '16ch' }}
             >
-              Read what we actually think.
+              {t.newsletterPopup.heading}
             </h2>
             <p className="t-body" style={{ color: 'rgba(34,30,27,.7)', margin: '0 0 1.75rem', maxWidth: '42ch' }}>
-              Essays and notes on brand, product and the business of making things —
-              a few times a year, never a pitch.
+              {t.newsletterPopup.body}
             </p>
             <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
-              <label htmlFor="nl-popup-email" className="sr-only">Email address</label>
+              <label htmlFor="nl-popup-email" className="sr-only">{t.footer.emailLabel}</label>
               <input
                 id="nl-popup-email"
                 type="email"
                 required
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                placeholder="you@company.com"
+                placeholder={t.newsletterPopup.emailPlaceholder}
                 className="input-field"
                 autoComplete="email"
               />
-              <button type="submit" className="btn-primary shrink-0">Subscribe</button>
+              <button type="submit" className="btn-primary shrink-0">{t.newsletterPopup.subscribe}</button>
             </form>
             {error && <p className="t-caption" style={{ color: '#6E2237', marginTop: '0.75rem' }}>{error}</p>}
             <button
@@ -182,7 +183,7 @@ export default function NewsletterPopup() {
               className="t-caption"
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(34,30,27,.4)', marginTop: '1rem', padding: 0, textTransform: 'none', letterSpacing: '0.02em' }}
             >
-              No thanks — maybe later.
+              {t.newsletterPopup.dismiss}
             </button>
           </>
         )}

@@ -220,8 +220,15 @@ function figmaSiteConfiguration(config: FigmaSiteConfiguration): Plugin {
  * never drift out of sync with what actually exists. New capabilities,
  * projects or notes appear in the next build automatically.
  */
+/* English lives unprefixed at the root; Dutch and French mirror every route
+   under /nl and /fr (see src/i18n/locale.ts) — same slugs, since translated
+   content never changes a page's URL. Each <url> entry carries an
+   <xhtml:link> alternate per language so crawlers see all three as
+   translations of one page rather than duplicate content. */
 function sitemapPlugin(): Plugin {
   const BASE = 'https://notbyaccident.com'
+  const LOCALES = ['en', 'nl', 'fr'] as const
+  const localePath = (path: string, locale: (typeof LOCALES)[number]) => (locale === 'en' ? path : `/${locale}${path === '/' ? '' : path}`)
 
   function buildXml(): string {
     const today = new Date().toISOString().slice(0, 10)
@@ -238,20 +245,27 @@ function sitemapPlugin(): Plugin {
       ['/cookies', '0.2', 'yearly'],
     ]
 
-    const urls: { loc: string; priority: string; freq: string }[] = [
-      ...staticRoutes.map(([path, priority, freq]) => ({ loc: BASE + path, priority, freq })),
-      ...capabilities.map(c => ({ loc: `${BASE}/capabilities/${c.slug}`, priority: '0.7', freq: 'monthly' })),
-      ...projects.map(p => ({ loc: `${BASE}/case-studies/${p.slug}`, priority: '0.7', freq: 'monthly' })),
-      ...notes.map(n => ({ loc: `${BASE}/notes/${n.slug}`, priority: '0.6', freq: 'yearly' })),
+    const routes: { path: string; priority: string; freq: string }[] = [
+      ...staticRoutes.map(([path, priority, freq]) => ({ path, priority, freq })),
+      ...capabilities.map(c => ({ path: `/capabilities/${c.slug}`, priority: '0.7', freq: 'monthly' })),
+      ...projects.map(p => ({ path: `/case-studies/${p.slug}`, priority: '0.7', freq: 'monthly' })),
+      ...notes.map(n => ({ path: `/notes/${n.slug}`, priority: '0.6', freq: 'yearly' })),
     ]
 
+    const urls = routes.flatMap(r =>
+      LOCALES.map(locale => ({ ...r, locale, loc: BASE + localePath(r.path, locale) }))
+    )
+
     const body = urls
-      .map(
-        u => `  <url>\n    <loc>${u.loc}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>${u.freq}</changefreq>\n    <priority>${u.priority}</priority>\n  </url>`
-      )
+      .map(u => {
+        const alternates = LOCALES.map(
+          l => `    <xhtml:link rel="alternate" hreflang="${l}" href="${BASE + localePath(u.path, l)}" />`
+        ).join('\n')
+        return `  <url>\n    <loc>${u.loc}</loc>\n${alternates}\n    <xhtml:link rel="alternate" hreflang="x-default" href="${BASE + u.path}" />\n    <lastmod>${today}</lastmod>\n    <changefreq>${u.freq}</changefreq>\n    <priority>${u.priority}</priority>\n  </url>`
+      })
       .join('\n')
 
-    return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`
+    return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${body}\n</urlset>\n`
   }
 
   return {

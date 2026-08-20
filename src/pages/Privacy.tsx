@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { Link } from 'react-router-dom'
+import Link from '@/components/LocalizedLink'
 import Seo from '@/components/Seo'
 import { useReveal } from '@/hooks/useReveal'
 import { usePrivacyCopy } from '@/content'

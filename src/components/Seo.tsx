@@ -1,10 +1,18 @@
+import { useEffect } from 'react'
 import { useCompany, useSeo } from '@/content'
+import { LOCALES, localizePath, useLocale } from '@/i18n/locale'
 
 /**
  * SEO + structured data. React 19 hoists <title>, <meta> and <script> to
  * <head>, so rendering them anywhere in the tree is enough. We pass
  * JSON-LD for entity-based and AI search (Organization, WebPage, plus any
  * page-specific schema).
+ *
+ * `path` is always the canonical, unprefixed (English-shaped) route, e.g.
+ * "/work" — never "/nl/work". This component adds the current locale's
+ * prefix itself, and emits hreflang alternates for every language so
+ * search engines know the /nl and /fr versions are translations of the
+ * same page rather than duplicate content.
  */
 export default function Seo({
   title,
@@ -23,13 +31,18 @@ export default function Seo({
 }) {
   const company = useCompany()
   const seo = useSeo()
+  const locale = useLocale()
   const base = 'https://notbyaccident.com'
-  const url = base + path
+  const url = base + localizePath(path, locale)
   const fullTitle =
     title === company.name ? title : `${title} — ${company.name}`
   // Fall back to the admin-editable site defaults when a page omits its own.
   const metaDescription = description ?? seo.description
   const ogImage = image ?? seo.ogImage
+
+  useEffect(() => {
+    document.documentElement.lang = locale
+  }, [locale])
 
   // Phone and postal address are optional until the real studio details are
   // supplied — we never emit placeholder text as if it were structured data.
@@ -62,7 +75,12 @@ export default function Seo({
       <meta name="description" content={metaDescription} />
       {noindex && <meta name="robots" content="noindex, nofollow" />}
       <link rel="canonical" href={url} />
+      {LOCALES.map(l => (
+        <link key={l} rel="alternate" hrefLang={l} href={base + localizePath(path, l)} />
+      ))}
+      <link rel="alternate" hrefLang="x-default" href={base + path} />
       <meta property="og:type" content="website" />
+      <meta property="og:locale" content={locale === 'en' ? 'en_US' : locale === 'nl' ? 'nl_NL' : 'fr_FR'} />
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={metaDescription} />
       <meta property="og:url" content={url} />

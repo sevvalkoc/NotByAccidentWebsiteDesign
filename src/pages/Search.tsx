@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
+import Link from '@/components/LocalizedLink'
 import { useProjects, useNotes, useCapabilities } from '@/content'
 import Seo from '@/components/Seo'
 

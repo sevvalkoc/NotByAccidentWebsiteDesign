@@ -1,5 +1,6 @@
 import { useRef } from 'react'
-import { useParams, Link, Navigate } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
+import Link, { Navigate } from '@/components/LocalizedLink'
 import { useCompany, useProjects, useCapabilities } from '@/content'
 import Seo from '@/components/Seo'
 import { useReveal } from '@/hooks/useReveal'
