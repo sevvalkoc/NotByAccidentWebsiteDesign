@@ -389,6 +389,8 @@ export async function fetchHomeSections(): Promise<{
   for (const row of rows) {
     switch (row.section_key) {
       case 'hero':
+        if (row.eyebrow) hero.eyebrow = row.eyebrow
+        if (row.title) hero.title = row.title
         if (row.extra?.words?.length) hero.words = row.extra.words
         if (row.subtitle) hero.subhead = row.subtitle
         if (row.body) hero.definition = row.body

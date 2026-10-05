@@ -21,6 +21,8 @@ export const site: Site = {
   company,
 
   hero: {
+    eyebrow: 'Onafhankelijk creatief bureau · Amsterdam · Opgericht in 2019',
+    title: 'Wij maken bedrijven',
     words: ['gewild', 'gekozen', 'onthouden', 'aanbevolen'],
     subhead:
       'Groei is wat daarna gebeurt. Wij werken aan merk, product en vraag — in één kamer, met één commercieel doel.',
