@@ -150,10 +150,14 @@ export default function NotesEditor() {
       return
     }
 
-    const { error } = await supabase.from('articles').update(payload).eq('id', id)
+    const { data: updated, error } = await supabase.from('articles').update(payload).eq('id', id).select('id')
     if (error) {
       setSaving(false)
       return setError(error.message)
+    }
+    if (!updated || updated.length === 0) {
+      setSaving(false)
+      return setError('Nothing was saved — your account may not have write access. Check Admin → Users, or sign in again.')
     }
     if (slugChanged) {
       await supabase.from('redirects').insert({

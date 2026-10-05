@@ -13,6 +13,7 @@ interface Row {
 
 export default function NotesList() {
   const [rows, setRows] = useState<Row[] | null>(null)
+  const [error, setError] = useState('')
 
   async function load() {
     if (!supabase) return
@@ -25,7 +26,12 @@ export default function NotesList() {
 
   async function archive(id: string) {
     if (!supabase) return
-    await supabase.from('articles').update({ status: 'archived' }).eq('id', id)
+    const { data, error } = await supabase.from('articles').update({ status: 'archived' }).eq('id', id).select('id')
+    if (error) return setError(error.message)
+    if (!data || data.length === 0) {
+      return setError('Nothing changed — your account may not have write access. Check Admin → Users, or sign in again.')
+    }
+    setError('')
     await load()
   }
 
@@ -36,6 +42,7 @@ export default function NotesList() {
         description="Articles shown on /notes. Archiving hides an article without deleting it."
         actions={<Link to="/admin/notes/new"><AdminButton>+ New Article</AdminButton></Link>}
       />
+      {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
       {rows === null ? (
         <p className="text-sm text-gray-400">Loading…</p>
       ) : rows.length === 0 ? (

@@ -14,6 +14,7 @@ interface Row {
 
 export default function WorkList() {
   const [rows, setRows] = useState<Row[] | null>(null)
+  const [error, setError] = useState('')
 
   async function load() {
     if (!supabase) return
@@ -29,7 +30,12 @@ export default function WorkList() {
 
   async function remove(id: string) {
     if (!supabase) return
-    await supabase.from('projects').update({ status: 'archived' }).eq('id', id)
+    const { data, error } = await supabase.from('projects').update({ status: 'archived' }).eq('id', id).select('id')
+    if (error) return setError(error.message)
+    if (!data || data.length === 0) {
+      return setError('Nothing changed — your account may not have write access. Check Admin → Users, or sign in again.')
+    }
+    setError('')
     await load()
   }
 
@@ -40,6 +46,7 @@ export default function WorkList() {
         description="Case studies shown on /work and /case-studies. Deleting archives rather than removes — archived work never appears publicly."
         actions={<Link to="/admin/work/new"><AdminButton>+ New Work</AdminButton></Link>}
       />
+      {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
       {rows === null ? (
         <p className="text-sm text-gray-400">Loading…</p>
       ) : rows.length === 0 ? (
