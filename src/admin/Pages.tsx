@@ -154,9 +154,9 @@ export default function Pages() {
     setRows(rs => rs && rs.map(r => (r.id === id ? { ...r, ...patch } : r)))
   }
 
-  async function saveRow(row: SectionRow) {
-    if (!supabase) return
-    const { error } = await supabase
+  async function saveRow(row: SectionRow): Promise<boolean> {
+    if (!supabase) return false
+    const { data, error } = await supabase
       .from('page_sections')
       .update({
         eyebrow: row.eyebrow,
@@ -169,11 +169,18 @@ export default function Pages() {
         extra: row.extra,
       })
       .eq('id', row.id)
+      .select('id')
     if (error) {
       setError(error.message)
-      return
+      return false
     }
+    if (!data || data.length === 0) {
+      setError('Nothing was saved — your account may not have write access. Check Admin → Users, or sign in again.')
+      return false
+    }
+    setError('')
     refreshSite()
+    return true
   }
 
   /* Reordering/visibility save immediately (no Save button) — same
@@ -186,17 +193,28 @@ export default function Pages() {
     const idx = rows.findIndex(r => r.id === row.id)
     const swapWith = rows[idx + dir]
     if (!swapWith) return
-    await Promise.all([
-      supabase.from('page_sections').update({ sort_order: swapWith.sort_order }).eq('id', row.id),
-      supabase.from('page_sections').update({ sort_order: row.sort_order }).eq('id', swapWith.id),
+    const [a, b] = await Promise.all([
+      supabase.from('page_sections').update({ sort_order: swapWith.sort_order }).eq('id', row.id).select('id'),
+      supabase.from('page_sections').update({ sort_order: row.sort_order }).eq('id', swapWith.id).select('id'),
     ])
+    if (a.error || b.error) {
+      setError(a.error?.message ?? b.error?.message ?? 'Failed to reorder.')
+    } else if (!a.data?.length || !b.data?.length) {
+      setError('Nothing was reordered — your account may not have write access. Check Admin → Users, or sign in again.')
+    } else {
+      setError('')
+    }
     refreshSite()
     await load(activePage)
   }
 
   async function toggleVisible(row: SectionRow) {
     if (!supabase) return
-    await supabase.from('page_sections').update({ is_visible: !row.is_visible }).eq('id', row.id)
+    const { data, error } = await supabase.from('page_sections').update({ is_visible: !row.is_visible }).eq('id', row.id).select('id')
+    if (error) setError(error.message)
+    else if (!data || data.length === 0) {
+      setError('Nothing changed — your account may not have write access. Check Admin → Users, or sign in again.')
+    } else setError('')
     refreshSite()
     await load(activePage)
   }
@@ -351,7 +369,7 @@ export default function Pages() {
   )
 }
 
-function SaveBar({ onSave, label }: { onSave: () => void; label: string }) {
+function SaveBar({ onSave, label }: { onSave: () => Promise<boolean> | void; label: string }) {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   return (
@@ -362,10 +380,12 @@ function SaveBar({ onSave, label }: { onSave: () => void; label: string }) {
         onClick={async () => {
           setSaving(true)
           setSaved(false)
-          await onSave()
+          const ok = await onSave()
           setSaving(false)
-          setSaved(true)
-          window.setTimeout(() => setSaved(false), 2000)
+          if (ok !== false) {
+            setSaved(true)
+            window.setTimeout(() => setSaved(false), 2000)
+          }
         }}
       >
         {saving ? 'Saving…' : `Save ${label}`}

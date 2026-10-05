@@ -45,15 +45,21 @@ export default function Categories() {
     if (!supabase) return
     setSavingKey(row.key)
     setSavedKey(null)
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('category_meta')
       .update({ label: row.label, blurb: row.blurb })
       .eq('key', row.key)
+      .select('key')
     setSavingKey(null)
     if (error) {
       setError(error.message)
       return
     }
+    if (!data || data.length === 0) {
+      setError('Nothing was saved — your account may not have write access. Check Admin → Users, or sign in again.')
+      return
+    }
+    setError('')
     setSavedKey(row.key)
     refreshSite()
     setTimeout(() => setSavedKey(null), 2000)

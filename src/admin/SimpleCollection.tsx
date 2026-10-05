@@ -59,8 +59,11 @@ export default function SimpleCollection({ config }: { config: SimpleCollectionC
     if (!supabase) return
     setError('')
     if (editing && editing.id !== 'new') {
-      const { error } = await supabase.from(config.table).update(values).eq('id', editing.id)
+      const { data, error } = await supabase.from(config.table).update(values).eq('id', editing.id).select('id')
       if (error) return setError(error.message)
+      if (!data || data.length === 0) {
+        return setError('Nothing was saved — your account may not have write access. Check Admin → Users, or sign in again.')
+      }
     } else {
       const insertValues = { ...values, ...(config.fixedValues ?? {}) }
       if (config.orderKey) insertValues[config.orderKey] = rows?.length ?? 0

@@ -67,7 +67,12 @@ export default function MediaLibrary() {
 
   async function updateField(id: string, field: 'alt_text' | 'caption', value: string) {
     if (!supabase) return
-    await supabase.from('media').update({ [field]: value }).eq('id', id)
+    const { data, error } = await supabase.from('media').update({ [field]: value }).eq('id', id).select('id')
+    if (error || !data || data.length === 0) {
+      setError(error?.message ?? 'Nothing was saved — your account may not have write access. Check Admin → Users, or sign in again.')
+    } else {
+      setError('')
+    }
   }
 
   async function remove(id: string, storagePath: string) {

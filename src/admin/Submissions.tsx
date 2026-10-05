@@ -19,6 +19,7 @@ const STATUSES = ['new', 'read', 'replied', 'archived']
 
 export default function Submissions() {
   const [rows, setRows] = useState<Submission[] | null>(null)
+  const [error, setError] = useState('')
 
   async function load() {
     if (!supabase) return
@@ -31,7 +32,12 @@ export default function Submissions() {
 
   async function setStatus(id: string, status: string) {
     if (!supabase) return
-    await supabase.from('contact_submissions').update({ status }).eq('id', id)
+    const { data, error } = await supabase.from('contact_submissions').update({ status }).eq('id', id).select('id')
+    if (error) return setError(error.message)
+    if (!data || data.length === 0) {
+      return setError('Nothing changed — your account may not have write access. Check Admin → Users, or sign in again.')
+    }
+    setError('')
     setRows(prev => prev?.map(r => (r.id === id ? { ...r, status } : r)) ?? null)
   }
 
@@ -44,6 +50,7 @@ export default function Submissions() {
   return (
     <div>
       <AdminPageHeader title="Submissions" description="Contact form, newsletter and waiting-list signups — all in one inbox, distinguished by source." />
+      {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
       {rows === null ? (
         <p className="text-sm text-gray-400">Loading…</p>
       ) : rows.length === 0 ? (

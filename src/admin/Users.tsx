@@ -11,6 +11,7 @@ const statusTone: Record<ProfileStatus, 'green' | 'yellow' | 'red'> = {
 
 export default function Users({ isAdmin }: { isAdmin: boolean }) {
   const [rows, setRows] = useState<Profile[] | null>(null)
+  const [error, setError] = useState('')
 
   async function load() {
     if (!supabase) return
@@ -23,13 +24,19 @@ export default function Users({ isAdmin }: { isAdmin: boolean }) {
 
   async function setRole(id: string, role: 'admin' | 'editor') {
     if (!supabase) return
-    await supabase.from('profiles').update({ role }).eq('id', id)
+    setError('')
+    const { data, error } = await supabase.from('profiles').update({ role }).eq('id', id).select('id')
+    if (error) return setError(error.message)
+    if (!data || data.length === 0) return setError('Nothing changed — you may not have admin access.')
     await load()
   }
 
   async function setStatus(id: string, status: ProfileStatus) {
     if (!supabase) return
-    await supabase.from('profiles').update({ status }).eq('id', id)
+    setError('')
+    const { data, error } = await supabase.from('profiles').update({ status }).eq('id', id).select('id')
+    if (error) return setError(error.message)
+    if (!data || data.length === 0) return setError('Nothing changed — you may not have admin access.')
     await load()
   }
 
@@ -46,6 +53,7 @@ export default function Users({ isAdmin }: { isAdmin: boolean }) {
         }
       />
       {!isAdmin && <p className="text-sm text-yellow-700 mb-4">Only Admins can change roles or approve accounts — you can view this list as an Editor.</p>}
+      {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
       {rows === null ? (
         <p className="text-sm text-gray-400">Loading…</p>
       ) : (

@@ -135,8 +135,11 @@ export function TrainingEditor() {
       navigate(`/admin/trainings/${(data as { id: string }).id}`, { replace: true })
       return
     }
-    const { error } = await supabase.from('trainings').update(payload).eq('id', id)
+    const { data: updated, error } = await supabase.from('trainings').update(payload).eq('id', id).select('id')
     if (error) return setError(error.message)
+    if (!updated || updated.length === 0) {
+      return setError('Nothing was saved — your account may not have write access. Check Admin → Users, or sign in again.')
+    }
     setSaved(true)
   }
 
