@@ -83,6 +83,8 @@ export interface Testimonial {
 }
 
 export interface Hero {
+  eyebrow: string
+  title: string
   words: string[]
   subhead: string
   definition: string
@@ -260,10 +262,9 @@ export interface Site {
   customSections: Record<string, CustomSection[]>
 }
 
-/* Hero image and homepage section headings are not yet wired to a live CMS
-   editor (the `pages` / `page_sections` tables exist in the schema for
-   this, ready for a future admin screen) — everything else in Site is. */
 const seedHero: Hero = {
+  eyebrow: 'Independent creative company · Amsterdam · Est. 2019',
+  title: 'We make companies',
   words: ['wanted', 'chosen', 'remembered', 'recommended'],
   subhead:
     'Growth is what happens next. We work across brand, product and demand — in one room, to one commercial end.',

@@ -152,7 +152,7 @@ function Hero() {
               style={{ width: '40px', height: 'auto', marginBottom: '1.5rem', display: 'block' }}
             />
             <p className="t-caption" style={{ color: '#6E2237', marginBottom: '1.25rem' }}>
-              {t.home.heroEyebrow}
+              {hero.eyebrow}
             </p>
             <h1
               style={{
@@ -166,7 +166,7 @@ function Hero() {
                 maxWidth: '13ch',
               }}
             >
-              {t.home.heroPrefix}
+              {hero.title}{' '}
               <em
                 key={word}
                 style={{ fontStyle: 'italic', color: '#6E2237', animation: 'testimonial-in 400ms var(--ease-brand)', display: 'inline-block' }}

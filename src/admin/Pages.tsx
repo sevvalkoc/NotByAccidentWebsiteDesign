@@ -612,13 +612,17 @@ function ListCard({
   const items = row.extra.items ?? []
   const label = SECTION_LABELS[row.section_key] ?? row.section_key
   const showTitle = row.section_key === 'culture' // Principles has no section heading, just the list; Culture does.
+  // Legal sections render under Privacy's own page header — this list has no eyebrow slot of its own on the public page.
+  const showEyebrow = row.section_key !== 'legal'
 
   return (
     <AdminCard className="p-6">
       <h2 className="text-sm font-semibold text-gray-900 mb-4">{label}</h2>
-      <AdminField label="Eyebrow">
-        <AdminInput value={row.eyebrow ?? ''} onChange={e => onChange({ eyebrow: e.target.value })} />
-      </AdminField>
+      {showEyebrow && (
+        <AdminField label="Eyebrow">
+          <AdminInput value={row.eyebrow ?? ''} onChange={e => onChange({ eyebrow: e.target.value })} />
+        </AdminField>
+      )}
       {showTitle && (
         <AdminField label="Heading">
           <AdminInput value={row.title ?? ''} onChange={e => onChange({ title: e.target.value })} />

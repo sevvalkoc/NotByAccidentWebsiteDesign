@@ -24,6 +24,8 @@ export const site: Site = {
   company,
 
   hero: {
+    eyebrow: 'Entreprise créative indépendante · Amsterdam · Fondée en 2019',
+    title: 'Nous rendons les entreprises',
     words: ['désirables', 'choisies', 'mémorables', 'recommandées'],
     subhead:
       "La croissance vient ensuite. Nous travaillons la marque, le produit et la demande — dans une même pièce, vers un même objectif commercial.",
