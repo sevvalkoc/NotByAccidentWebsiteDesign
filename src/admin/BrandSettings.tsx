@@ -67,9 +67,12 @@ export default function BrandSettings() {
     if (!supabase) return
     setSaving(true)
     setError('')
-    const { error } = await supabase.from('brand_settings').update(form).eq('id', 1)
+    const { data, error } = await supabase.from('brand_settings').update(form).eq('id', 1).select('id')
     setSaving(false)
     if (error) return setError(error.message)
+    if (!data || data.length === 0) {
+      return setError("Nothing was saved — your account may not have write access. Check Admin → Users, or sign in again.")
+    }
     setSaved(true)
   }
 
