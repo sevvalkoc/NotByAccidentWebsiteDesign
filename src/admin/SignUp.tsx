@@ -10,6 +10,7 @@ export default function SignUp() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
+  const [existing, setExisting] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -18,7 +19,32 @@ export default function SignUp() {
     const res = await signUp(email, password, fullName)
     setLoading(false)
     if (res.error) setError(res.error)
+    else if (res.existing) setExisting(true)
     else setSent(true)
+  }
+
+  if (existing) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+        <div className="max-w-sm w-full bg-white border border-gray-200 rounded-lg p-8">
+          <h1 className="text-lg font-semibold text-gray-900 mb-2">You already have an account</h1>
+          <p className="text-sm text-gray-600 mb-4">
+            <span className="font-medium text-gray-900">{email}</span> is already registered, so no new email was sent. Sign in with your password, or
+            set a new one if you don’t remember it.
+          </p>
+          <div className="flex flex-wrap gap-3 mt-6">
+            <Link to="/admin/login">
+              <AdminButton type="button">Sign in</AdminButton>
+            </Link>
+            <Link to="/admin/forgot-password">
+              <AdminButton type="button" variant="secondary">
+                Reset password
+              </AdminButton>
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   if (sent) {
