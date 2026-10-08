@@ -1,0 +1,20 @@
+.mark {
+  display: inline-block;
+  background-color: currentColor;
+  -webkit-mask: var(--src) center / contain no-repeat;
+  mask: var(--src) center / contain no-repeat;
+  flex: none;
+}
+/* Supplied artwork, 1200 × 166. Width is set where it's used and stays
+   small: the logo is identity, not content. */
+.mark--lockup {
+  --src: url('/brand/nba-lockup.png');
+  width: 120px;
+  aspect-ratio: 1200 / 166;
+}
+/* Supplied artwork, 1000 × 132. */
+.mark--wordmark {
+  --src: url('/brand/nba-wordmark.png');
+  width: 112px;
+  aspect-ratio: 1000 / 132;
+}

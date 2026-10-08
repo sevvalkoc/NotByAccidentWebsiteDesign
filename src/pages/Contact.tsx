@@ -1,267 +1,166 @@
-import { useRef, useState } from 'react'
-import Seo from '@/components/Seo'
-import { submitLead, useCompany, useContactCopy, useCustomSections } from '@/content'
-import { useReveal } from '@/hooks/useReveal'
-import { useT } from '@/i18n/ui'
-import { usePageSeo } from '@/i18n/pageSeo'
-import CustomSectionBlock from '@/components/CustomSectionBlock'
+import { useId, useState, type FormEvent } from 'react'
+import PageHead, { crumbSchema } from '@/components/PageHead'
+import StudioClock from '@/components/StudioClock'
+import Zone from '@/components/Zone'
+import { plain } from '@/components/Rich'
+import { useCopy, usePageMeta, useSection, useSite } from '@/content'
+import { usePage } from '@/hooks/usePage'
+import { useLocale } from '@/i18n/locale'
+import { submitLead } from '@/lib/leads'
+import './misc.css'
 
+/** Contact: the address first, the form for those who prefer it. */
 export default function Contact() {
-  const ref = useRef<HTMLElement>(null)
-  const [submitted, setSubmitted] = useState(false)
-  const [formError, setFormError] = useState('')
-  const company = useCompany()
-  const copy = useContactCopy()
-  const customSections = useCustomSections('contact')
-  const t = useT()
-  const seo = usePageSeo('/contact')
-  useReveal(ref, { threshold: 0.08 })
+  const copy = useCopy()
+  const site = useSite()
+  const locale = useLocale()
+  const meta = usePageMeta('contact')
+  const header = useSection('contact', 'header')
+  const form = useSection('contact', 'form')
+  const c = copy.contact
+  const id = useId()
+  const [state, setState] = useState<'idle' | 'sending' | 'done' | 'error' | 'offline'>('idle')
+  const crumbs = [
+    { name: copy.nav.homeCrumb, path: '/' },
+    { name: copy.pages.contact, path: '/contact' },
+  ]
+  usePage({
+    page: 'contact',
+    path: '/contact',
+    jsonLd: [crumbSchema(crumbs, locale), { '@context': 'https://schema.org', '@type': 'ContactPage', name: plain(meta.title), description: meta.description, about: { '@id': 'https://notbyaccident.com/#organization' } }],
+  })
 
+  async function submit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    const f = new FormData(e.currentTarget)
+    const get = (k: string) => String(f.get(k) ?? '').trim()
+    const email = get('email')
+    if (!email) return
+    // Company and budget travel in the message (the previous form dropped them).
+    const message = [get('company') && `Company: ${get('company')}`, get('budget') && `Budget: ${get('budget')}`, get('message')].filter(Boolean).join('\n\n')
+    setState('sending')
+    const res = await submitLead({ email, name: get('name'), message, source: 'contact' })
+    setState(res.ok ? 'done' : res.reason)
+  }
+
+  const co = site.company
   return (
-    <main id="main" ref={ref} style={{ paddingTop: '56px', backgroundColor: '#F0EADA' }}>
-      <Seo title={seo.title} description={seo.description} path="/contact" />
-
-      {/* Header */}
-      <div
-        style={{
-          paddingTop: 'clamp(64px, 8vw, 128px)',
-          paddingBottom: 'clamp(48px, 6vw, 80px)',
-          borderBottom: '1px solid rgba(34,30,27,.1)',
-        }}
-      >
-        <div className="page-grid">
-          <p className="t-caption mb-4 reveal" style={{ color: 'rgba(34,30,27,.45)' }}>{copy.eyebrow}</p>
-          <h1 className="t-display reveal reveal-delay-1" style={{ maxWidth: '14ch', marginBottom: '1.5rem' }}>
-            {copy.heading}
-          </h1>
-          <p
-            className="t-subhead reveal reveal-delay-2"
-            style={{ color: 'rgba(34,30,27,.65)', fontWeight: 400, maxWidth: '40ch' }}
-          >
-            {copy.subhead}
-          </p>
+    <main id="main" tabIndex={-1}>
+      <PageHead page="contact" env="signal" />
+      <Zone env="frost" className="wrap band contact">
+        <div className="contact__direct">
+          {header?.body ? <p className="dim">{header.body}</p> : null}
+          <dl className="facts">
+            <div>
+              <dt className="t-caption dimmer">{copy.footer.newBusiness}</dt>
+              <dd className="t-title">
+                <a className="link" href={`mailto:${co.newBusinessEmail}`}>
+                  {co.newBusinessEmail}
+                </a>
+              </dd>
+            </div>
+            <div>
+              <dt className="t-caption dimmer">{copy.footer.general}</dt>
+              <dd>
+                <a className="link" href={`mailto:${co.email}`}>
+                  {co.email}
+                </a>
+              </dd>
+            </div>
+            <div>
+              <dt className="t-caption dimmer">{copy.footer.press}</dt>
+              <dd>
+                <a className="link" href={`mailto:${co.pressEmail}`}>
+                  {co.pressEmail}
+                </a>
+              </dd>
+            </div>
+            {co.phone ? (
+              <div>
+                <dt className="t-caption dimmer">Phone</dt>
+                <dd>
+                  <a className="link" href={`tel:${co.phone.replace(/[^+\d]/g, '')}`}>
+                    {co.phone}
+                  </a>
+                </dd>
+              </div>
+            ) : null}
+            <div>
+              <dt className="t-caption dimmer">{c.hours}</dt>
+              <dd className="t-small">
+                {co.hours}
+                {form?.body ? `. ${form.body}` : ''}
+              </dd>
+            </div>
+          </dl>
+          <StudioClock className="dimmer contact__clock t-caption" />
         </div>
-      </div>
-
-      {/* Main content */}
-      <div
-        className="page-grid"
-        style={{
-          paddingTop: 'clamp(56px, 7vw, 96px)',
-          paddingBottom: 'clamp(80px, 10vw, 160px)',
-        }}
-      >
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr',
-            gap: 'clamp(48px, 6vw, 96px)',
-          }}
-          className="md:grid-cols-[38%_55%]"
-        >
-          {/* Left: context */}
-          <div>
-            <div className="reveal" style={{ marginBottom: '3rem' }}>
-              <p
-                className="t-body"
-                style={{ color: 'rgba(34,30,27,.7)', marginBottom: '1.5rem' }}
-              >
-                {copy.intro1}
-              </p>
-              <p className="t-body" style={{ color: 'rgba(34,30,27,.7)' }}>
-                {copy.intro2}
-              </p>
-            </div>
-
-            <div className="reveal reveal-delay-1">
-              <p className="t-caption mb-2" style={{ color: 'rgba(34,30,27,.4)' }}>
-                {t.contact.email}
-              </p>
-              <a
-                href={`mailto:${company.email}`}
-                className="link-beetroot t-ui block mb-4"
-              >
-                {company.email}
-              </a>
-
-              <p className="t-caption mb-2" style={{ color: 'rgba(34,30,27,.4)' }}>
-                {t.contact.responseTime}
-              </p>
-              <p className="t-body m-0" style={{ color: 'rgba(34,30,27,.65)', fontSize: '15px' }}>
-                {t.contact.responseBody}
-              </p>
-            </div>
-
-            {/* Pickle rule */}
-            <div
-              style={{
-                marginTop: '3rem',
-                height: '2px',
-                width: '48px',
-                backgroundColor: '#7F8B3E',
-              }}
-            />
-          </div>
-
-          {/* Right: form */}
-          {submitted ? (
-            <div
-              className="reveal"
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                padding: 'clamp(32px, 4vw, 48px)',
-                border: '1px solid rgba(34,30,27,.1)',
-                borderRadius: '2px',
-                minHeight: '320px',
-              }}
-            >
-              <p
-                style={{
-                  fontFamily: 'Lora, Georgia, serif',
-                  fontStyle: 'italic',
-                  fontSize: 'clamp(20px, 2.5vw, 28px)',
-                  fontWeight: 400,
-                  lineHeight: 1.3,
-                  color: '#221E1B',
-                  margin: '0 0 1rem',
-                  maxWidth: '24ch',
-                }}
-              >
-                {t.contact.thankYouHeading}
-              </p>
-              <p className="t-body m-0" style={{ color: 'rgba(34,30,27,.6)' }}>
-                {t.contact.thankYouBody}
-              </p>
-            </div>
+        <div className="contact__form">
+          {form?.title ? <h2 className="label">{form.title}</h2> : null}
+          {state === 'done' ? (
+            <p className="t-title" role="status">
+              {c.thanks}
+            </p>
           ) : (
-            <form
-              onSubmit={async e => {
-                e.preventDefault()
-                const form = e.currentTarget
-                const email = (form.elements.namedItem('c-email') as HTMLInputElement)?.value ?? ''
-                const name = (form.elements.namedItem('c-name') as HTMLInputElement)?.value ?? ''
-                const message = (form.elements.namedItem('c-message') as HTMLTextAreaElement)?.value ?? ''
-                if (!email.trim()) return
-                setFormError('')
-                const res = await submitLead({ email, name, message, source: 'contact' })
-                if (!res.ok) {
-                  setFormError(res.error ?? t.contact.formError)
-                  return
-                }
-                setSubmitted(true)
-              }}
-              className="reveal"
-              aria-label={t.contact.formAriaLabel}
-              style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
-            >
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label
-                    htmlFor="c-name"
-                    className="t-caption"
-                    style={{ color: 'rgba(34,30,27,.5)', textTransform: 'none', letterSpacing: '0.02em', fontSize: '13px' }}
-                  >
-                    {t.contact.name}
-                  </label>
-                  <input
-                    id="c-name"
-                    type="text"
-                    required
-                    className="input-field"
-                    placeholder={t.contact.namePlaceholder}
-                    autoComplete="name"
-                  />
+            <form onSubmit={submit} className="form">
+              <div className="form__row">
+                <div className="field">
+                  <label htmlFor={`${id}-n`}>{c.name}</label>
+                  <input id={`${id}-n`} name="name" className="input" autoComplete="name" aria-describedby={`${id}-nh`} />
+                  <p id={`${id}-nh`} className="help">
+                    {c.nameHelp}
+                  </p>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label
-                    htmlFor="c-company"
-                    className="t-caption"
-                    style={{ color: 'rgba(34,30,27,.5)', textTransform: 'none', letterSpacing: '0.02em', fontSize: '13px' }}
-                  >
-                    {t.contact.company}
-                  </label>
-                  <input
-                    id="c-company"
-                    type="text"
-                    className="input-field"
-                    placeholder={t.contact.companyPlaceholder}
-                    autoComplete="organization"
-                  />
+                <div className="field">
+                  <label htmlFor={`${id}-c`}>{c.company}</label>
+                  <input id={`${id}-c`} name="company" className="input" autoComplete="organization" aria-describedby={`${id}-ch`} />
+                  <p id={`${id}-ch`} className="help">
+                    {c.companyHelp}
+                  </p>
                 </div>
               </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label
-                  htmlFor="c-email"
-                  className="t-caption"
-                  style={{ color: 'rgba(34,30,27,.5)', textTransform: 'none', letterSpacing: '0.02em', fontSize: '13px' }}
-                >
-                  {t.contact.emailLabel}
+              <div className="field">
+                <label htmlFor={`${id}-e`}>
+                  {c.email} <span className="dimmer">({copy.forms.required})</span>
                 </label>
-                <input
-                  id="c-email"
-                  type="email"
-                  required
-                  className="input-field"
-                  placeholder={t.contact.emailPlaceholder}
-                  autoComplete="email"
-                />
+                <input id={`${id}-e`} name="email" type="email" required className="input" autoComplete="email" inputMode="email" aria-describedby={`${id}-eh`} />
+                <p id={`${id}-eh`} className="help">
+                  {c.emailHelp}
+                </p>
               </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label
-                  htmlFor="c-budget"
-                  className="t-caption"
-                  style={{ color: 'rgba(34,30,27,.5)', textTransform: 'none', letterSpacing: '0.02em', fontSize: '13px' }}
-                >
-                  {t.contact.budget}
-                </label>
-                <select
-                  id="c-budget"
-                  className="input-field"
-                  defaultValue=""
-                  style={{ cursor: 'pointer' }}
-                >
-                  <option value="" disabled>{t.contact.selectRange}</option>
-                  {t.contact.budgetOptions.map(opt => (
-                    <option key={opt}>{opt}</option>
+              <div className="field">
+                <label htmlFor={`${id}-b`}>{c.budget}</label>
+                <select id={`${id}-b`} name="budget" className="input" defaultValue="" aria-describedby={`${id}-bh`}>
+                  <option value="" disabled>
+                    {c.budgetPick}
+                  </option>
+                  {c.budgetOptions.map(o => (
+                    <option key={o}>{o}</option>
                   ))}
                 </select>
+                <p id={`${id}-bh`} className="help">
+                  {c.budgetHelp}
+                </p>
               </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label
-                  htmlFor="c-message"
-                  className="t-caption"
-                  style={{ color: 'rgba(34,30,27,.5)', textTransform: 'none', letterSpacing: '0.02em', fontSize: '13px' }}
-                >
-                  {t.contact.whatWorking}
-                </label>
-                <textarea
-                  id="c-message"
-                  required
-                  className="textarea-field"
-                  placeholder={t.contact.whatWorkingPlaceholder}
-                />
+              <div className="field">
+                <label htmlFor={`${id}-m`}>{c.message}</label>
+                <textarea id={`${id}-m`} name="message" className="input" rows={5} aria-describedby={`${id}-mh`} />
+                <p id={`${id}-mh`} className="help">
+                  {c.messageHelp}
+                </p>
               </div>
-
-              <div>
-                <button type="submit" className="btn-primary">
-                  {t.contact.send}
+              <div className="actions">
+                <button type="submit" className="btn" disabled={state === 'sending'}>
+                  {state === 'sending' ? copy.forms.sending : c.send}
                 </button>
-                {formError && (
-                  <p className="t-caption" style={{ color: '#6E2237', marginTop: '0.75rem' }}>{formError}</p>
-                )}
+                <p className="form-msg" role="alert">
+                  {state === 'error' ? copy.forms.error : state === 'offline' ? copy.forms.offline : ''}
+                </p>
               </div>
             </form>
           )}
         </div>
-      </div>
-      {customSections.map(cs => (
-        <CustomSectionBlock key={cs.key} section={cs} />
-      ))}
+      </Zone>
     </main>
   )
 }

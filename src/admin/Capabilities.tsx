@@ -22,6 +22,11 @@ export default function Capabilities() {
           { key: 'question', label: 'Question it answers', type: 'text' },
           { key: 'outcome', label: 'Outcome', type: 'text' },
           { key: 'includes', label: 'What it includes', type: 'string-array', hint: 'Comma-separated.' },
+          { key: 'seo_title', label: 'SEO title', type: 'text' },
+          { key: 'seo_description', label: 'Meta description', type: 'textarea' },
+          { key: 'canonical_url', label: 'Canonical URL', type: 'url' },
+          { key: 'og_media_id', label: 'Social image', type: 'media' },
+          { key: 'noindex', label: 'Hide from search engines (noindex)', type: 'checkbox' },
           { key: 'queries', label: 'Search queries it should rank for', type: 'string-array', hint: 'Comma-separated — feeds SEO, not shown publicly.' },
         ],
       }}

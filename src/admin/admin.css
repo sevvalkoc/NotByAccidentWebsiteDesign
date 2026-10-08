@@ -1,0 +1,10 @@
+@import 'tailwindcss' source(none);
+@source './';
+
+/* The public site sets the page colours on <body> from its environments;
+   the admin is a light, neutral tool regardless. */
+body[data-admin] {
+  background: #f9fafb;
+  color: #111827;
+  color-scheme: light;
+}

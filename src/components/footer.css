@@ -1,0 +1,167 @@
+.ftr {
+  padding-top: var(--s-9);
+  padding-bottom: var(--s-6);
+}
+.ftr__top {
+  display: grid;
+  gap: var(--s-7) var(--gutter);
+  padding-bottom: var(--s-8);
+}
+.ftr__closing {
+  max-width: 14ch;
+}
+.ftr__news {
+  display: grid;
+  gap: var(--s-4);
+  max-width: 480px;
+}
+@media (min-width: 1024px) {
+  /* Closing line and newsletter share a top edge. */
+  .ftr__top {
+    grid-template-columns: 7fr 5fr;
+    align-items: start;
+  }
+}
+.ftr__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--s-6) var(--gutter);
+  padding-block: var(--s-6);
+  border-top: 1px solid var(--rule);
+}
+@media (min-width: 768px) {
+  .ftr__grid {
+    grid-template-columns: 1fr 1.4fr 1.2fr;
+  }
+}
+.ftr__list {
+  margin: 0;
+  columns: 2;
+  column-gap: var(--gutter);
+}
+.ftr__list li {
+  padding-block: 3px;
+}
+.ftr__dl {
+  display: grid;
+  gap: var(--s-3);
+  align-content: start;
+}
+.ftr__dl a {
+  overflow-wrap: anywhere;
+}
+.ftr__meta {
+  display: grid;
+  gap: var(--s-2);
+  align-content: start;
+}
+.ftr__meta p:first-child {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-2);
+}
+.clock-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.5;
+  flex: none;
+  transform: translateY(-1px);
+}
+.clock-dot[data-open='true'] {
+  background: var(--acid);
+  opacity: 1;
+}
+.ftr__inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1) var(--s-4);
+  margin: 0;
+}
+.ftr__inline [aria-current] {
+  color: var(--acid);
+}
+.ftr__base {
+  display: grid;
+  gap: var(--s-3);
+  align-items: center;
+  padding-top: var(--s-5);
+  border-top: 1px solid var(--rule);
+}
+.ftr__mark {
+  display: inline-flex;
+  width: max-content;
+  color: var(--fg);
+}
+.ftr__mark .mark--wordmark {
+  width: 96px;
+}
+@media (min-width: 1024px) {
+  .ftr__base {
+    grid-template-columns: auto 1fr auto;
+  }
+  .ftr__last {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Carbon tracker: live weight and CO2e of the page being read, on the
+   Sustainable Web Design scale. The current grade lights up in acid. */
+.climate {
+  display: grid;
+  gap: var(--s-2);
+  margin-top: var(--s-5);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--rule);
+  max-width: 34ch;
+}
+.climate__value {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--s-1);
+  margin: 0;
+}
+.climate__g {
+  font-size: var(--t-title);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.climate__scale {
+  display: flex;
+  gap: 3px;
+  margin: var(--s-1) 0 0;
+}
+.climate__grade {
+  min-width: 30px;
+  padding: 4px 6px;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  color: var(--fg-3);
+  font-size: var(--t-micro);
+  font-weight: 500;
+  text-align: center;
+  line-height: 1;
+}
+.climate__grade[data-on] {
+  background: var(--acid);
+  border-color: var(--acid);
+  color: var(--void);
+}
+.climate__how summary {
+  cursor: pointer;
+  width: fit-content;
+  color: var(--fg-2);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+.climate__how summary::-webkit-details-marker {
+  display: none;
+}
+.climate__text {
+  display: grid;
+  gap: var(--s-2);
+  margin-top: var(--s-3);
+}

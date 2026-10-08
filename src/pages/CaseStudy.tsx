@@ -1,308 +1,194 @@
-import { useRef } from 'react'
 import { useParams } from 'react-router-dom'
-import Link, { Navigate } from '@/components/LocalizedLink'
-import { useCompany, useProjects, useCapabilities } from '@/content'
-import Seo from '@/components/Seo'
-import { useReveal } from '@/hooks/useReveal'
-import { useT } from '@/i18n/ui'
+import { Breadcrumbs, crumbSchema } from '@/components/PageHead'
+import Link from '@/components/Link'
+import Slip from '@/components/Slip'
+import Zone from '@/components/Zone'
+import NotFound from './NotFound'
+import { figureFor, useCopy, useSite } from '@/content'
+import { usePage } from '@/hooks/usePage'
+import { useLocale } from '@/i18n/locale'
+import { caseStudy } from '@/seo/schema'
+import { projectMedia } from './home/SelectedWork'
+import './work.css'
 
 export default function CaseStudy() {
-  const { slug } = useParams<{ slug: string }>()
-  const company = useCompany()
-  const projects = useProjects()
-  const capabilities = useCapabilities()
-  const project = projects.find(p => p.slug === slug)
-  const ref = useRef<HTMLElement>(null)
-  const t = useT()
-  useReveal(ref, { threshold: 0.08 })
+  const { slug } = useParams()
+  const site = useSite()
+  const i = site.projects.findIndex(p => p.slug === slug)
+  if (i < 0) return <NotFound />
+  return <Case key={site.projects[i].slug} index={i} />
+}
 
-  if (!project) return <Navigate to="/case-studies" replace />
-
-  const idx = projects.findIndex(p => p.slug === slug)
-  const next = projects[(idx + 1) % projects.length]
-  const relatedCapabilities = capabilities.filter(c => project.relatedCapabilities.includes(c.slug))
-
-  const caseSchema = [
-    {
-      '@context': 'https://schema.org',
-      '@type': 'CreativeWork',
-      name: project.name,
-      headline: `${project.name} — ${project.discipline}`,
-      description: project.brief,
-      image: project.heroImg,
-      dateCreated: project.year,
-      locationCreated: project.location,
-      url: `https://notbyaccident.com/case-studies/${project.slug}`,
-      creator: { '@type': 'Organization', name: company.legalName },
-      keywords: project.services.join(', '),
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'BreadcrumbList',
-      itemListElement: [
-        { '@type': 'ListItem', position: 1, name: t.caseStudy.breadcrumbCaseStudies, item: 'https://notbyaccident.com/case-studies' },
-        { '@type': 'ListItem', position: 2, name: project.name, item: `https://notbyaccident.com/case-studies/${project.slug}` },
-      ],
-    },
+/** A case: one image and one line to open, the thinking in the middle, one
+ *  figure for what happened, then the work itself. Every field is edited in
+ *  Admin → Work. */
+function Case({ index }: { index: number }) {
+  const copy = useCopy()
+  const site = useSite()
+  const locale = useLocale()
+  const c = copy.caseStudy
+  const p = site.projects[index]
+  const next = site.projects[(index + 1) % site.projects.length]
+  const f = figureFor(p, locale)
+  const caps = site.capabilities.filter(x => p.relatedCapabilities.includes(x.slug))
+  const crumbs = [
+    { name: copy.nav.homeCrumb, path: '/' },
+    { name: copy.pages.caseStudies, path: '/case-studies' },
+    { name: p.name, path: `/case-studies/${p.slug}` },
   ]
+  usePage({
+    path: `/case-studies/${p.slug}`,
+    title: `${p.name} · ${c.titleSuffix}`,
+    description: p.narrative ? `${p.brief} ${p.narrative.outcome}` : `${p.name}: ${p.brief} ${p.services.join(', ')}, ${p.year}.`,
+    seo: p.seo,
+    image: p.heroImg || p.img,
+    imageAlt: `${p.name}: ${p.brief}`,
+    type: 'article',
+    jsonLd: [caseStudy(p, locale), crumbSchema(crumbs, locale)],
+  })
+
+  const meta = [
+    [c.client, p.client || p.name],
+    [c.discipline, p.discipline],
+    [c.location, p.location],
+    [c.year, p.year],
+  ].filter(([, v]) => v)
 
   return (
-    <main
-      id="main"
-      ref={ref}
-      style={{ paddingTop: '56px', backgroundColor: '#F0EADA' }}
-    >
-      <Seo title={`${project.name}${t.caseStudy.titleSuffix}`} description={project.brief} path={`/case-studies/${project.slug}`} image={project.heroImg} jsonLd={caseSchema} />
-
-      {/* Hero image — full bleed */}
-      <div
-        className="img-crosshair overflow-hidden bg-carbon"
-        style={{ width: '100%', aspectRatio: '16/7' }}
-      >
-        <img
-          src={project.heroImg}
-          alt={project.brief}
-          className="w-full h-full object-cover"
-          loading="eager"
-          fetchPriority="high"
-        />
-      </div>
-
-      {/* Case study header */}
-      <div
-        className="page-grid"
-        style={{
-          paddingTop: 'clamp(40px, 5vw, 64px)',
-          paddingBottom: 'clamp(48px, 6vw, 80px)',
-          borderBottom: '1px solid rgba(34,30,27,.1)',
-        }}
-      >
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr',
-            gap: '2rem',
-          }}
-          className="md:grid-cols-[60%_35%]"
-        >
-          <div>
-            <nav className="mb-4" aria-label={t.caseStudy.breadcrumbNavLabel}>
-              <Link
-                to="/case-studies"
-                className="t-caption no-underline hover:opacity-70 transition-opacity"
-                style={{ color: 'rgba(34,30,27,.45)' }}
-              >
-                {t.caseStudy.back}
-              </Link>
-            </nav>
-            <h1 className="t-headline-lg reveal" style={{ margin: '0 0 12px' }}>
-              {project.name}
-            </h1>
-            <p
-              className="reveal reveal-delay-1"
-              style={{
-                fontFamily: 'Lora, Georgia, serif',
-                fontStyle: 'italic',
-                fontSize: 'clamp(18px, 2vw, 24px)',
-                fontWeight: 400,
-                lineHeight: 1.3,
-                letterSpacing: '-0.005em',
-                color: 'rgba(34,30,27,.65)',
-                maxWidth: '44ch',
-                margin: 0,
-              }}
-            >
-              {project.brief}
-            </p>
+    <main id="main" tabIndex={-1} className="case">
+      <Zone as="header" env="frost" className="case__open">
+        <div className="wrap">
+          <div className="phead__top">
+            <Breadcrumbs items={crumbs} />
           </div>
-
-          <div
-            className="reveal reveal-delay-2"
-            style={{ paddingTop: '2rem' }}
-          >
-            <dl
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '16px',
-                margin: 0,
-                padding: 0,
-              }}
-            >
-              {[
-                { term: t.caseStudy.discipline, desc: project.discipline },
-                { term: t.caseStudy.location, desc: project.location },
-                { term: t.caseStudy.year, desc: project.year },
-              ].map(item => (
-                <div key={item.term}>
-                  <dt className="t-caption mb-1" style={{ color: 'rgba(34,30,27,.4)' }}>
-                    {item.term}
-                  </dt>
-                  <dd className="t-body m-0" style={{ color: '#221E1B', fontSize: '15px' }}>
-                    {item.desc}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </div>
+          <h1 className="phead__title">
+            <span className="rise">
+              <span>{p.name}</span>
+            </span>
+          </h1>
+          <p className="t-lead dim case__brief">{p.brief}</p>
         </div>
-      </div>
-
-      {/* Problem → Insight → Intervention → Outcome */}
-      {project.narrative && (
-        <div
-          className="page-grid"
-          style={{
-            paddingTop: 'clamp(56px, 7vw, 96px)',
-            paddingBottom: 'clamp(56px, 7vw, 96px)',
-          }}
-        >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-12">
-            {([
-              ['problem', t.caseStudy.problem, project.narrative.problem, '#6E2237'],
-              ['insight', t.caseStudy.insight, project.narrative.insight, '#7F8B3E'],
-              ['intervention', t.caseStudy.intervention, project.narrative.intervention, '#6A6383'],
-              ['outcome', t.caseStudy.outcome, project.narrative.outcome, '#C08A1E'],
-            ] as const).map(([key, label, text, accent], i) => (
-              <div key={key} className="reveal" style={{ transitionDelay: `${i * 60}ms`, borderTop: `2px solid ${accent}`, paddingTop: '18px' }}>
-                <p className="t-caption mb-3" style={{ color: accent }}>{label}</p>
-                <p
-                  style={{
-                    fontFamily: key === 'outcome' ? 'Lora, Georgia, serif' : 'DM Sans, system-ui, sans-serif',
-                    fontStyle: key === 'outcome' ? 'italic' : 'normal',
-                    fontSize: key === 'outcome' ? '20px' : '17px',
-                    lineHeight: key === 'outcome' ? 1.35 : 1.6,
-                    color: '#221E1B',
-                    maxWidth: '46ch',
-                    margin: 0,
-                  }}
-                >
-                  {text}
-                </p>
+        <div className="wrap">
+          <Slip media={projectMedia(p)} ratio={16 / 9} trigger="arrive" priority sizes="(min-width: 1440px) 1440px, 100vw" className="case__hero" />
+          <dl className="case__meta t-caption">
+            {meta.map(([k, v]) => (
+              <div key={k}>
+                <dt className="dimmer">{k}</dt>
+                <dd>{v}</dd>
               </div>
             ))}
+          </dl>
+        </div>
+      </Zone>
+
+      <Zone env="frost" className="case__body">
+        {p.introduction ? (
+          <section className="wrap band">
+            <div className="split">
+              <span />
+              <p className="t-lead">{p.introduction}</p>
+            </div>
+          </section>
+        ) : null}
+        {p.narrative ? (
+          <>
+            <section className="wrap band" aria-labelledby="c-problem">
+              <div className="split">
+                <h2 id="c-problem" className="label sticky-label">
+                  {c.problem}
+                </h2>
+                <p className="t-title case__text">{p.narrative.problem}</p>
+              </div>
+            </section>
+            <section className="wrap band" aria-labelledby="c-insight">
+              <div className="split">
+                <h2 id="c-insight" className="label sticky-label">
+                  {c.insight}
+                </h2>
+                <p className="t-section serif case__insight">{p.narrative.insight}</p>
+              </div>
+            </section>
+            <section className="wrap band" aria-labelledby="c-decided">
+              <div className="split">
+                <h2 id="c-decided" className="label sticky-label">
+                  {c.intervention}
+                </h2>
+                <p className="t-title case__text">{p.narrative.intervention}</p>
+              </div>
+            </section>
+          </>
+        ) : (
+          <section className="wrap band">
+            <p className="t-title">{c.inProgress}</p>
+          </section>
+        )}
+      </Zone>
+
+      {p.narrative ? (
+        <Zone env="void" className="case__result" labelledBy="c-outcome">
+          <div className="wrap split">
+            <h2 id="c-outcome" className="label">
+              {c.outcome}
+            </h2>
+            <div>
+              {f ? (
+                <p className="case__fig">
+                  <span className="t-display t-num">{f.value}</span>
+                  <span className="t-small dim">{f.label}</span>
+                </p>
+              ) : null}
+              <p className="t-title case__outcome">{p.narrative.outcome}</p>
+            </div>
           </div>
-        </div>
-      )}
+        </Zone>
+      ) : null}
 
-      {/* Second image */}
-      <div className="page-grid reveal" style={{ paddingBottom: 'clamp(56px, 7vw, 96px)' }}>
-        <div
-          className="overflow-hidden bg-carbon img-crosshair"
-          style={{ width: '100%', aspectRatio: '3/2' }}
-        >
-          <img
-            src={project.img}
-            alt={t.caseStudy.additionalViewAlt(project.name)}
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
-        </div>
-        <p className="t-caption mt-3" style={{ color: 'rgba(34,30,27,.35)' }}>
-          {project.name}, {project.year}. {project.location}.
-        </p>
-      </div>
+      {p.gallery?.length ? (
+        <Zone env="mineral" className="case__gallery" label={c.gallery}>
+          <div className="wrap gallery">
+            {p.gallery.map((m, i) => (
+              <figure key={m.url + i} className={`gallery__i gallery__i--${i % 4}`}>
+                <Slip media={m} ratio={i % 4 === 1 ? 4 / 5 : 3 / 2} trigger="arrive" sizes="(min-width: 1024px) 60vw, 92vw" />
+                {m.caption ? <figcaption className="t-caption dimmer">{m.caption}</figcaption> : null}
+              </figure>
+            ))}
+          </div>
+        </Zone>
+      ) : null}
 
-      {/* Capabilities — the work, linked to the discipline pages that did it */}
-      <div
-        className="page-grid reveal"
-        style={{
-          paddingBottom: 'clamp(64px, 8vw, 128px)',
-          borderBottom: '1px solid rgba(34,30,27,.1)',
-        }}
-      >
-        <p className="t-caption mb-6" style={{ color: 'rgba(34,30,27,.45)' }}>
-          {t.caseStudy.capabilitiesHeading}
-        </p>
-        <ul
-          className="list-none m-0 p-0"
-          style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}
-        >
-          {relatedCapabilities.length > 0
-            ? relatedCapabilities.map(c => (
-                <li key={c.slug}>
-                  <Link to={`/capabilities/${c.slug}`} className="pill">{c.name}</Link>
-                </li>
-              ))
-            : project.services.map(s => (
-                <li
-                  key={s}
-                  className="t-caption"
-                  style={{
-                    display: 'inline-block',
-                    padding: '6px 14px',
-                    border: '1px solid rgba(34,30,27,.2)',
-                    borderRadius: '2px',
-                    color: 'rgba(34,30,27,.7)',
-                    textTransform: 'none',
-                    letterSpacing: '0.02em',
-                  }}
-                >
-                  {s}
-                </li>
+      <Zone env="frost" className="wrap band case__end">
+        <div className="split">
+          <h2 className="label">{c.capabilities}</h2>
+          <div className="case__end-body">
+            <ul role="list" className="case__caps">
+              {(caps.length ? caps.map(x => ({ key: x.slug, name: x.name, to: `/capabilities/${x.slug}` })) : p.services.map(s => ({ key: s, name: s, to: '' }))).map(x => (
+                <li key={x.key}>{x.to ? <Link to={x.to} className="link-q">{x.name}</Link> : x.name}</li>
               ))}
-        </ul>
-      </div>
-
-      {/* Next project */}
-      <div
-        className="page-grid"
-        style={{
-          paddingTop: 'clamp(48px, 6vw, 80px)',
-          paddingBottom: 'clamp(64px, 8vw, 128px)',
-        }}
-      >
-        <p className="t-caption mb-6 reveal" style={{ color: 'rgba(34,30,27,.45)' }}>
-          {t.caseStudy.nextProject}
-        </p>
-        <Link
-          to={`/case-studies/${next.slug}`}
-          className="block no-underline group reveal"
-          aria-label={t.caseStudy.nextAriaLabel(next.name)}
-        >
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr',
-              gap: '2rem',
-            }}
-            className="md:grid-cols-[auto_1fr]"
-          >
-            <div
-              className="overflow-hidden bg-carbon img-crosshair"
-              style={{ width: '280px', maxWidth: '100%', aspectRatio: '3/2' }}
-            >
-              <img
-                src={next.img}
-                alt={next.brief}
-                className="w-full h-full object-cover img-hover"
-                loading="lazy"
-              />
-            </div>
-            <div style={{ alignSelf: 'center' }}>
-              <h2
-                className="group-hover:underline"
-                style={{
-                  fontFamily: 'Lora, Georgia, serif',
-                  fontSize: 'clamp(22px, 2.5vw, 32px)',
-                  fontWeight: 400,
-                  lineHeight: 1.1,
-                  letterSpacing: '-0.01em',
-                  color: '#221E1B',
-                  textDecorationColor: '#6E2237',
-                  textDecorationThickness: '1px',
-                  margin: '0 0 8px',
-                }}
-              >
-                {next.name}
-              </h2>
-              <p className="t-body m-0" style={{ color: 'rgba(34,30,27,.6)' }}>
-                {next.brief}
-              </p>
-            </div>
+            </ul>
+            {p.credits ? (
+              <div className="t-small">
+                <p className="label">{c.credits}</p>
+                <p className="dim case__credits">{p.credits}</p>
+              </div>
+            ) : null}
+            {p.externalUrl ? (
+              <a href={p.externalUrl} target="_blank" rel="noopener noreferrer" className="link-q go t-small">
+                {c.visit}
+              </a>
+            ) : null}
           </div>
-        </Link>
-      </div>
+        </div>
+      </Zone>
+
+      {next && next.slug !== p.slug ? (
+        <Zone as="nav" env="frost" className="case__next" label={c.next}>
+          <Link to={`/case-studies/${next.slug}`} className="wrap case__next-link">
+            <span className="label">{c.next}</span>
+            <span className="t-section">{next.name}</span>
+            <span className="t-small dim">{next.brief}</span>
+          </Link>
+        </Zone>
+      ) : null}
     </main>
   )
 }

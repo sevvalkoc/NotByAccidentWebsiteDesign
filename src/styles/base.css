@@ -1,0 +1,398 @@
+/* Everything here sits in a cascade layer, below anything unlayered (the
+   component and page stylesheets) and below the admin's Tailwind layers,
+   which are declared later. Element defaults such as `input { color:
+   inherit }` therefore never override a utility class in /admin. */
+@layer nba-base {
+/* ── Base ─────────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--header-h) + var(--s-4));
+}
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--sans);
+  font-size: var(--t-body);
+  line-height: 1.55;
+  font-variant-numeric: lining-nums;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
+  transition:
+    --bg var(--d-env) var(--ease),
+    --fg var(--d-env) var(--ease),
+    --fg-2 var(--d-env) var(--ease),
+    --fg-3 var(--d-env) var(--ease),
+    --rule var(--d-env) var(--ease),
+    --accent var(--d-env) var(--ease);
+}
+img,
+video,
+svg {
+  display: block;
+  max-width: 100%;
+}
+img {
+  height: auto;
+}
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+blockquote,
+dl,
+dd,
+ul,
+ol {
+  margin: 0;
+}
+h1,
+h2,
+h3,
+h4 {
+  font-weight: 400;
+}
+ul[role='list'],
+ol[role='list'] {
+  list-style: none;
+  padding: 0;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+button {
+  cursor: pointer;
+}
+address {
+  font-style: normal;
+}
+::selection {
+  background: var(--acid);
+  color: var(--void);
+}
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* ── Type ─────────────────────────────────────────────────────────────── */
+.t-micro {
+  font-size: var(--t-micro);
+  line-height: 1.3;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.t-caption {
+  font-size: var(--t-caption);
+  line-height: 1.45;
+  font-variant-numeric: tabular-nums;
+}
+.t-small {
+  font-size: var(--t-small);
+  line-height: 1.5;
+}
+.t-body {
+  font-size: var(--t-body);
+  line-height: 1.6;
+  max-width: var(--measure);
+  text-wrap: pretty;
+}
+.t-lead {
+  font-size: var(--t-lead);
+  line-height: 1.45;
+  letter-spacing: -0.005em;
+  max-width: 46ch;
+  text-wrap: pretty;
+}
+.t-title {
+  font-size: var(--t-title);
+  line-height: 1.2;
+  letter-spacing: -0.012em;
+  text-wrap: balance;
+}
+.t-section {
+  font-size: var(--t-section);
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+.t-display {
+  font-size: var(--t-display);
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+/* The serif is an accent: an emphasised word, a quotation, a number. */
+.t-section em,
+.t-display em,
+.t-title em,
+.serif {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+.t-num {
+  font-variant-numeric: tabular-nums;
+}
+.dim {
+  color: var(--fg-2);
+}
+.dimmer {
+  color: var(--fg-3);
+}
+
+/* ── Links ────────────────────────────────────────────────────────────── */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+.link {
+  text-decoration: underline;
+  text-decoration-color: var(--fg-3);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  transition: text-decoration-color var(--d-2) var(--ease);
+}
+.link:hover {
+  text-decoration-color: currentColor;
+}
+.link-q {
+  background: linear-gradient(currentColor, currentColor) no-repeat 0 100% / 0 1px;
+  transition: background-size var(--d-3) var(--ease);
+  padding-bottom: 1px;
+}
+.link-q:hover,
+.link-q:focus-visible,
+.link-q[aria-current='page'] {
+  background-size: 100% 1px;
+}
+/* An arrow that moves on intent. */
+.go::after {
+  content: '→';
+  display: inline-block;
+  margin-left: 0.4em;
+  transition: transform var(--d-2) var(--ease);
+}
+.go:hover::after,
+.go:focus-visible::after {
+  transform: translateX(3px);
+}
+
+/* ── Controls ─────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-3);
+  min-height: 44px;
+  padding: 0 var(--s-5);
+  border: 1px solid var(--fg);
+  border-radius: 999px;
+  background: var(--fg);
+  color: var(--bg);
+  font-size: var(--t-small);
+  font-weight: 500;
+  line-height: 1;
+  transition:
+    background-color var(--d-1) var(--ease),
+    color var(--d-1) var(--ease);
+}
+.btn:hover {
+  background: transparent;
+  color: var(--fg);
+}
+.btn--ghost {
+  background: transparent;
+  color: var(--fg);
+  border-color: var(--rule);
+}
+.btn--ghost:hover {
+  border-color: var(--fg);
+}
+.btn[disabled] {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.field {
+  display: grid;
+  gap: var(--s-2);
+}
+.field label {
+  font-size: var(--t-small);
+  font-weight: 500;
+}
+.field .help {
+  font-size: var(--t-caption);
+  color: var(--fg-3);
+}
+.input {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 0;
+  border: 0;
+  border-bottom: 1px solid var(--fg-3);
+  border-radius: 0;
+  background: transparent;
+  font-size: 1rem;
+  transition: border-color var(--d-1) var(--ease);
+}
+.input:hover,
+.input:focus {
+  border-bottom-color: var(--fg);
+  outline: none;
+}
+.input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+textarea.input {
+  min-height: 140px;
+  resize: vertical;
+  line-height: 1.5;
+}
+select.input {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - 10px) 50%, calc(100% - 5px) 50%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 32px;
+}
+select.input option {
+  color: var(--void);
+}
+.form-msg {
+  font-size: var(--t-small);
+}
+/* One-field capture: input and button on one line, same height, one
+   baseline. Used in the footer, Studio, Trainings and Reports. */
+.capture {
+  width: 100%;
+  max-width: 480px;
+}
+.capture__row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--s-4);
+}
+.capture__row .input {
+  flex: 1;
+  min-width: 0;
+  min-height: 48px;
+}
+.capture__row .btn {
+  flex: none;
+  min-height: 48px;
+}
+
+/* ── Layout ───────────────────────────────────────────────────────────── */
+.wrap {
+  width: 100%;
+  max-width: calc(var(--max) + 2 * var(--margin));
+  margin-inline: auto;
+  padding-inline: var(--margin);
+}
+.rule {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: 0;
+}
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.skip {
+  position: fixed;
+  top: var(--s-3);
+  left: var(--s-3);
+  z-index: var(--z-skip);
+  padding: var(--s-3) var(--s-4);
+  background: var(--frost);
+  color: var(--void);
+  font-weight: 500;
+  transform: translateY(-200%);
+  transition: transform var(--d-2) var(--ease);
+}
+.skip:focus {
+  transform: none;
+}
+
+/* A label that introduces a section: small, quiet, once. */
+.label {
+  display: block;
+  font-size: var(--t-micro);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--fg-3);
+}
+
+/* ── Page transition: sheets of paper ─────────────────────────────────── */
+::view-transition-old(root) {
+  animation: var(--d-3) var(--ease) both nba-sheet-out;
+}
+::view-transition-new(root) {
+  animation: var(--d-3) var(--ease) both nba-sheet-in;
+}
+::view-transition-group(header),
+::view-transition-old(header),
+::view-transition-new(header) {
+  animation: none;
+}
+@keyframes nba-sheet-out {
+  to {
+    transform: translateY(-6vh);
+    opacity: 0.6;
+  }
+}
+@keyframes nba-sheet-in {
+  from {
+    transform: translateY(100vh);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+}
+
+}

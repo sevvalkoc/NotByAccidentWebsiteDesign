@@ -1,135 +1,89 @@
-import { useRef } from 'react'
-import Link from '@/components/LocalizedLink'
-import { useCapabilities, useCapabilitiesCopy, useCategories, useCustomSections } from '@/content'
-import Seo from '@/components/Seo'
-import { useReveal } from '@/hooks/useReveal'
-import { useT } from '@/i18n/ui'
-import { usePageSeo, capabilitiesDescription } from '@/i18n/pageSeo'
+import PageHead, { crumbSchema } from '@/components/PageHead'
+import Link from '@/components/Link'
+import Zone from '@/components/Zone'
+import { Cta, plain } from '@/components/Rich'
+import { useCopy, usePageMeta, useSection, useSite } from '@/content'
+import { usePage } from '@/hooks/usePage'
 import { useLocale } from '@/i18n/locale'
-import CustomSectionBlock from '@/components/CustomSectionBlock'
+import { collection } from '@/seo/schema'
+import { groupAnchor } from '@/routes'
+import './capabilities.css'
 
+/** A map, not a maze: the five practices up top, then each practice with
+ *  every discipline it covers listed beside it, one link per discipline. */
 export default function Capabilities() {
-  const ref = useRef<HTMLElement>(null)
-  const capabilities = useCapabilities()
-  const categories = useCategories()
-  const copy = useCapabilitiesCopy()
-  const customSections = useCustomSections('capabilities')
-  const t = useT()
-  const seo = usePageSeo('/capabilities')
+  const copy = useCopy()
+  const site = useSite()
   const locale = useLocale()
-  useReveal(ref, { threshold: 0.06 })
-
-  const schema = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: t.capabilitiesIndex.breadcrumbHome, item: 'https://notbyaccident.com/' },
-      { '@type': 'ListItem', position: 2, name: t.capabilitiesIndex.breadcrumbCapabilities, item: 'https://notbyaccident.com/capabilities' },
+  const meta = usePageMeta('capabilities')
+  const cta = useSection('capabilities', 'cta')
+  const crumbs = [
+    { name: copy.nav.homeCrumb, path: '/' },
+    { name: copy.pages.capabilities, path: '/capabilities' },
+  ]
+  usePage({
+    page: 'capabilities',
+    path: '/capabilities',
+    jsonLd: [
+      collection(plain(meta.title), meta.description, '/capabilities', locale, site.capabilities.map(x => ({ name: x.name, path: `/capabilities/${x.slug}` }))),
+      crumbSchema(crumbs, locale),
     ],
-  }
+  })
 
   return (
-    <main id="main" ref={ref} style={{ paddingTop: '56px', backgroundColor: '#F0EADA' }}>
-      <Seo
-        title={seo.title}
-        description={capabilitiesDescription(locale, capabilities.length)}
-        path="/capabilities"
-        jsonLd={schema}
-      />
-
-      {/* Header — dark ground */}
-      <div style={{ backgroundColor: '#221E1B', paddingTop: 'clamp(64px, 8vw, 128px)', paddingBottom: 'clamp(56px, 7vw, 104px)' }}>
-        <div className="page-grid">
-          <p className="t-caption mb-6 reveal" style={{ color: 'rgba(240,234,218,.4)' }}>{copy.eyebrow}</p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }} className="md:grid-cols-[56%_40%]">
-            <h1 className="t-headline-lg reveal reveal-delay-1" style={{ color: '#F0EADA', margin: 0, maxWidth: '18ch' }}>
-              {capabilities.length} {copy.headingSuffix}
-            </h1>
-            <p className="t-body reveal reveal-delay-2" style={{ color: 'rgba(240,234,218,.6)', maxWidth: '44ch', alignSelf: 'end' }}>
-              {copy.subhead}
-            </p>
-          </div>
-
-          {/* Category jump-nav — colour-coded */}
-          <div className="flex flex-wrap gap-2 reveal reveal-delay-3" style={{ marginTop: '2.5rem' }}>
-            {categories.map(cat => (
-              <a
-                key={cat.key}
-                href={`#${cat.key.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}
-                className="pill"
-                style={{ borderColor: 'rgba(240,234,218,.25)', color: 'rgba(240,234,218,.85)' }}
-              >
-                <span aria-hidden="true" style={{ width: '7px', height: '7px', borderRadius: '100px', backgroundColor: cat.accent, display: 'inline-block', marginRight: '7px' }} />
-                {cat.label}
-              </a>
+    <main id="main" tabIndex={-1}>
+      <PageHead page="capabilities" />
+      <Zone env="frost" className="wrap caps">
+        <nav className="caps__index" aria-label={copy.pages.capabilities}>
+          <ol role="list">
+            {site.categories.map((g, n) => (
+              <li key={g.key}>
+                <a href={`#${groupAnchor(g.key)}`} className="caps__jump">
+                  <span className="t-caption dimmer">{String(n + 1).padStart(2, '0')}</span>
+                  <span>{g.label}</span>
+                </a>
+              </li>
             ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Category blocks */}
-      <div className="page-grid" style={{ paddingTop: 'clamp(56px, 7vw, 112px)', paddingBottom: 'clamp(64px, 8vw, 128px)' }}>
-        {categories.map((cat, pi) => {
-          const items = capabilities.filter(c => c.category === cat.key)
-          const anchor = cat.key.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+          </ol>
+        </nav>
+        {site.categories.map((g, n) => {
+          const items = site.capabilities.filter(x => x.category === g.key)
           return (
-            <section
-              key={cat.key}
-              id={anchor}
-              style={{ scrollMarginTop: '80px', marginBottom: pi < categories.length - 1 ? 'clamp(48px, 6vw, 88px)' : 0 }}
-            >
-              <div className="flex items-baseline gap-4 mb-6 reveal" style={{ flexWrap: 'wrap' }}>
-                <span aria-hidden="true" style={{ width: '10px', height: '10px', borderRadius: '100px', backgroundColor: cat.accent, flex: 'none' }} />
-                <span style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 'clamp(26px, 3vw, 40px)', color: '#221E1B', lineHeight: 1 }}>
-                  {cat.label}
-                </span>
-                <span className="t-body hidden md:block" style={{ color: 'rgba(34,30,27,.5)', fontSize: '15px' }}>
-                  — {cat.blurb}
-                </span>
-              </div>
-
-              <div className="reveal">
-                {items.map(cap => (
-                  <Link
-                    key={cap.slug}
-                    to={`/capabilities/${cap.slug}`}
-                    className="cap-row"
-                    style={{ gridTemplateColumns: '1fr auto', padding: 'clamp(18px, 2vw, 26px) 16px', margin: '0 -16px' }}
-                  >
-                    <div className="grid grid-cols-1 md:grid-cols-[minmax(200px,240px)_1fr] gap-x-8 gap-y-1 items-baseline">
-                      <p className="m-0" style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 'clamp(19px, 1.8vw, 24px)', lineHeight: 1.1 }}>
-                        {cap.name}
-                      </p>
-                      <p className="cap-muted m-0" style={{ fontSize: '15px', color: 'rgba(34,30,27,.6)', maxWidth: '58ch' }}>
-                        {cap.summary}
-                      </p>
-                    </div>
-                    <span className="cap-arrow t-ui self-center" style={{ paddingLeft: '1rem' }}>→</span>
-                  </Link>
+            <section key={g.key} id={groupAnchor(g.key)} className="caps__area" aria-labelledby={`${groupAnchor(g.key)}-t`}>
+              <header className="caps__head">
+                <span className="t-caption dimmer">{String(n + 1).padStart(2, '0')}</span>
+                <h2 id={`${groupAnchor(g.key)}-t`} className="caps__name">
+                  {g.label}
+                </h2>
+                <p className="caps__blurb dim">{g.blurb}</p>
+                <p className="t-caption dimmer">{copy.capabilities.count(items.length)}</p>
+              </header>
+              <ul role="list" className="caps__list">
+                {items.map(x => (
+                  <li key={x.slug}>
+                    <Link to={`/capabilities/${x.slug}`} className="caps__row">
+                      <span className="caps__cap">{x.name}</span>
+                      <span className="caps__go" aria-hidden="true">
+                        →
+                      </span>
+                    </Link>
+                  </li>
                 ))}
-                <div style={{ borderTop: '1px solid rgba(34,30,27,.14)' }} />
-              </div>
+              </ul>
             </section>
           )
         })}
-      </div>
-
-      {/* CTA */}
-      <div style={{ backgroundColor: '#221E1B' }}>
-        <div className="page-grid" style={{ paddingTop: 'clamp(56px, 7vw, 96px)', paddingBottom: 'clamp(56px, 7vw, 96px)', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          <p className="reveal" style={{ fontFamily: 'Lora, Georgia, serif', fontStyle: 'italic', fontSize: 'clamp(22px, 3vw, 40px)', fontWeight: 400, lineHeight: 1.2, letterSpacing: '-0.01em', color: '#F0EADA', margin: 0, maxWidth: '28ch' }}>
-            “{t.capabilitiesIndex.notSureText}”
-          </p>
-          <div>
-            <Link to="/contact" className="btn-milk reveal reveal-delay-1" style={{ textDecoration: 'none', display: 'inline-flex' }}>
-              {t.capabilitiesIndex.startConversation}
-            </Link>
+        {cta ? (
+          <div className="caps__cta">
+            <p className="t-title">{cta.title}</p>
+            {cta.ctaLabel ? (
+              <Cta url={cta.ctaUrl} className="btn">
+                {cta.ctaLabel}
+              </Cta>
+            ) : null}
           </div>
-        </div>
-      </div>
-      {customSections.map(cs => (
-        <CustomSectionBlock key={cs.key} section={cs} />
-      ))}
+        ) : null}
+      </Zone>
     </main>
   )
 }

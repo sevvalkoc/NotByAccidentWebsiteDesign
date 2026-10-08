@@ -1,0 +1,144 @@
+.hdr {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: var(--z-header);
+  height: var(--header-h);
+  display: flex;
+  flex-direction: column;
+  color: var(--fg);
+  transition:
+    transform var(--d-3) var(--ease),
+    background-color var(--d-2) var(--ease);
+}
+.hdr[data-solid] {
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.hdr[data-hidden] {
+  transform: translateY(-100%);
+}
+.hdr__in {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--s-5);
+}
+.hdr__home {
+  display: inline-flex;
+  padding-block: var(--s-3);
+}
+/* The logo is identity, not content: 100–120px wide, never more. */
+.hdr__mark {
+  width: 104px;
+  color: var(--fg);
+}
+.hdr__logo {
+  height: 15px;
+  width: auto;
+}
+@media (min-width: 1024px) {
+  .hdr__mark {
+    width: 120px;
+  }
+}
+.hdr__nav {
+  margin-left: auto;
+  display: none;
+}
+.hdr__nav ul {
+  display: flex;
+  gap: clamp(var(--s-4), 2vw, var(--s-6));
+  margin: 0;
+}
+.hdr__nav a,
+.hdr__contact,
+.hdr__menu {
+  font-size: var(--t-small);
+  font-weight: 500;
+}
+.hdr__nav a {
+  padding-block: var(--s-2);
+  color: var(--fg-2);
+  transition: color var(--d-2) var(--ease);
+}
+.hdr__nav a:hover,
+.hdr__nav a[aria-current] {
+  color: var(--fg);
+}
+.hdr__contact {
+  display: none;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 var(--s-4);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  transition: border-color var(--d-2) var(--ease);
+}
+.hdr__contact:hover,
+.hdr__contact[aria-current] {
+  border-color: var(--fg);
+}
+.hdr__menu {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.hdr__glyph {
+  width: 16px;
+  height: 7px;
+  border-block: 1.5px solid currentColor;
+  transition: height var(--d-2) var(--ease);
+}
+.hdr__menu:hover .hdr__glyph {
+  height: 10px;
+}
+@media (min-width: 1024px) {
+  .hdr__nav {
+    display: block;
+  }
+  .hdr__contact {
+    display: inline-flex;
+  }
+  .hdr__menu {
+    margin-left: 0;
+  }
+  .hdr__menu span:first-child {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+}
+
+/* Announcement: one line above the header, editable under Admin → Global.
+   It adds its height to the header so page tops stay clear. */
+:root:has(.announce) {
+  --announce-h: 32px;
+  --header-h: calc(56px + var(--announce-h));
+}
+.announce {
+  height: var(--announce-h);
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-3);
+  padding-inline: var(--s-4);
+  background: var(--signal);
+  color: var(--void);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.announce span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

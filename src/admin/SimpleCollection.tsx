@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { refreshSite } from '@/content'
 import {
   AdminPageHeader,
   AdminCard,
@@ -55,6 +56,13 @@ export default function SimpleCollection({ config }: { config: SimpleCollectionC
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config.table])
 
+  /** After any write: re-read the list, and refresh the public site's live
+   *  content so an open preview tab picks the change up. */
+  async function reload() {
+    refreshSite()
+    await load()
+  }
+
   async function handleSave(values: Record<string, unknown>) {
     if (!supabase) return
     setError('')
@@ -71,14 +79,14 @@ export default function SimpleCollection({ config }: { config: SimpleCollectionC
       if (error) return setError(error.message)
     }
     setEditing(null)
-    await load()
+    await reload()
   }
 
   async function handleDelete(id: string) {
     if (!supabase) return
     const { error } = await supabase.from(config.table).delete().eq('id', id)
     if (error) setError(error.message)
-    else await load()
+    else await reload()
   }
 
   async function move(row: Row, direction: -1 | 1) {
@@ -92,7 +100,7 @@ export default function SimpleCollection({ config }: { config: SimpleCollectionC
       supabase.from(config.table).update({ [config.orderKey]: b }).eq('id', row.id),
       supabase.from(config.table).update({ [config.orderKey]: a }).eq('id', swapWith.id),
     ])
-    await load()
+    await reload()
   }
 
   return (

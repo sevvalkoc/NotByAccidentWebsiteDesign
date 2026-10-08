@@ -1,145 +1,106 @@
-import { useEffect, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import Link from '@/components/LocalizedLink'
-import Seo from '@/components/Seo'
-import { supabase } from '@/lib/supabase'
-import { useT } from '@/i18n/ui'
-import { usePageSeo } from '@/i18n/pageSeo'
+import { useEffect, useRef, useState } from 'react'
+import { useLocation } from 'react-router-dom'
+import Link from '@/components/Link'
+import Zone from '@/components/Zone'
+import { useCopy, useSection } from '@/content'
+import { usePage } from '@/hooks/usePage'
+import { stripLocale } from '@/i18n/locale'
+import './misc.css'
 
-/* Redirects created in the admin (SEO → Redirects), including the ones
-   auto-created when a Work/Article slug changes, are looked up here: this
-   is a client-side SPA with no server to issue a real HTTP 301, so a
-   checked-then-redirected 404 route is the closest equivalent. Search
-   engines that re-crawl the old URL will still see this happen via
-   history.replaceState, which is a reasonable approximation but not a true
-   301 — worth knowing if redirect SEO value matters for a specific page. */
-function useRedirectCheck() {
-  const location = useLocation()
-  const navigate = useNavigate()
-  const [checked, setChecked] = useState(!supabase)
+const PHRASE = 'Not by Accident'
 
-  useEffect(() => {
-    if (!supabase) return
-    let cancelled = false
-    setChecked(false)
-    supabase
-      .from('redirects')
-      .select('to_path')
-      .eq('from_path', location.pathname)
-      .eq('is_active', true)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (cancelled) return
-        const target = (data as { to_path: string } | null)?.to_path
-        if (target) navigate(target, { replace: true })
-        else setChecked(true)
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [location.pathname, navigate])
-
-  return checked
+/* Deterministic scatter, so the server and the browser agree. */
+function scatter(i: number, len: number) {
+  const r = (n: number) => {
+    const x = Math.sin((i + 1) * 9301 + n * 49297) * 233280
+    return x - Math.floor(x)
+  }
+  // Pull the outermost letters inwards so nothing leaves the screen.
+  const edge = i < 2 ? 6 : i > len - 3 ? -6 : 0
+  return { x: (r(1) - 0.5) * 18 + edge, y: (r(2) - 0.5) * 110 } // vw, % of line height
 }
 
+/** The site's one licensed accident. The letters arrive out of order; drag
+ *  them, or put them back. Everything else here was made on purpose. */
 export default function NotFound() {
-  const checked = useRedirectCheck()
-  const t = useT()
-  const seo = usePageSeo('/404')
-  if (!checked) return null
-  return (
-    <main
-      id="main"
-      style={{
-        paddingTop: '56px',
-        backgroundColor: '#F0EADA',
-        minHeight: '100svh',
-        display: 'flex',
-        alignItems: 'center',
-      }}
-    >
-      <Seo title={seo.title} description={seo.description} path="/404" noindex />
-      <div
-        className="page-grid w-full"
-        style={{
-          paddingTop: 'clamp(64px, 8vw, 128px)',
-          paddingBottom: 'clamp(64px, 8vw, 128px)',
-        }}
-      >
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr',
-            gap: 'clamp(48px, 6vw, 80px)',
-          }}
-          className="md:grid-cols-[50%_45%]"
-        >
-          <div>
-            <p
-              className="t-caption mb-8"
-              style={{ color: 'rgba(34,30,27,.35)' }}
-            >
-              {t.notFound.code}
-            </p>
-            <h1
-              style={{
-                fontFamily: 'Lora, Georgia, serif',
-                fontSize: 'clamp(32px, 5vw, 72px)',
-                fontWeight: 400,
-                lineHeight: 0.98,
-                letterSpacing: '-0.02em',
-                color: '#221E1B',
-                margin: '0 0 2rem',
-                maxWidth: '12ch',
-              }}
-            >
-              {t.notFound.heading}
-            </h1>
-            <p
-              className="t-body"
-              style={{ color: 'rgba(34,30,27,.65)', maxWidth: '40ch', marginBottom: '2.5rem' }}
-            >
-              {t.notFound.body}
-            </p>
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-              <Link
-                to="/"
-                className="btn-primary"
-                style={{ textDecoration: 'none', display: 'inline-flex' }}
-              >
-                {t.notFound.goHome}
-              </Link>
-              <Link
-                to="/work"
-                className="btn-ghost"
-                style={{ textDecoration: 'none', display: 'inline-flex' }}
-              >
-                {t.notFound.seeWork}
-              </Link>
-            </div>
-          </div>
+  const copy = useCopy()
+  const c = copy.notFound
+  const h = useSection('404', 'header')
+  const { pathname } = useLocation()
+  usePage({ page: '404', path: stripLocale(pathname).path, noindex: true })
 
-          <div style={{ alignSelf: 'start', paddingTop: '1rem' }}>
-            <p
-              style={{
-                fontFamily: 'Lora, Georgia, serif',
-                fontStyle: 'italic',
-                fontSize: 'clamp(16px, 1.5vw, 20px)',
-                lineHeight: 1.6,
-                color: 'rgba(34,30,27,.45)',
-                margin: 0,
-                borderLeft: '2px solid #7F8B3E',
-                paddingLeft: '1.5rem',
-              }}
-            >
-              "{t.notFound.quote}"
-            </p>
-            <p className="t-caption mt-4" style={{ color: 'rgba(34,30,27,.3)', paddingLeft: '1.5rem' }}>
-              {t.notFound.attribution}
-            </p>
-          </div>
+  const letters = [...PHRASE]
+  const [tidy, setTidy] = useState(false)
+  const [moved, setMoved] = useState<Record<number, { x: number; y: number }>>({})
+  const drag = useRef<{ i: number; sx: number; sy: number; ox: number; oy: number } | null>(null)
+
+  useEffect(() => {
+    const move = (e: PointerEvent) => {
+      const d = drag.current
+      if (!d) return
+      setMoved(m => ({ ...m, [d.i]: { x: d.ox + (e.clientX - d.sx), y: d.oy + (e.clientY - d.sy) } }))
+    }
+    const up = () => (drag.current = null)
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+    return () => {
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+    }
+  }, [])
+
+  return (
+    <Zone as="div" env="beet" className="lost">
+      <main id="main" tabIndex={-1} className="wrap lost__in">
+        {h?.eyebrow ? <p className="label">{h.eyebrow}</p> : null}
+        <h1 className="phead__title lost__title">{h?.title}</h1>
+        {h?.body ? <p className="t-lead dim lost__body">{h.body}</p> : null}
+
+        <div className="lost__stage" aria-hidden="true" data-tidy={tidy || undefined}>
+          {letters.map((ch, i) => {
+            const s = scatter(i, letters.length)
+            const m = moved[i]
+            const style = tidy
+              ? undefined
+              : ({ transform: `translate(calc(${s.x}vw + ${m?.x ?? 0}px), calc(${s.y}% + ${m?.y ?? 0}px))` } as React.CSSProperties)
+            return (
+              <span
+                key={i}
+                className="lost__ch"
+                data-space={ch === ' ' || undefined}
+                style={style}
+                onPointerDown={e => {
+                  if (tidy) return
+                  ;(e.target as HTMLElement).setPointerCapture?.(e.pointerId)
+                  drag.current = { i, sx: e.clientX, sy: e.clientY, ox: m?.x ?? 0, oy: m?.y ?? 0 }
+                }}
+              >
+                {ch === ' ' ? ' ' : ch}
+              </span>
+            )
+          })}
         </div>
-      </div>
-    </main>
+
+        <p className="t-caption dimmer lost__hint">{c.hint}</p>
+        <div className="actions">
+          <button
+            type="button"
+            className="btn"
+            onClick={() => {
+              setTidy(t => !t)
+              setMoved({})
+            }}
+          >
+            {tidy ? c.untidy : c.tidy}
+          </button>
+          <Link to="/" className="link-q go">
+            {c.home}
+          </Link>
+          <Link to="/work" className="link-q go">
+            {c.work}
+          </Link>
+        </div>
+      </main>
+    </Zone>
   )
 }

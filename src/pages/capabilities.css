@@ -1,0 +1,149 @@
+.caps {
+  padding-block: var(--s-5) var(--section-pad);
+}
+/* The index: five practices, always in view of each other. */
+.caps__index ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin: 0 0 var(--s-8);
+}
+.caps__jump {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--s-2);
+  padding: 10px 16px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  font-size: var(--t-small);
+  transition:
+    background-color var(--d-2) var(--ease),
+    color var(--d-2) var(--ease);
+}
+.caps__jump:hover,
+.caps__jump:focus-visible {
+  background: var(--fg);
+  color: var(--bg);
+}
+.caps__jump:hover .dimmer,
+.caps__jump:focus-visible .dimmer {
+  color: inherit;
+}
+/* Each practice: name and line on the left, its disciplines on the right. */
+.caps__area {
+  display: grid;
+  gap: var(--s-5) var(--gutter);
+  padding-block: var(--s-7);
+  border-top: 1px solid var(--rule);
+  scroll-margin-top: calc(var(--header-h) + var(--s-4));
+}
+.caps__head {
+  display: grid;
+  gap: var(--s-2);
+  align-content: start;
+}
+.caps__name {
+  font-size: var(--t-section);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+}
+.caps__blurb {
+  max-width: 34ch;
+}
+.caps__list {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: var(--gutter);
+}
+.caps__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-4);
+  padding-block: var(--s-3);
+  border-bottom: 1px solid var(--rule);
+}
+.caps__cap {
+  font-size: var(--t-lead);
+  line-height: 1.25;
+  transition: transform var(--d-3) var(--ease);
+}
+.caps__go {
+  opacity: 0.4;
+  transition:
+    opacity var(--d-2) var(--ease),
+    transform var(--d-3) var(--ease);
+}
+.caps__row:hover .caps__cap,
+.caps__row:focus-visible .caps__cap {
+  transform: translateX(6px);
+}
+.caps__row:hover .caps__go,
+.caps__row:focus-visible .caps__go {
+  opacity: 1;
+  transform: translateX(-2px);
+}
+@media (min-width: 768px) {
+  .caps__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .caps__area {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    padding-block: var(--s-8);
+  }
+  .caps__head {
+    grid-column: 1 / span 4;
+    position: sticky;
+    top: calc(var(--header-h) + var(--s-5));
+    align-self: start;
+  }
+  .caps__list {
+    grid-column: 6 / -1;
+  }
+}
+.caps__cta {
+  display: grid;
+  gap: var(--s-5);
+  justify-items: start;
+  max-width: 36ch;
+  padding-top: var(--s-8);
+  border-top: 1px solid var(--rule);
+}
+/* Detail */
+.cap__lede {
+  max-width: 36ch;
+}
+.cap__qa {
+  padding-block: var(--section-pad);
+}
+.cap__qa-body {
+  display: grid;
+  gap: var(--s-8);
+}
+.cap__qa-body .t-section {
+  max-width: 20ch;
+}
+.cap__a {
+  max-width: 30ch;
+  margin-top: var(--s-3);
+}
+.cap__work {
+  display: grid;
+  gap: var(--s-6) var(--gutter);
+  margin: 0;
+}
+@media (min-width: 768px) {
+  .cap__work {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.cap__work-link {
+  display: grid;
+  gap: var(--s-2);
+}
+.cap__cta {
+  margin-top: var(--s-7);
+}

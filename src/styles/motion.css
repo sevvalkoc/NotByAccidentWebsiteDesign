@@ -1,0 +1,105 @@
+/* ── Motion ──────────────────────────────────────────────────────────────
+   Three ideas, nothing else:
+   1. The slip: media in bands that fall out of register and settle back.
+   2. Environments: the page changes colour as you move between zones.
+   3. Sheets: pages push in over each other (base.css).
+   Plus quiet arrivals: lines rise into place, blocks wipe in once. */
+
+/* ── 1. The slip ──────────────────────────────────────────────────────── */
+.slip {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: rgb(128 128 128 / 0.12);
+}
+.slip__band {
+  position: absolute;
+  inset: 0;
+  /* 1px overlap: at rest, anti-aliased band edges would otherwise show the
+     placeholder through as hairlines. Neighbouring bands carry the same
+     image, so the overlap is invisible. */
+  clip-path: inset(max(0px, calc(var(--top) - 1px)) 0 max(0px, calc(var(--bottom) - 1px)) 0);
+  transform: translate3d(0, 0, 0);
+  transition: transform 560ms var(--ease);
+  transition-delay: calc(var(--i) * 45ms);
+}
+.slip img,
+.slip video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--fx, 50%) var(--fy, 50%);
+}
+.slip > video {
+  position: absolute;
+  inset: 0;
+}
+/* Interruption: the bands jump quickly out of register… */
+.slip[data-slip='out'] .slip__band {
+  transform: translate3d(var(--dx), 0, 0);
+  transition-duration: 140ms;
+  transition-delay: calc(var(--i) * 16ms);
+}
+/* …then settle back, weighted, one after another (the rule above). */
+@media (prefers-reduced-motion: reduce) {
+  .slip__band {
+    transition: none;
+  }
+  .slip[data-slip='out'] .slip__band {
+    transform: none;
+  }
+}
+
+/* The slip, in type: on intent a line and its neighbour part company for
+   a moment, then settle back into register. */
+@keyframes nba-slip-type {
+  30% {
+    transform: translateX(var(--dx));
+  }
+}
+
+/* ── Arrivals ─────────────────────────────────────────────────────────── */
+.js-cuts [data-cut]:not([data-cut='in']) {
+  clip-path: inset(0 0 100% 0);
+  animation: nba-failsafe 1ms 3s forwards;
+}
+[data-cut] {
+  transition: clip-path 800ms var(--ease);
+  transition-delay: calc(var(--i, 0) * 80ms);
+}
+[data-cut='in'] {
+  clip-path: inset(0 0 0 0);
+}
+@keyframes nba-failsafe {
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* Lines rise inside their own mask. Transform only, so text is painted
+   (and counted for LCP) from the first frame. */
+.rise {
+  display: block;
+  overflow: clip;
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+.rise > span {
+  display: inline-block;
+  animation: nba-rise 900ms var(--ease) both;
+  animation-delay: calc(80ms + var(--i, 0) * 80ms);
+}
+@keyframes nba-rise {
+  from {
+    transform: translateY(104%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js-cuts [data-cut]:not([data-cut='in']) {
+    clip-path: none;
+  }
+  .rise > span {
+    animation: none;
+  }
+}

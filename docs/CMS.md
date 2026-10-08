@@ -16,8 +16,9 @@ before the admin dashboard works:
 
 ### 1. Run the database migrations
 
-Go to your Supabase project → **SQL Editor** → **New query**, and run these
-four files in order (copy-paste the whole file, click Run):
+Go to your Supabase project → **SQL Editor** → **New query**, and run the
+files in `supabase/migrations/` in order, 0001 to 0010 (copy-paste the whole
+file, click Run). The first four:
 
 1. `supabase/migrations/0001_init.sql` — creates every table, security rule
    and storage bucket.
@@ -40,7 +41,13 @@ four files in order (copy-paste the whole file, click Run):
    flow uses to create a profile row. It changes no behaviour — that
    function only ever runs as the `on_auth_user_created` trigger anyway.
 
-All four files are safe to re-run if something goes wrong partway through.
+Then 0005–0009 (the previous site's page sections, kept so both sites can
+share one database) and **0010_next_site.sql**, which this site needs: it
+adds the new-site pages (`next/*`), their sections, the practice-area table
+and the extra SEO/social/video columns. It never overwrites anything an
+editor has changed. Details in `docs/05-v2.md`.
+
+All files are safe to re-run if something goes wrong partway through.
 
 Also turn on email confirmation: Supabase Dashboard → **Authentication** →
 **Providers** → **Email** → make sure **Confirm email** is switched on. That
@@ -242,6 +249,29 @@ without deleting it.
 
 ---
 
+## Editing the homepage and other pages
+
+**Homepage** in the sidebar shows every section of the homepage as a card,
+top to bottom: Hero, Selected work, Practice areas, Proof, Studio statement,
+Featured notes, Contact, then SEO. Change a field, click that card's
+**Save**, and the change is live on the next page load. "Saved. Live on the
+site now." means the database accepted it; if it can't save, it says why.
+
+- Wrap a word in `*asterisks*` to set it in italic (`We make companies *wanted*.`).
+- **Visible** hides or shows a whole section.
+- Pickers (projects, notes, testimonial) only list real records. A draft
+  project can be picked but won't appear until it's published.
+- An image is uploaded straight from the card; a video URL, if set, plays
+  instead of the image, and the image becomes its poster.
+
+**Pages** has a tab per page (Work, Studio, Contact, Privacy…) with the same
+cards. **Global** edits the header menu, the footer menu, the footer's
+closing line and the announcement bar (shown above the header while it is
+visible and has text).
+
+Every page has an **SEO** card: SEO title, meta description, social
+title/description/image, canonical URL, and "hide from search engines".
+
 ## Editing Contact information, the footer and navigation
 
 **Footer / Contact** in the sidebar edits your studio address, phone,
@@ -250,8 +280,8 @@ once, and it updates in the footer, the Contact page, and the site's
 structured data (the machine-readable info search engines and AI assistants
 read) simultaneously.
 
-**Navigation** manages the header menu and the footer's "Explore" column —
-label, URL, whether it opens in a new tab, and the order. Changing a link's
+**Navigation** manages the *previous* site's menus. The new site's header
+and footer menus are under **Global**, so editing one never changes the other. Changing a link's
 URL here does **not** automatically create a redirect — if a page's actual
 address changed, add that under **SEO → Redirects** as well.
 
@@ -310,21 +340,14 @@ update automatically as you publish content.
 
 Being direct about this rather than letting you discover it by accident:
 
-- **Homepage & Studio page copy** (the Hero headline rotation, section
-  eyebrows/headings, the Studio page's opening statement and principles
-  text) is not yet wired to a live editor. The database schema for this
-  (`pages` / `page_sections`) already exists and is ready — building the
-  admin screen and the corresponding read-side wiring is the next phase.
-  Everything else in this document **is** live today.
-- **Brand Settings' colours and fonts** are stored but not yet applied to
-  the live site's CSS automatically (see above).
+- The Dutch and French versions use their own built-in copy; the CMS edits
+  the English site.
+- **Brand Settings' colours and fonts** are stored but not applied to the
+  site's CSS automatically. The logo, favicon and default social image are.
 - Scheduled publishing (`scheduled_at` fields exist on Work and Articles)
   is not yet automated — publishing still happens by clicking Publish.
-  There's no cron job flipping status at a future time yet.
-- The SEO overview is a straightforward field-presence check, not a full
-  crawler (no broken-link detection across the whole site, for instance).
+- Search engines see an edit after the next deploy (the static pages are
+  rebuilt then); visitors see it immediately.
 
-None of this affects what's already live and working: Work, Blog/Notes,
-Testimonials, Clients, Partners, Studio team, Trainings (private catalogue
-prep), Reports, Media Library, Contact/Footer settings, Navigation,
-Submissions, and Redirects are all fully functional today.
+Everything else in this guide is live and covered by the automated
+acceptance test (`scripts/cms-acceptance.mjs`, see `docs/05-v2.md`).

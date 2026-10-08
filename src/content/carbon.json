@@ -1,0 +1,36 @@
+{
+  "model": "Sustainable Web Design v4",
+  "library": "CO2.js 0.19.0",
+  "greenHosting": false,
+  "gramsPerByte": 1.482e-7,
+  "scale": [
+    {
+      "grade": "A+",
+      "max": 0.04
+    },
+    {
+      "grade": "A",
+      "max": 0.079
+    },
+    {
+      "grade": "B",
+      "max": 0.145
+    },
+    {
+      "grade": "C",
+      "max": 0.209
+    },
+    {
+      "grade": "D",
+      "max": 0.278
+    },
+    {
+      "grade": "E",
+      "max": 0.359
+    },
+    {
+      "grade": "F",
+      "max": null
+    }
+  ]
+}

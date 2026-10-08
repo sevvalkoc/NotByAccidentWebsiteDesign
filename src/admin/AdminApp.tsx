@@ -1,3 +1,5 @@
+import './admin.css'
+import { useEffect } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { useAuth, isStaff, isAdmin, isPending, signOut } from '@/lib/auth'
 import { supabaseReady } from '@/lib/supabase'
@@ -9,6 +11,8 @@ import ForgotPassword from '@/admin/ForgotPassword'
 import ResetPassword from '@/admin/ResetPassword'
 import Dashboard from '@/admin/Dashboard'
 import Pages from '@/admin/Pages'
+import SiteEditor from '@/admin/SiteEditor'
+import SitePages from '@/admin/SitePages'
 import WorkList from '@/admin/WorkList'
 import WorkEditor from '@/admin/WorkEditor'
 import Capabilities from '@/admin/Capabilities'
@@ -57,6 +61,15 @@ function AdminShell({ profile }: { profile: Profile | null }) {
       <Routes>
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
+        <Route
+          path="homepage"
+          element={<SiteEditor slug="home" title="Homepage" description="Every section of the homepage: copy, images, video, selected projects, practice areas, proof, notes, contact and SEO. Save writes straight to the live site." />}
+        />
+        <Route path="site-pages" element={<SitePages />} />
+        <Route
+          path="global"
+          element={<SiteEditor slug="global" title="Global" description="Header and footer menus, footer copy and the announcement bar. Contact details and socials live under Footer / Contact; logo and favicon under Brand Settings." />}
+        />
         <Route path="pages" element={<Pages />} />
         <Route path="work" element={<WorkList />} />
         <Route path="work/:id" element={<WorkEditor />} />
@@ -88,6 +101,11 @@ function AdminShell({ profile }: { profile: Profile | null }) {
 
 export default function AdminApp() {
   const { loading, session, profile } = useAuth()
+
+  useEffect(() => {
+    document.body.dataset.admin = ''
+    return () => void delete document.body.dataset.admin
+  }, [])
 
   if (!supabaseReady) return <Login />
   if (loading) {

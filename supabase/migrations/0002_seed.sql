@@ -131,7 +131,7 @@ values
   ('external', 'https://images.unsplash.com/photo-1503694978374-8a2fa686963a?w=1200&h=800&fit=crop&auto=format', 'image', 'photo-1503694978374-8a2fa686963a', null),
   ('external', 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=1200&h=800&fit=crop&auto=format', 'image', 'photo-1554224155-8d04cb21cd6c', null),
   ('external', 'https://images.unsplash.com/photo-1675773051474-55c4b7d2cf53?w=600&h=750&fit=crop&auto=format', 'image', 'photo-1675773051474-55c4b7d2cf53', null),
-  ('external', 'https://images.unsplash.com/photo-1523908511403-7fc7b25592f4?w=600&h=750&fit=crop&auto=format', 'image', 'photo-1523908511403-7fc7b25592f4', null);
+  ('external', 'https://images.unsplash.com/photo-1523908511403-7fc7b25592f4?w=600&h=750&fit=crop&auto=format', 'image', 'photo-1523908511403-7fc7b25592f4', null)
 on conflict (bucket, storage_path) do nothing;
 
 -- Projects / Case studies
