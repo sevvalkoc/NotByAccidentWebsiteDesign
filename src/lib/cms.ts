@@ -1,593 +1,294 @@
-/* Public-read data layer: fetches published content from Supabase and maps
-   it onto the exact shapes src/data.ts already exports, so every existing
-   page keeps working unchanged — it just calls a hook instead of importing
-   a static array. Every fetcher returns `null` (not `[]`) on any failure or
-   when Supabase isn't configured yet, so callers can tell "empty" apart
-   from "couldn't ask" and fall back to the static seed data accordingly. */
-import { supabase, supabaseReady, publicMediaUrl } from '@/lib/supabase'
-import type { Project, ProjectNarrative, Note, NoteBlock, Capability, Category, TeamMember } from '@/data'
-import type {
-  Testimonial,
-  Wordmark,
-  Social,
-  Company,
-  Hero,
-  Homepage,
-  Studio,
-  StudioListItem,
-  ContactCopy,
-  ReportsCopy,
-  PageHeader,
-  CapabilitiesPageCopy,
-  LegalCopy,
-  CookiesCopy,
-  NavLink,
-  Seo,
-  Trainings,
-  CategoryMeta,
-  CustomSection,
-} from '@/content'
-import type { ArticleBlock } from '@/lib/database.types'
+/* Public-read CMS layer. Pure functions over a Supabase client, so the same
+   code runs in the browser (live refresh after hydration) and in Node at
+   build time (scripts/cms-snapshot.ts), which keeps prerendered HTML and
+   the hydrated app in agreement.
 
-type MediaRef = { bucket: string; storage_path: string } | null
-function mediaUrl(m: MediaRef): string {
-  return m ? publicMediaUrl(m.bucket, m.storage_path) : ''
+   Row-level security does the publishing work: anonymous reads only ever
+   see published projects/articles, active capabilities and visible
+   sections. Every fetcher returns null on failure so the caller keeps its
+   seed value. Where a query uses columns added by migration 0010, it falls
+   back to the pre-0010 column set so an unmigrated database still works. */
+import type { SupabaseClient } from '@supabase/supabase-js'
+import type { Project, ProjectNarrative, NoteBlock, Category, TeamMember } from '../content/seed/data.en.ts'
+import type { ArticleBlock } from './database.types.ts'
+import type {
+  Company,
+  Social,
+  Testimonial,
+  CategoryMeta,
+  LiveContent,
+  MediaRef,
+  MetaOverride,
+  PageSections,
+  SectionContent,
+  SectionItem,
+  Brand,
+  Project as RichProject,
+  Note as RichNote,
+  Capability as RichCapability,
+} from '../content/types.ts'
+
+type MediaRow = {
+  bucket: string
+  storage_path: string
+  file_type?: string | null
+  alt_text?: string | null
+  caption?: string | null
+  focal_x?: number | null
+  focal_y?: number | null
+} | null
+
+const MEDIA = 'bucket, storage_path, file_type, alt_text, caption, focal_x, focal_y'
+
+function url(client: SupabaseClient, m: MediaRow): string {
+  if (!m || !m.storage_path) return ''
+  if (m.bucket === 'external') return m.storage_path
+  return client.storage.from(m.bucket).getPublicUrl(m.storage_path).data.publicUrl
 }
 
-export async function fetchProjects(): Promise<Project[] | null> {
-  if (!supabase) return null
-  const { data, error } = await supabase
-    .from('projects')
-    .select(
-      `id, slug, title, year, location, short_description, challenge, insight, strategy, what_we_did,
-       outcome, results, services, related_capability_slugs, featured, sort_order,
-       hero_image:media!hero_image_media_id ( bucket, storage_path ),
-       thumbnail:media!thumbnail_media_id ( bucket, storage_path )`
-    )
-    .eq('status', 'published')
-    .order('sort_order', { ascending: true })
-  if (error || !data) return null
-  type Row = {
+function mediaRef(client: SupabaseClient, m: MediaRow, fallbackAlt = ''): MediaRef | null {
+  const u = url(client, m)
+  if (!u) return null
+  return {
+    url: u,
+    alt: m?.alt_text || fallbackAlt,
+    kind: m?.file_type === 'video' || /\.(mp4|webm|mov)(\?|$)/i.test(u) ? 'video' : 'image',
+    caption: m?.caption || undefined,
+    focalX: m?.focal_x ?? undefined,
+    focalY: m?.focal_y ?? undefined,
+  }
+}
+
+const clean = <T extends object>(o: T): T => Object.fromEntries(Object.entries(o).filter(([, v]) => v !== null && v !== undefined && v !== '')) as T
+
+function meta(client: SupabaseClient, r: Record<string, unknown>): MetaOverride {
+  return clean({
+    title: (r.seo_title as string) || undefined,
+    description: (r.seo_description as string) || undefined,
+    ogTitle: (r.og_title as string) || undefined,
+    ogDescription: (r.og_description as string) || undefined,
+    ogImage: url(client, (r.og as MediaRow) ?? null) || undefined,
+    canonical: (r.canonical_url as string) || undefined,
+    noindex: (r.noindex as boolean) || undefined,
+  })
+}
+
+/** Runs the extended query; on a column error, the pre-0010 one. */
+async function tryBoth<T>(rich: () => PromiseLike<{ data: T | null; error: unknown }>, base: () => PromiseLike<{ data: T | null; error: unknown }>) {
+  const a = await rich()
+  if (!a.error) return a.data
+  const b = await base()
+  return b.error ? null : b.data
+}
+
+/* ── Projects ──────────────────────────────────────────────────────────── */
+const PROJECT_BASE = `id, slug, title, client, industry, year, location, short_description, introduction, challenge, insight, strategy, what_we_did,
+  outcome, results, services, related_capability_slugs, featured, sort_order, credits, external_url,
+  seo_title, seo_description, canonical_url, noindex,
+  hero_image:media!hero_image_media_id ( ${MEDIA} ),
+  thumbnail:media!thumbnail_media_id ( ${MEDIA} ),
+  og:media!og_media_id ( ${MEDIA} ),
+  project_media ( kind, video_url, caption, sort_order, media ( ${MEDIA} ) )`
+const PROJECT_RICH = PROJECT_BASE + ', hero_video_url, og_title, og_description'
+
+export async function fetchProjects(client: SupabaseClient): Promise<RichProject[] | null> {
+  const run = (cols: string) => client.from('projects').select(cols).eq('status', 'published').order('sort_order', { ascending: true })
+  const data = await tryBoth(() => run(PROJECT_RICH), () => run(PROJECT_BASE))
+  if (!data || (data as unknown[]).length === 0) return null
+  type Row = Record<string, unknown> & {
     id: string
     slug: string
     title: string
-    year: string | null
-    location: string | null
-    short_description: string | null
-    challenge: string | null
-    insight: string | null
-    strategy: string | null
-    what_we_did: string | null
-    outcome: string | null
-    results: string | null
     services: string[] | null
     related_capability_slugs: string[] | null
     featured: boolean
-    sort_order: number
-    hero_image: MediaRef
-    thumbnail: MediaRef
+    hero_image: MediaRow
+    thumbnail: MediaRow
+    project_media: { kind: string; video_url: string | null; caption: string | null; sort_order: number; media: MediaRow }[] | null
   }
-  return (data as unknown as Row[]).map((row, index): Project => {
-    const hasNarrative = Boolean(row.challenge || row.insight || row.strategy || row.what_we_did || row.outcome)
+  return (data as unknown as Row[]).map((row, index): RichProject => {
+    const s = (k: string) => (row[k] as string | null) ?? ''
+    const hasNarrative = Boolean(s('challenge') || s('insight') || s('strategy') || s('what_we_did') || s('outcome'))
     const narrative: ProjectNarrative | null = hasNarrative
-      ? {
-          problem: row.challenge ?? '',
-          insight: row.insight ?? '',
-          intervention: row.strategy ?? row.what_we_did ?? '',
-          outcome: row.outcome ?? row.results ?? '',
-        }
+      ? { problem: s('challenge'), insight: s('insight'), intervention: s('strategy') || s('what_we_did'), outcome: s('outcome') || s('results') }
       : null
-    const hero = mediaUrl(row.hero_image) || mediaUrl(row.thumbnail)
-    const thumb = mediaUrl(row.thumbnail) || mediaUrl(row.hero_image)
-    return {
+    const hero = url(client, row.hero_image) || url(client, row.thumbnail)
+    const gallery = [...(row.project_media ?? [])]
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((pm): MediaRef | null => {
+        const m = mediaRef(client, pm.media, row.title)
+        if (pm.kind === 'video' && pm.video_url) return { url: pm.video_url, alt: row.title, kind: 'video' as const, caption: pm.caption ?? undefined, poster: m?.url }
+        return m ? { ...m, caption: pm.caption || m.caption } : null
+      })
+      .filter((m): m is MediaRef => m !== null)
+    const base: Project = {
       id: row.id,
-      // Display position, not the raw sort_order value — keeps numbering
-      // dense and starting at 01 regardless of what sort_order a new row
-      // happens to have been created with.
       num: String(index + 1).padStart(2, '0'),
       name: row.title,
       discipline: (row.services ?? []).join(' · '),
-      year: row.year ?? '',
-      location: row.location ?? '',
-      brief: row.short_description ?? '',
+      year: s('year'),
+      location: s('location'),
+      brief: s('short_description'),
       narrative,
       services: row.services ?? [],
       relatedCapabilities: row.related_capability_slugs ?? [],
-      img: thumb,
+      img: url(client, row.thumbnail) || hero,
       heroImg: hero,
-      result: row.results || narrative?.outcome || '',
+      result: s('results') || narrative?.outcome || '',
       slug: row.slug,
       featured: row.featured,
+    }
+    return {
+      ...base,
+      client: s('client') || undefined,
+      industry: s('industry') || undefined,
+      introduction: s('introduction') || undefined,
+      heroVideo: s('hero_video_url') || undefined,
+      gallery,
+      credits: s('credits') || undefined,
+      externalUrl: s('external_url') || undefined,
+      seo: meta(client, row),
     }
   })
 }
 
-export async function fetchCategoryMeta(): Promise<CategoryMeta[] | null> {
-  if (!supabase) return null
-  const { data, error } = await supabase
-    .from('category_meta')
-    .select('key, label, blurb, accent')
-    .order('sort_order', { ascending: true })
-  if (error || !data) return null
+/* ── Capabilities ──────────────────────────────────────────────────────── */
+export async function fetchCategoryMeta(client: SupabaseClient): Promise<CategoryMeta[] | null> {
+  const { data, error } = await client.from('category_meta').select('key, label, blurb').order('sort_order', { ascending: true })
+  if (error || !data || data.length === 0) return null
   return data as CategoryMeta[]
 }
 
-export async function fetchCapabilities(): Promise<Capability[] | null> {
-  if (!supabase) return null
-  const { data, error } = await supabase
-    .from('capabilities')
-    .select('slug, name, category, summary, lede, includes, question, outcome, queries')
-    .eq('is_active', true)
-    .order('sort_order', { ascending: true })
-  if (error || !data) return null
-  type Row = {
-    slug: string
-    name: string
-    category: Category
-    summary: string | null
-    lede: string | null
-    includes: string[] | null
-    question: string | null
-    outcome: string | null
-    queries: string[] | null
-  }
-  return (data as Row[]).map(
-    (row): Capability => ({
+const CAP_BASE = 'slug, name, category, summary, lede, includes, question, outcome, queries'
+const CAP_RICH = CAP_BASE + `, seo_title, seo_description, canonical_url, noindex, og:media!og_media_id ( ${MEDIA} )`
+
+export async function fetchCapabilities(client: SupabaseClient): Promise<RichCapability[] | null> {
+  const run = (cols: string) => client.from('capabilities').select(cols).eq('is_active', true).order('sort_order', { ascending: true })
+  const data = await tryBoth(() => run(CAP_RICH), () => run(CAP_BASE))
+  if (!data || (data as unknown[]).length === 0) return null
+  type Row = Record<string, unknown> & { slug: string; name: string; category: Category; includes: string[] | null; queries: string[] | null }
+  return (data as unknown as Row[]).map(
+    (row): RichCapability => ({
       slug: row.slug,
       name: row.name,
       category: row.category,
-      summary: row.summary ?? '',
-      lede: row.lede ?? '',
+      summary: (row.summary as string) ?? '',
+      lede: (row.lede as string) ?? '',
       includes: row.includes ?? [],
-      question: row.question ?? '',
-      outcome: row.outcome ?? '',
+      question: (row.question as string) ?? '',
+      outcome: (row.outcome as string) ?? '',
       queries: row.queries ?? [],
-    })
+      seo: meta(client, row),
+    }),
   )
 }
 
-export async function fetchNotes(): Promise<Note[] | null> {
-  if (!supabase) return null
-  const { data, error } = await supabase
-    .from('articles')
-    .select(
-      `id, slug, title, excerpt, body, reading_time_minutes, published_at,
-       hero_image:media!hero_image_media_id ( bucket, storage_path ),
-       category:article_categories ( name )`
-    )
-    .eq('status', 'published')
-    .order('published_at', { ascending: false })
-  if (error || !data) return null
-  type Row = {
+/* ── Notes ─────────────────────────────────────────────────────────────── */
+const NOTE_BASE = `id, slug, title, excerpt, body, tags, reading_time_minutes, published_at,
+  seo_title, seo_description, canonical_url, noindex,
+  hero_image:media!hero_image_media_id ( ${MEDIA} ),
+  og:media!og_media_id ( ${MEDIA} ),
+  category:article_categories ( name )`
+const NOTE_RICH = NOTE_BASE + ', og_title, og_description'
+
+export async function fetchNotes(client: SupabaseClient): Promise<RichNote[] | null> {
+  const run = (cols: string) => client.from('articles').select(cols).eq('status', 'published').order('published_at', { ascending: false })
+  const data = await tryBoth(() => run(NOTE_RICH), () => run(NOTE_BASE))
+  if (!data || (data as unknown[]).length === 0) return null
+  type Row = Record<string, unknown> & {
     id: string
     slug: string
     title: string
-    excerpt: string | null
     body: ArticleBlock[] | null
-    reading_time_minutes: number | null
-    published_at: string | null
-    hero_image: MediaRef
+    tags: string[] | null
+    hero_image: MediaRow
     category: { name: string } | null
   }
   const rows = data as unknown as Row[]
-
-  // Image blocks store a media id, not a URL — resolve every referenced id
-  // across all articles in one batch instead of one query per block.
-  const imageMediaIds = new Set<string>()
-  for (const row of rows) for (const b of row.body ?? []) if (b.type === 'image' && b.mediaId) imageMediaIds.add(b.mediaId)
-  const mediaById = new Map<string, string>()
-  if (imageMediaIds.size > 0) {
-    const { data: mediaRows } = await supabase.from('media').select('id, bucket, storage_path').in('id', [...imageMediaIds])
-    for (const m of (mediaRows as { id: string; bucket: string; storage_path: string }[]) ?? []) {
-      mediaById.set(m.id, publicMediaUrl(m.bucket, m.storage_path))
-    }
+  const ids = new Set<string>()
+  for (const row of rows) for (const b of row.body ?? []) if (b.type === 'image' && b.mediaId) ids.add(b.mediaId)
+  const byId = new Map<string, string>()
+  if (ids.size > 0) {
+    const { data: media } = await client.from('media').select(`id, ${MEDIA}`).in('id', [...ids])
+    for (const m of (media as (MediaRow & { id: string })[]) ?? []) byId.set(m!.id, url(client, m))
   }
-
-  function toNoteBlocks(blocks: ArticleBlock[]): NoteBlock[] {
-    return blocks
+  const toBlocks = (blocks: ArticleBlock[]): NoteBlock[] =>
+    blocks
       .map((b): NoteBlock | null => {
         if (b.type === 'image') {
-          const url = mediaById.get(b.mediaId)
-          return url ? { type: 'image', url, caption: b.caption } : null
+          const u = byId.get(b.mediaId)
+          return u ? { type: 'image', url: u, caption: b.caption } : null
         }
         return b as NoteBlock
       })
       .filter((b): b is NoteBlock => b !== null)
-  }
-
-  function toPlainText(blocks: ArticleBlock[]): string {
-    return blocks
-      .map(b => {
-        if (b.type === 'list') return b.items.join('\n')
-        if (b.type === 'image' || b.type === 'divider' || b.type === 'embed') return ''
-        return b.text
-      })
+  const toText = (blocks: ArticleBlock[]) =>
+    blocks
+      .map(b => (b.type === 'list' ? b.items.join('\n') : b.type === 'image' || b.type === 'divider' || b.type === 'embed' ? '' : b.text))
       .filter(Boolean)
       .join('\n\n')
-  }
 
-  return rows.map((row): Note => {
+  return rows.map((row): RichNote => {
     const blocks = row.body ?? []
+    const published = row.published_at as string | null
     return {
       id: row.id,
       title: row.title,
-      subtitle: row.excerpt ?? '',
-      body: toPlainText(blocks),
-      blocks: toNoteBlocks(blocks),
-      date: row.published_at
-        ? new Date(row.published_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
-        : '',
+      subtitle: (row.excerpt as string) ?? '',
+      body: toText(blocks),
+      blocks: toBlocks(blocks),
+      date: published ? new Date(published).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Amsterdam' }) : '',
       category: row.category?.name ?? 'Notes',
       readTime: row.reading_time_minutes ? `${row.reading_time_minutes} min` : '',
-      img: mediaUrl(row.hero_image),
+      img: url(client, row.hero_image),
       slug: row.slug,
+      tags: row.tags ?? [],
+      seo: meta(client, row),
     }
   })
 }
 
-export async function fetchTestimonials(): Promise<Testimonial[] | null> {
-  if (!supabase) return null
-  const { data, error } = await supabase
-    .from('testimonials')
-    .select('quote, person_name, role, company')
-    .eq('is_active', true)
-    .order('sort_order', { ascending: true })
-  if (error || !data) return null
-  return (data as { quote: string; person_name: string; role: string | null; company: string | null }[]).map(
-    (row): Testimonial => ({ quote: row.quote, name: row.person_name, role: row.role ?? '', company: row.company ?? '' })
-  )
+/* ── People ────────────────────────────────────────────────────────────── */
+export async function fetchTestimonials(client: SupabaseClient): Promise<Testimonial[] | null> {
+  const { data, error } = await client.from('testimonials').select('quote, person_name, role, company').eq('is_active', true).order('sort_order', { ascending: true })
+  if (error || !data || data.length === 0) return null
+  return (data as { quote: string; person_name: string; role: string | null; company: string | null }[]).map(r => ({
+    quote: r.quote,
+    name: r.person_name,
+    role: r.role ?? '',
+    company: r.company ?? '',
+  }))
 }
 
-async function fetchWordmarks(table: 'clients' | 'partners', nameCol: 'company_name' | 'partner_name'): Promise<Wordmark[] | null> {
-  if (!supabase) return null
-  const { data, error } = await supabase
-    .from(table)
-    .select(`${nameCol}, logo:media!logo_media_id ( bucket, storage_path )`)
-    .eq('is_active', true)
-    .order('sort_order', { ascending: true })
-  if (error || !data) return null
-  type Row = Record<string, unknown> & { logo: MediaRef }
-  return (data as unknown as Row[]).map((row): Wordmark => {
-    const name = String(row[nameCol] ?? '')
-    // No uploaded logo yet — fall back to a typographic wordmark so the
-    // slider still reads as distinct marks rather than blank tiles.
-    const styles: Wordmark['style'][] = ['serif', 'sans-tight', 'sans-wide', 'mono', 'italic', 'black']
-    const style = styles[Math.abs(hashCode(name)) % styles.length]
-    return { name, style }
-  })
-}
-function hashCode(s: string): number {
-  let h = 0
-  for (let i = 0; i < s.length; i++) h = (h << 5) - h + s.charCodeAt(i)
-  return h
-}
-export const fetchClients = () => fetchWordmarks('clients', 'company_name')
-export const fetchPartners = () => fetchWordmarks('partners', 'partner_name')
-
-export async function fetchTeam(): Promise<TeamMember[] | null> {
-  if (!supabase) return null
-  const { data, error } = await supabase
+export async function fetchTeam(client: SupabaseClient): Promise<TeamMember[] | null> {
+  const { data, error } = await client
     .from('team_members')
-    .select('id, name, role, bio, portrait:media!portrait_media_id ( bucket, storage_path )')
+    .select(`id, name, role, bio, portrait:media!portrait_media_id ( ${MEDIA} )`)
     .eq('is_active', true)
     .order('sort_order', { ascending: true })
+  if (error || !data || data.length === 0) return null
+  type Row = { id: string; name: string; role: string | null; bio: string | null; portrait: MediaRow }
+  return (data as unknown as Row[]).map(r => ({ id: r.id, name: r.name, role: r.role ?? '', bio: r.bio ?? '', img: url(client, r.portrait) }))
+}
+
+/* ── Settings, brand, navigation ───────────────────────────────────────── */
+export async function fetchSiteSettings(
+  client: SupabaseClient,
+  fallback: Company,
+): Promise<{ company: Company; socials: Social[]; seoDefaults: MetaOverride } | null> {
+  const { data, error } = await client.from('site_settings').select('*').eq('id', 1).maybeSingle()
   if (error || !data) return null
-  type Row = { id: string; name: string; role: string | null; bio: string | null; portrait: MediaRef }
-  return (data as unknown as Row[]).map(
-    (row): TeamMember => ({ id: row.id, name: row.name, role: row.role ?? '', bio: row.bio ?? '', img: mediaUrl(row.portrait) })
-  )
-}
-
-/* Homepage hero copy and section headings — reads the `pages` / `page_sections`
-   rows seeded by supabase/migrations/0005_homepage_sections.sql. Returns only
-   the fields present in the DB; content.ts merges this over the static seed
-   so a section that hasn't been edited yet just keeps its seed value. */
-type PageSectionRow = {
-  section_key: string
-  eyebrow: string | null
-  title: string | null
-  subtitle: string | null
-  body: string | null
-  cta_label: string | null
-  cta_url: string | null
-  sort_order: number
-  extra: {
-    words?: string[]
-    imageOffsetX?: number
-    imageOffsetY?: number
-    items?: StudioListItem[]
-    body2?: string
-    waitingListNote?: string
-    lastUpdated?: string
-    buttons?: { label: string; url: string }[]
-  } | null
-  image: MediaRef
-}
-
-/** Shared by every page's section-fetcher below — one page lookup, one
- *  section-rows query, reused instead of repeated per page. Ordered by
- *  sort_order since Home.tsx renders homepage sections in this order. */
-async function fetchPageSectionRows(slug: string): Promise<PageSectionRow[] | null> {
-  if (!supabase) return null
-  const { data: page } = await supabase.from('pages').select('id').eq('slug', slug).maybeSingle()
-  if (!page) return null
-  const { data, error } = await supabase
-    .from('page_sections')
-    .select(
-      `section_key, eyebrow, title, subtitle, body, cta_label, cta_url, sort_order, extra,
-       image:media!image_media_id ( bucket, storage_path )`
-    )
-    .eq('page_id', (page as { id: string }).id)
-    .eq('is_visible', true)
-    .order('sort_order', { ascending: true })
-  if (error || !data) return null
-  return data as unknown as PageSectionRow[]
-}
-
-/** Sections an editor added from Admin → Pages beyond a page's built-in
- *  ones (created with a "custom-" prefixed section_key — see
- *  src/admin/Pages.tsx's addCustomSection). One query for the whole site,
- *  grouped by page slug, so every page's public component can just ask for
- *  its own list via useCustomSections(slug). */
-export async function fetchAllCustomSections(): Promise<Record<string, CustomSection[]> | null> {
-  if (!supabase) return null
-  const { data: pages, error: pagesError } = await supabase.from('pages').select('id, slug')
-  if (pagesError || !pages) return null
-  const slugById = new Map((pages as { id: string; slug: string }[]).map(p => [p.id, p.slug]))
-
-  const { data, error } = await supabase
-    .from('page_sections')
-    .select(
-      `page_id, section_key, eyebrow, title, subtitle, body, cta_label, cta_url, sort_order,
-       image:media!image_media_id ( bucket, storage_path )`
-    )
-    .like('section_key', 'custom-%')
-    .eq('is_visible', true)
-    .order('sort_order', { ascending: true })
-  if (error || !data) return null
-
-  type Row = {
-    page_id: string
-    section_key: string
-    eyebrow: string | null
-    title: string | null
-    subtitle: string | null
-    body: string | null
-    cta_label: string | null
-    cta_url: string | null
-    image: MediaRef
-  }
-  const bySlug: Record<string, CustomSection[]> = {}
-  for (const row of data as unknown as Row[]) {
-    const slug = slugById.get(row.page_id)
-    if (!slug) continue
-    ;(bySlug[slug] ??= []).push({
-      key: row.section_key,
-      eyebrow: row.eyebrow ?? '',
-      heading: row.title ?? '',
-      subhead: row.subtitle ?? '',
-      body: row.body ?? '',
-      image: mediaUrl(row.image),
-      ctaLabel: row.cta_label ?? '',
-      ctaUrl: row.cta_url ?? '',
-    })
-  }
-  return bySlug
-}
-
-export async function fetchHomeSections(): Promise<{
-  hero: Partial<Hero>
-  homepage: Partial<Homepage>
-  sections: string[]
-} | null> {
-  const rows = await fetchPageSectionRows('home')
-  if (!rows) return null
-
-  const hero: Partial<Hero> = {}
-  const homepage: Partial<Homepage> = {}
-
-  for (const row of rows) {
-    switch (row.section_key) {
-      case 'hero':
-        if (row.eyebrow) hero.eyebrow = row.eyebrow
-        if (row.title) hero.title = row.title
-        if (row.extra?.words?.length) hero.words = row.extra.words
-        if (row.subtitle) hero.subhead = row.subtitle
-        if (row.body) hero.definition = row.body
-        if (row.image) hero.image = mediaUrl(row.image)
-        if (typeof row.extra?.imageOffsetX === 'number') hero.imageOffsetX = row.extra.imageOffsetX
-        if (typeof row.extra?.imageOffsetY === 'number') hero.imageOffsetY = row.extra.imageOffsetY
-        if (row.extra?.buttons?.length) hero.buttons = row.extra.buttons
-        break
-      case 'capabilities':
-        if (row.eyebrow) homepage.capabilitiesEyebrow = row.eyebrow
-        if (row.title) homepage.capabilitiesHeading = row.title
-        if (row.image) homepage.capabilitiesImage = mediaUrl(row.image)
-        break
-      case 'notes':
-        if (row.eyebrow) homepage.notesEyebrow = row.eyebrow
-        if (row.title) homepage.journalHeading = row.title
-        break
-      case 'case_studies':
-        if (row.eyebrow) homepage.featuredEyebrow = row.eyebrow
-        if (row.title) homepage.featuredHeading = row.title
-        break
-      case 'final_cta':
-        if (row.eyebrow) homepage.ctaEyebrow = row.eyebrow
-        if (row.title) homepage.ctaHeading = row.title
-        if (row.body) homepage.ctaBody = row.body
-        if (row.cta_label) homepage.ctaButtonLabel = row.cta_label
-        if (row.cta_url) homepage.ctaButtonUrl = row.cta_url
-        if (row.image) homepage.finalCtaImage = mediaUrl(row.image)
-        break
-    }
-  }
-  // rows is already ordered by sort_order (see fetchPageSectionRows) and
-  // only contains visible sections (is_visible filter) — the exact order
-  // Home.tsx should render in.
-  const sections = rows.map(r => r.section_key)
-  return { hero, homepage, sections }
-}
-
-export async function fetchStudioSections(): Promise<Partial<Studio> | null> {
-  const rows = await fetchPageSectionRows('studio')
-  if (!rows) return null
-
-  const studio: Partial<Studio> = {}
-  for (const row of rows) {
-    switch (row.section_key) {
-      case 'opening':
-        if (row.eyebrow) studio.eyebrow = row.eyebrow
-        if (row.title) studio.heading = row.title
-        if (row.subtitle) studio.subhead = row.subtitle
-        if (row.body) studio.body = row.body
-        if (row.image) studio.openingImage = mediaUrl(row.image)
-        break
-      case 'principles':
-        if (row.eyebrow) studio.principlesEyebrow = row.eyebrow
-        if (row.extra?.items?.length) studio.principles = row.extra.items
-        break
-      case 'culture':
-        if (row.eyebrow) studio.cultureEyebrow = row.eyebrow
-        if (row.title) studio.cultureHeading = row.title
-        if (row.extra?.items?.length) studio.cultureItems = row.extra.items
-        break
-      case 'cta':
-        if (row.title) studio.ctaHeading = row.title
-        break
-    }
-  }
-  return studio
-}
-
-export async function fetchContactSections(): Promise<Partial<ContactCopy> | null> {
-  const rows = await fetchPageSectionRows('contact')
-  const row = rows?.find(r => r.section_key === 'header')
-  if (!row) return null
-  const c: Partial<ContactCopy> = {}
-  if (row.eyebrow) c.eyebrow = row.eyebrow
-  if (row.title) c.heading = row.title
-  if (row.subtitle) c.subhead = row.subtitle
-  if (row.body) c.intro1 = row.body
-  if (row.extra?.body2) c.intro2 = row.extra.body2
-  return c
-}
-
-export async function fetchReportsSections(): Promise<Partial<ReportsCopy> | null> {
-  const rows = await fetchPageSectionRows('reports')
-  const row = rows?.find(r => r.section_key === 'header')
-  if (!row) return null
-  const r: Partial<ReportsCopy> = {}
-  if (row.eyebrow) r.eyebrow = row.eyebrow
-  if (row.title) r.heading = row.title
-  if (row.subtitle) r.subhead = row.subtitle
-  return r
-}
-
-export async function fetchTrainingsPageSections(): Promise<Partial<Trainings> | null> {
-  const rows = await fetchPageSectionRows('trainings')
-  const row = rows?.find(r => r.section_key === 'header')
-  if (!row) return null
-  const t: Partial<Trainings> = {}
-  if (row.eyebrow) t.eyebrow = row.eyebrow
-  if (row.title) t.heading = row.title
-  if (row.subtitle) t.subhead = row.subtitle
-  if (row.body) t.body1 = row.body
-  if (row.extra?.body2) t.body2 = row.extra.body2
-  if (row.extra?.waitingListNote) t.waitingListNote = row.extra.waitingListNote
-  if (row.extra?.items?.length) t.format = row.extra.items.map(i => ({ label: i.title, value: i.body }))
-  return t
-}
-
-async function fetchPageHeader(slug: string): Promise<Partial<PageHeader> | null> {
-  const rows = await fetchPageSectionRows(slug)
-  const row = rows?.find(r => r.section_key === 'header')
-  if (!row) return null
-  const h: Partial<PageHeader> = {}
-  if (row.eyebrow) h.eyebrow = row.eyebrow
-  if (row.title) h.heading = row.title
-  if (row.subtitle) h.subhead = row.subtitle
-  return h
-}
-export const fetchWorkSections = () => fetchPageHeader('work')
-export const fetchCaseStudiesSections = () => fetchPageHeader('case-studies')
-
-export async function fetchCapabilitiesPageSections(): Promise<Partial<CapabilitiesPageCopy> | null> {
-  const rows = await fetchPageSectionRows('capabilities')
-  const row = rows?.find(r => r.section_key === 'header')
-  if (!row) return null
-  const c: Partial<CapabilitiesPageCopy> = {}
-  if (row.eyebrow) c.eyebrow = row.eyebrow
-  if (row.title) c.headingSuffix = row.title
-  if (row.subtitle) c.subhead = row.subtitle
-  return c
-}
-
-export async function fetchPrivacySections(): Promise<Partial<LegalCopy> | null> {
-  const rows = await fetchPageSectionRows('privacy')
-  if (!rows) return null
-  const header = rows.find(r => r.section_key === 'header')
-  const legal = rows.find(r => r.section_key === 'legal')
-  const p: Partial<LegalCopy> = {}
-  if (header?.eyebrow) p.eyebrow = header.eyebrow
-  if (header?.title) p.heading = header.title
-  if (header?.subtitle) p.subhead = header.subtitle
-  if (header?.image) p.headerImage = mediaUrl(header.image)
-  if (typeof header?.extra?.lastUpdated === 'string') p.lastUpdated = header.extra.lastUpdated
-  if (legal?.extra?.items?.length) p.sections = legal.extra.items
-  return p
-}
-
-export async function fetchCookiesSections(): Promise<Partial<CookiesCopy> | null> {
-  const rows = await fetchPageSectionRows('cookies')
-  if (!rows) return null
-  const header = rows.find(r => r.section_key === 'header')
-  const table = rows.find(r => r.section_key === 'table')
-  const managing = rows.find(r => r.section_key === 'managing')
-  const c: Partial<CookiesCopy> = {}
-  if (header?.eyebrow) c.eyebrow = header.eyebrow
-  if (header?.title) c.heading = header.title
-  if (header?.subtitle) c.subhead = header.subtitle
-  if (table?.extra?.items?.length) c.rows = table.extra.items
-  if (managing?.title) c.managingHeading = managing.title
-  if (managing?.body) c.managingBody = managing.body
-  return c
-}
-
-export async function fetchSiteSettings(): Promise<{ company: Company; socials: Social[]; seo: Seo } | null> {
-  if (!supabase) return null
-  const { data, error } = await supabase.from('site_settings').select('*').eq('id', 1).maybeSingle()
-  if (error || !data) return null
-  const row = data as {
-    site_name: string
-    site_description: string | null
-    default_seo_title: string | null
-    default_meta_description: string | null
-    default_og_image_url: string | null
-    contact_email: string | null
-    new_business_email: string | null
-    press_email: string | null
-    phone: string | null
-    address_line1: string | null
-    address_line2: string | null
-    address_city: string | null
-    address_postcode: string | null
-    address_country: string | null
-    registration_note: string | null
-    hours: string | null
-    social_links: { label: string; url: string }[] | null
-  }
+  const row = data as Record<string, string | null> & { social_links: { label: string; url: string }[] | null }
   const company: Company = {
-    name: row.site_name,
-    legalName: row.site_name,
-    tagline: 'Wanted, on purpose.',
-    proposition: row.site_description ?? '',
-    email: row.contact_email ?? '',
-    pressEmail: row.press_email ?? '',
-    newBusinessEmail: row.new_business_email ?? '',
+    ...fallback,
+    name: row.site_name || fallback.name,
+    legalName: row.site_name || fallback.legalName,
+    proposition: row.site_description || fallback.proposition,
+    email: row.contact_email || fallback.email,
+    pressEmail: row.press_email || fallback.pressEmail,
+    newBusinessEmail: row.new_business_email || fallback.newBusinessEmail,
     phone: row.phone ?? '',
-    phonePlaceholder: 'Phone number — to be added',
-    registrationNote: row.registration_note ?? 'Company registration details to be added.',
+    registrationNote: row.registration_note ?? '',
     address: {
       line1: row.address_line1 ?? '',
       line2: row.address_line2 ?? '',
@@ -595,44 +296,109 @@ export async function fetchSiteSettings(): Promise<{ company: Company; socials: 
       postcode: row.address_postcode ?? '',
       country: row.address_country ?? '',
     },
-    addressPlaceholder: 'Studio address — to be added',
-    hours: row.hours ?? '',
+    hours: row.hours || fallback.hours,
   }
-  const socials: Social[] = (row.social_links ?? []).map(s => ({ label: s.label, handle: s.label, url: s.url }))
-  const seo: Seo = {
-    description: row.default_meta_description ?? row.site_description ?? '',
-    ogImage: row.default_og_image_url ?? '',
-  }
-  return { company, socials, seo }
+  const socials: Social[] = (row.social_links ?? []).filter(s => s.url).map(s => ({ label: s.label, handle: s.label, url: s.url }))
+  const seoDefaults = clean({
+    title: row.default_seo_title || undefined,
+    description: row.default_meta_description || undefined,
+    ogImage: row.default_og_image_url || undefined,
+  })
+  return { company, socials, seoDefaults }
 }
 
-export async function fetchNavigation(location: 'header' | 'footer' = 'header'): Promise<NavLink[] | null> {
-  if (!supabase) return null
-  const { data, error } = await supabase
-    .from('navigation_items')
-    .select('label, url, soon')
-    .eq('location', location)
-    .eq('is_visible', true)
-    .order('sort_order', { ascending: true })
+export async function fetchBrand(client: SupabaseClient): Promise<{ brand: Brand; ogImage?: string } | null> {
+  const { data, error } = await client
+    .from('brand_settings')
+    .select(`logo:media!logo_primary_media_id ( ${MEDIA} ), favicon:media!favicon_media_id ( ${MEDIA} ), og:media!og_default_media_id ( ${MEDIA} )`)
+    .eq('id', 1)
+    .maybeSingle()
   if (error || !data) return null
-  return (data as { label: string; url: string; soon: boolean }[]).map(row => ({ to: row.url, label: row.label, soon: row.soon || undefined }))
+  const r = data as unknown as { logo: MediaRow; favicon: MediaRow; og: MediaRow }
+  return { brand: clean({ logoUrl: url(client, r.logo) || undefined, faviconUrl: url(client, r.favicon) || undefined }), ogImage: url(client, r.og) || undefined }
 }
 
-/* Hero / homepage section copy and the Trainings "coming soon" copy live as
-   page_sections rows. Falls back to the static seed when a page/section
-   hasn't been created in the CMS yet, so partial migration is safe. */
-export async function fetchPageSections(pageSlug: string): Promise<Record<string, Record<string, unknown>> | null> {
-  if (!supabase) return null
-  const { data: page } = await supabase.from('pages').select('id').eq('slug', pageSlug).maybeSingle()
-  if (!page) return null
-  const { data, error } = await supabase
-    .from('page_sections')
-    .select('section_key, eyebrow, title, subtitle, body, cta_label, cta_url, video_url, extra, is_visible')
-    .eq('page_id', (page as { id: string }).id)
-  if (error || !data) return null
-  const out: Record<string, Record<string, unknown>> = {}
-  for (const row of data as Record<string, unknown>[]) out[row.section_key as string] = row
+/* ── Pages and their sections ──────────────────────────────────────────── */
+const PAGE_BASE = `slug, seo_title, seo_description, canonical_url, noindex, og:media!og_media_id ( ${MEDIA} ),
+  page_sections ( section_key, eyebrow, title, subtitle, body, cta_label, cta_url, video_url, is_visible, extra, image:media!image_media_id ( ${MEDIA} ) )`
+const PAGE_RICH = PAGE_BASE + ', og_title, og_description'
+
+export async function fetchPages(client: SupabaseClient): Promise<{ pages: Record<string, PageSections>; meta: Record<string, MetaOverride> } | null> {
+  const run = (cols: string) => client.from('pages').select(cols).like('slug', 'next/%')
+  const data = await tryBoth(() => run(PAGE_RICH), () => run(PAGE_BASE))
+  if (!data || (data as unknown[]).length === 0) return null
+  type SectionRow = {
+    section_key: string
+    eyebrow: string | null
+    title: string | null
+    subtitle: string | null
+    body: string | null
+    cta_label: string | null
+    cta_url: string | null
+    video_url: string | null
+    is_visible: boolean
+    extra: Record<string, unknown> | null
+    image: MediaRow
+  }
+  type Row = Record<string, unknown> & { slug: string; page_sections: SectionRow[] | null }
+  const pages: Record<string, PageSections> = {}
+  const metaOut: Record<string, MetaOverride> = {}
+  for (const row of data as unknown as Row[]) {
+    const slug = row.slug.replace(/^next\//, '')
+    metaOut[slug] = meta(client, row)
+    const sections: PageSections = {}
+    for (const s of row.page_sections ?? []) {
+      const { items, ...extra } = (s.extra ?? {}) as { items?: SectionItem[] } & Record<string, unknown>
+      const text = (v: string | null) => v ?? undefined
+      const content: SectionContent = {
+        eyebrow: text(s.eyebrow),
+        title: text(s.title),
+        subtitle: text(s.subtitle),
+        body: text(s.body),
+        ctaLabel: text(s.cta_label),
+        ctaUrl: text(s.cta_url),
+        image: mediaRef(client, s.image),
+        videoUrl: text(s.video_url),
+        items: Array.isArray(items) ? items : undefined,
+        extra,
+        visible: s.is_visible,
+      }
+      sections[s.section_key] = content
+    }
+    pages[slug] = sections
+  }
+  return { pages, meta: metaOut }
+}
+
+/** Everything the public site reads from the CMS, in one call. Only fields
+ *  that came back are present, so a partial outage degrades per collection. */
+export async function fetchLiveContent(client: SupabaseClient, fallbackCompany: Company): Promise<LiveContent> {
+  const out: LiveContent = {}
+  let brandOg: string | undefined
+  await Promise.allSettled([
+    fetchProjects(client).then(v => v && (out.projects = v)),
+    fetchCapabilities(client).then(v => v && (out.capabilities = v)),
+    fetchCategoryMeta(client).then(v => v && (out.categories = v)),
+    fetchNotes(client).then(v => v && (out.notes = v)),
+    fetchTestimonials(client).then(v => v && (out.testimonials = v)),
+    fetchTeam(client).then(v => v && (out.team = v)),
+    fetchPages(client).then(v => {
+      if (!v) return
+      out.pages = v.pages
+      out.pageMeta = v.meta
+    }),
+    fetchBrand(client).then(v => {
+      if (!v) return
+      out.brand = v.brand
+      brandOg = v.ogImage
+    }),
+    fetchSiteSettings(client, fallbackCompany).then(v => {
+      if (!v) return
+      out.company = v.company
+      if (v.socials.length) out.socials = v.socials
+      out.seoDefaults = v.seoDefaults
+    }),
+  ])
+  if (brandOg) out.seoDefaults = { ogImage: brandOg, ...(out.seoDefaults ?? {}) }
   return out
 }
-
-export type { Hero, Homepage, Trainings }

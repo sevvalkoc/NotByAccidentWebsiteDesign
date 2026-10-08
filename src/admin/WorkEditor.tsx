@@ -24,6 +24,10 @@ interface FormState {
   industry: string
   location: string
   short_description: string
+  introduction: string
+  hero_video_url: string
+  og_title: string
+  og_description: string
   challenge: string
   insight: string
   strategy: string
@@ -53,6 +57,10 @@ const blank: FormState = {
   industry: '',
   location: '',
   short_description: '',
+  introduction: '',
+  hero_video_url: '',
+  og_title: '',
+  og_description: '',
   challenge: '',
   insight: '',
   strategy: '',
@@ -103,6 +111,10 @@ export default function WorkEditor() {
           industry: String(row.industry ?? ''),
           location: String(row.location ?? ''),
           short_description: String(row.short_description ?? ''),
+          introduction: String(row.introduction ?? ''),
+          hero_video_url: String(row.hero_video_url ?? ''),
+          og_title: String(row.og_title ?? ''),
+          og_description: String(row.og_description ?? ''),
           challenge: String(row.challenge ?? ''),
           insight: String(row.insight ?? ''),
           strategy: String(row.strategy ?? ''),
@@ -147,6 +159,10 @@ export default function WorkEditor() {
       industry: form.industry || null,
       location: form.location || null,
       short_description: form.short_description || null,
+      introduction: form.introduction || null,
+      hero_video_url: form.hero_video_url || null,
+      og_title: form.og_title || null,
+      og_description: form.og_description || null,
       challenge: form.challenge || null,
       insight: form.insight || null,
       strategy: form.strategy || null,
@@ -240,6 +256,7 @@ export default function WorkEditor() {
           <AdminField label="Location"><AdminInput value={form.location} onChange={e => set('location', e.target.value)} /></AdminField>
         </div>
         <AdminField label="Short description" hint="Shown on listing cards"><AdminTextarea rows={2} value={form.short_description} onChange={e => set('short_description', e.target.value)} /></AdminField>
+        <AdminField label="Introduction" hint="Opening paragraph of the case study"><AdminTextarea rows={3} value={form.introduction} onChange={e => set('introduction', e.target.value)} /></AdminField>
       </AdminCard>
 
       <AdminCard className="p-6 mb-6">
@@ -268,6 +285,7 @@ export default function WorkEditor() {
           <MediaPicker label="Hero image" mediaId={form.hero_image_media_id} onChange={v => set('hero_image_media_id', v)} />
           <MediaPicker label="Thumbnail" mediaId={form.thumbnail_media_id} onChange={v => set('thumbnail_media_id', v)} />
         </div>
+        <AdminField label="Hero video URL" hint="Optional MP4/WebM. Plays in place of the hero image; the image becomes its poster."><AdminInput type="url" value={form.hero_video_url} onChange={e => set('hero_video_url', e.target.value)} /></AdminField>
         {!isNew && <GalleryManager projectId={id!} />}
         {isNew && <p className="text-xs text-gray-400">Save this project once before adding gallery images.</p>}
       </AdminCard>
@@ -277,6 +295,8 @@ export default function WorkEditor() {
         <AdminField label="SEO title"><AdminInput value={form.seo_title} onChange={e => set('seo_title', e.target.value)} /></AdminField>
         <AdminField label="Meta description"><AdminTextarea rows={2} value={form.seo_description} onChange={e => set('seo_description', e.target.value)} /></AdminField>
         <AdminField label="Canonical URL"><AdminInput type="url" value={form.canonical_url} onChange={e => set('canonical_url', e.target.value)} /></AdminField>
+        <AdminField label="Social title" hint="Open Graph / X. Defaults to the SEO title."><AdminInput value={form.og_title} onChange={e => set('og_title', e.target.value)} /></AdminField>
+        <AdminField label="Social description" hint="Defaults to the meta description."><AdminTextarea rows={2} value={form.og_description} onChange={e => set('og_description', e.target.value)} /></AdminField>
         <MediaPicker label="OG image" mediaId={form.og_media_id} onChange={v => set('og_media_id', v)} />
         <div className="mt-4">
           <AdminCheckbox label="Noindex (hide from search engines)" checked={form.noindex} onChange={e => set('noindex', e.target.checked)} />

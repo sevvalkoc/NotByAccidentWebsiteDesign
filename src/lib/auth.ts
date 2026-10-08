@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
-import { supabase, supabaseReady } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 import type { Profile } from '@/lib/database.types'
 
 export interface AuthState {

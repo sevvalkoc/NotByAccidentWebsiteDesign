@@ -5,7 +5,9 @@ import type { Profile } from '@/lib/database.types'
 
 const NAV: { to: string; label: string }[] = [
   { to: '/admin/dashboard', label: 'Dashboard' },
-  { to: '/admin/pages', label: 'Pages' },
+  { to: '/admin/homepage', label: 'Homepage' },
+  { to: '/admin/site-pages', label: 'Pages' },
+  { to: '/admin/global', label: 'Global (menus, footer)' },
   { to: '/admin/work', label: 'Work' },
   { to: '/admin/capabilities', label: 'Capabilities' },
   { to: '/admin/categories', label: 'Categories' },
@@ -24,6 +26,7 @@ const NAV: { to: string; label: string }[] = [
   { to: '/admin/brand', label: 'Brand Settings' },
   { to: '/admin/site', label: 'Site Settings' },
   { to: '/admin/users', label: 'Users' },
+  { to: '/admin/pages', label: 'Previous site: pages' },
 ]
 
 export default function AdminLayout({ profile, children }: { profile: Profile | null; children: ReactNode }) {

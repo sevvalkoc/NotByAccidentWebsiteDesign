@@ -1,161 +1,108 @@
-import { useRef } from 'react'
-import Link from '@/components/LocalizedLink'
-import { useProjects, useWorkCopy, useCustomSections } from '@/content'
-import Seo from '@/components/Seo'
-import { useReveal } from '@/hooks/useReveal'
-import { useT } from '@/i18n/ui'
-import { usePageSeo } from '@/i18n/pageSeo'
-import CustomSectionBlock from '@/components/CustomSectionBlock'
+import { useEffect, useState } from 'react'
+import PageHead, { crumbSchema } from '@/components/PageHead'
+import Link from '@/components/Link'
+import Slip from '@/components/Slip'
+import Zone from '@/components/Zone'
+import { plain } from '@/components/Rich'
+import { useCopy, usePageMeta, useSite } from '@/content'
+import { usePage } from '@/hooks/usePage'
+import { useLocale } from '@/i18n/locale'
+import { collection } from '@/seo/schema'
+import { projectMedia } from './home/SelectedWork'
+import './work.css'
 
+type View = 'index' | 'sheet'
+const KEY = 'nba.work.view'
+
+/** The archive. One dataset, two views: an index you read, a sheet you scan. */
 export default function Work() {
-  const ref = useRef<HTMLElement>(null)
-  const projects = useProjects()
-  const copy = useWorkCopy()
-  const customSections = useCustomSections('work')
-  const t = useT()
-  const seo = usePageSeo('/work')
-  useReveal(ref, { threshold: 0.08 })
+  const copy = useCopy()
+  const site = useSite()
+  const locale = useLocale()
+  const meta = usePageMeta('work')
+  const c = copy.work
+  const [view, setView] = useState<View>('index')
+  const [hover, setHover] = useState<string | null>(null)
+
+  useEffect(() => {
+    try {
+      const v = localStorage.getItem(KEY)
+      if (v === 'sheet' || v === 'index') setView(v)
+    } catch {
+      /* private mode: default view */
+    }
+  }, [])
+  const choose = (v: View) => {
+    setView(v)
+    try {
+      localStorage.setItem(KEY, v)
+    } catch {
+      /* ignore */
+    }
+  }
+
+  const crumbs = [
+    { name: copy.nav.homeCrumb, path: '/' },
+    { name: copy.pages.work, path: '/work' },
+  ]
+  usePage({
+    page: 'work',
+    path: '/work',
+    jsonLd: [collection(plain(meta.title), meta.description, '/work', locale, site.projects.map(p => ({ name: p.name, path: `/case-studies/${p.slug}` }))), crumbSchema(crumbs, locale)],
+  })
+  const active = site.projects.find(p => p.slug === hover)
 
   return (
-    <main id="main" ref={ref} style={{ paddingTop: '56px' }}>
-      <Seo title={seo.title} description={seo.description} path="/work" />
-      {/* Page header */}
-      <div
-        style={{
-          backgroundColor: '#F0EADA',
-          paddingTop: 'clamp(48px, 6vw, 96px)',
-          paddingBottom: 'clamp(48px, 6vw, 96px)',
-          borderBottom: '1px solid rgba(34,30,27,.1)',
-        }}
-      >
-        <div className="page-grid">
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr',
-              gap: '2rem',
-              alignItems: 'end',
-            }}
-            className="md:grid-cols-[55%_45%]"
-          >
-            <div>
-              <p className="t-caption mb-4" style={{ color: 'rgba(34,30,27,.45)' }}>{copy.eyebrow}</p>
-              <h1 className="t-headline-lg reveal" style={{ margin: 0 }}>
-                {copy.heading}
-              </h1>
-            </div>
-            <p
-              className="t-body reveal reveal-delay-1"
-              style={{ color: 'rgba(34,30,27,.6)', maxWidth: '42ch' }}
-            >
-              {copy.subhead}
-            </p>
+    <main id="main" tabIndex={-1}>
+      <PageHead page="work" env="mineral" />
+      <Zone env="mineral" className="wrap archive" label={copy.pages.work}>
+        <div className="archive__bar">
+          <span className="label">{c.viewLabel}</span>
+          <div role="group" aria-label={c.viewLabel} className="archive__toggle t-small">
+            {(['index', 'sheet'] as View[]).map(v => (
+              <button key={v} type="button" aria-pressed={view === v} onClick={() => choose(v)}>
+                {v === 'index' ? c.viewIndex : c.viewSheet}
+              </button>
+            ))}
           </div>
         </div>
-      </div>
 
-      {/* Projects — image + text rows alternating */}
-      <section style={{ backgroundColor: '#F0EADA', paddingBottom: 'clamp(64px, 8vw, 128px)' }}>
-        <div className="page-grid">
-          {projects.map((project, i) => (
-            <article
-              key={project.id}
-              className="reveal"
-              style={{
-                paddingTop: 'clamp(56px, 6vw, 96px)',
-                paddingBottom: 'clamp(56px, 6vw, 96px)',
-                borderBottom: i < projects.length - 1 ? '1px solid rgba(34,30,27,.1)' : 'none',
-              }}
-            >
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr',
-                  gap: 'clamp(32px, 4vw, 64px)',
-                  alignItems: 'start',
-                }}
-                className={i % 2 === 0 ? 'md:grid-cols-[55%_40%]' : 'md:grid-cols-[40%_55%]'}
-              >
-                {/* Image */}
-                <div
-                  className={`overflow-hidden bg-carbon img-crosshair ${i % 2 !== 0 ? 'md:order-2' : ''}`}
-                  style={{ width: '100%', aspectRatio: '3/2' }}
-                >
-                  <Link to={`/case-studies/${project.slug}`} className="block w-full h-full">
-                    <img
-                      src={project.img}
-                      alt={project.brief}
-                      className="w-full h-full object-cover img-hover"
-                      loading="lazy"
-                    />
+        {view === 'index' ? (
+          <div className="archive__index" onPointerLeave={() => setHover(null)}>
+            <ol role="list" className="archive__list">
+              {site.projects.map(p => (
+                <li key={p.slug}>
+                  <Link to={`/case-studies/${p.slug}`} className="archive__row" onPointerEnter={() => setHover(p.slug)} onFocus={() => setHover(p.slug)}>
+                    <span className="archive__name">{p.name}</span>
+                    <span className="archive__brief dim t-small">{p.brief}</span>
+                    <span className="archive__meta t-caption dimmer">
+                      {p.discipline}
+                      {p.year ? ` · ${p.year}` : ''}
+                    </span>
                   </Link>
-                </div>
-
-                {/* Text */}
-                <div
-                  className={`flex flex-col justify-between ${i % 2 !== 0 ? 'md:order-1' : ''}`}
-                  style={{ minHeight: '240px' }}
-                >
-                  <div>
-                    <p className="t-caption mb-3" style={{ color: 'rgba(34,30,27,.4)' }}>
-                      {project.num}
-                    </p>
-                    <h2
-                      style={{
-                        fontFamily: 'Lora, Georgia, serif',
-                        fontSize: 'clamp(24px, 2.8vw, 36px)',
-                        fontWeight: 400,
-                        lineHeight: 1.1,
-                        letterSpacing: '-0.01em',
-                        color: '#221E1B',
-                        margin: '0 0 12px',
-                      }}
-                    >
-                      {project.name}
-                    </h2>
-                    <p className="t-body m-0" style={{ color: 'rgba(34,30,27,.65)', maxWidth: '40ch' }}>
-                      {project.brief}
-                    </p>
-                  </div>
-
-                  <div style={{ marginTop: '2rem' }}>
-                    <div
-                      style={{
-                        display: 'flex',
-                        gap: '2rem',
-                        marginBottom: '1.5rem',
-                      }}
-                    >
-                      <div>
-                        <p className="t-caption mb-1" style={{ color: 'rgba(34,30,27,.35)' }}>{t.work.discipline}</p>
-                        <p className="t-ui m-0" style={{ color: 'rgba(34,30,27,.7)', fontWeight: 400 }}>
-                          {project.discipline}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="t-caption mb-1" style={{ color: 'rgba(34,30,27,.35)' }}>{t.work.year}</p>
-                        <p className="t-ui m-0" style={{ color: 'rgba(34,30,27,.7)', fontWeight: 400 }}>
-                          {project.year}
-                        </p>
-                      </div>
-                    </div>
-                    <Link
-                      to={`/case-studies/${project.slug}`}
-                      className="btn-ghost"
-                      style={{ textDecoration: 'none', display: 'inline-flex' }}
-                    >
-                      {t.work.viewCaseStudy}
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-      {customSections.map(cs => (
-        <CustomSectionBlock key={cs.key} section={cs} />
-      ))}
+                </li>
+              ))}
+            </ol>
+            <div className="archive__peek" aria-hidden="true">
+              {active ? <Slip key={active.slug} media={projectMedia(active)} ratio={4 / 5} trigger="arrive" sizes="30vw" alt="" /> : null}
+            </div>
+          </div>
+        ) : (
+          <ol role="list" className="sheetview">
+            {site.projects.map((p, i) => (
+              <li key={p.slug} className={`sheetview__i sheetview__i--${i % 5}`}>
+                <Link to={`/case-studies/${p.slug}`} className="sheetview__link">
+                  <Slip media={projectMedia(p)} ratio={i % 2 ? 4 / 5 : 3 / 2} sizes="(min-width: 1024px) 40vw, 92vw" alt="" />
+                  <p className="t-small">
+                    {p.name}
+                    <span className="dimmer"> · {p.year}</span>
+                  </p>
+                </Link>
+              </li>
+            ))}
+          </ol>
+        )}
+      </Zone>
     </main>
   )
 }

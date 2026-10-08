@@ -8,12 +8,16 @@ import { Link } from 'react-router-dom'
    one accent (blue) for primary actions, red for destructive ones. */
 
 export function AdminField({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
+  // The hint sits outside the <label>, so an input's accessible name is its
+  // label alone, not the label plus the help text.
   return (
-    <label className="block mb-4">
-      <span className="block text-sm font-medium text-gray-700 mb-1">{label}</span>
-      {children}
+    <div className="mb-4">
+      <label className="block">
+        <span className="block text-sm font-medium text-gray-700 mb-1">{label}</span>
+        {children}
+      </label>
       {hint && <span className="block text-xs text-gray-400 mt-1">{hint}</span>}
-    </label>
+    </div>
   )
 }
 
