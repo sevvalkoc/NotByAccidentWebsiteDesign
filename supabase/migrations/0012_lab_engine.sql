@@ -508,7 +508,7 @@ returns jsonb language plpgsql stable security definer set search_path = public 
 declare
   cov text[]; need int; t public.lab_partner_types;
   crit jsonb := '[]'::jsonb; s numeric; w numeric; total numeric := 0; got numeric := 0; known numeric := 0;
-  strong text[] := '{}'; weak text[] := '{}'; missing text[] := '{}'; reasons text[] := '{}'; limits text[] := '{}';
+  strong text[] := '{}'; weak text[] := '{}'; missing text[] := '{}'; reasons text[] := '{}'; limits text[] := '{}'; labels text[];
   brand_tags text[]; d int; expl text;
 begin
   select * into t from public.lab_partner_types where key = p.type_key;
@@ -594,11 +594,15 @@ begin
   end loop;
 
   if array_length(strong, 1) is not null then
-    reasons := reasons || (
-      'Strong ' || array_to_string(array(select case k when 'category' then 'category' when 'geography' then 'geography' when 'segment' then 'customer' when 'distribution' then 'distribution' when 'readiness' then 'readiness' else null end
-                                          from unnest(strong) k where k <> 'price'), ' and ') || ' alignment.');
+    labels := array(select case k when 'category' then 'product category' when 'geography' then 'target geography' when 'segment' then 'customer segment'
+                                   when 'distribution' then 'distribution model' when 'readiness' then 'commercial readiness' end
+                    from unnest(strong) k where k <> 'price');
+    if array_length(labels, 1) = 1 then
+      reasons := reasons || ('Strong alignment on ' || labels[1] || '.');
+    elsif array_length(labels, 1) > 1 then
+      reasons := reasons || ('Strong alignment on ' || array_to_string(labels[1:array_length(labels, 1) - 1], ', ') || ' and ' || labels[array_length(labels, 1)] || '.');
+    end if;
     if 'price' = any (strong) then reasons := reasons || ('Your price positioning also fits this ' || lower(coalesce(t.label, 'partner')) || '''s recorded range.'); end if;
-    reasons := array_remove(reasons, 'Strong  alignment.');
   end if;
   if 'category' = any (weak) then limits := limits || 'Category overlap is limited: check the partner''s current assortment.'::text; end if;
   if 'geography' = any (weak) then limits := limits || 'The partner works mainly outside your target markets.'::text; end if;
@@ -1159,7 +1163,7 @@ create or replace function public.lab_admin_import_partners(p_rows jsonb, p_dry_
 returns jsonb language plpgsql security definer set search_path = public as $$
 declare
   r jsonb; i int := 0; inserted int := 0; updated int := 0; skipped int := 0; errors jsonb := '[]'::jsonb;
-  v_id uuid; dom text; nm text; cc text; tk text; web text; arr_err text; markets text[]; seen text[] := '{}'; key text;
+  v_id uuid; dom text; nm text; cc text; tk text; web text; arr_err text; markets text[]; seen text[] := '{}'; dkey text;
 begin
   perform public.lab_require_admin();
   if jsonb_typeof(p_rows) <> 'array' then raise exception 'rows must be an array' using errcode = '22023'; end if;
@@ -1177,9 +1181,9 @@ begin
     markets := array(select upper(btrim(x)) from jsonb_array_elements_text(coalesce(r->'markets', '[]'::jsonb)) x where btrim(x) <> '');
     if exists (select 1 from unnest(markets) m where m !~ '^[A-Z]{2}$') then errors := errors || jsonb_build_object('row', i, 'error', 'markets must be two-letter codes'); skipped := skipped + 1; continue; end if;
     dom := lower(regexp_replace(regexp_replace(coalesce(web, ''), '^https?://(www\.)?', '', 'i'), '/.*$', ''));
-    key := coalesce(nullif(dom, ''), lower(nm) || '|' || coalesce(cc, ''));
-    if key = any (seen) then errors := errors || jsonb_build_object('row', i, 'error', 'duplicate of an earlier row in this file'); skipped := skipped + 1; continue; end if;
-    seen := seen || key;
+    dkey := coalesce(nullif(dom, ''), lower(nm) || '|' || coalesce(cc, ''));
+    if dkey = any (seen) then errors := errors || jsonb_build_object('row', i, 'error', 'duplicate of an earlier row in this file'); skipped := skipped + 1; continue; end if;
+    seen := seen || dkey;
     select id into v_id from public.lab_partners where not archived and ((dom <> '' and website_domain = dom) or (lower(name) = lower(nm) and country_code is not distinct from cc)) limit 1;
     if p_dry_run then
       if v_id is null then inserted := inserted + 1; else updated := updated + 1; end if;

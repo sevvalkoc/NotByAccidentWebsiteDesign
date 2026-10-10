@@ -129,6 +129,9 @@ declare bad text;
 begin
   select m into bad from unnest(new.target_markets || new.current_markets) m where m !~ '^[A-Z]{2}$' limit 1;
   if bad is not null then raise exception 'invalid market code: %', bad using errcode = '22023'; end if;
+  -- target markets are the markets The Lab covers; current markets can be anywhere
+  select m into bad from unnest(new.target_markets) m where not exists (select 1 from public.lab_markets k where k.code = m) limit 1;
+  if bad is not null then raise exception 'The Lab does not cover % yet', bad using errcode = '22023'; end if;
   new.name := btrim(new.name);
   new.updated_at := now();
   if tg_op = 'INSERT' then
@@ -630,7 +633,11 @@ begin
     new.visible_to_user := true;
     if new.kind in ('status', 'system') then new.kind := 'note'; end if;
   end if;
-  update public.lab_opportunities set last_activity_at = now() where id = new.opportunity_id;
+  -- entries written by the opportunity's own trigger (depth > 1) are already
+  -- stamped there; touching the row again would collide with that update
+  if pg_trigger_depth() = 1 then
+    update public.lab_opportunities set last_activity_at = now() where id = new.opportunity_id;
+  end if;
   return new;
 end $$;
 drop trigger if exists lab_activities_guard on public.lab_opportunity_activities;
@@ -725,8 +732,12 @@ create policy lab_consents_own_read on public.lab_consents for select using (use
 create policy lab_consents_own_insert on public.lab_consents for insert with check (user_id = auth.uid());
 
 -- brands
-create policy lab_brands_read on public.lab_brands for select using (public.lab_is_member(id) or public.lab_is_admin());
-create policy lab_brands_insert on public.lab_brands for insert with check (created_by = auth.uid());
+-- created_by: the creator reads the row back in the same INSERT … RETURNING,
+-- before the after-insert trigger has written the owner membership
+create policy lab_brands_read on public.lab_brands for select using (public.lab_is_member(id) or created_by = auth.uid() or public.lab_is_admin());
+create policy lab_brands_insert on public.lab_brands for insert with check (
+  created_by = auth.uid() and exists (select 1 from public.lab_profiles p where p.user_id = auth.uid())
+);
 create policy lab_brands_update on public.lab_brands for update using (public.lab_is_member(id) or public.lab_is_admin()) with check (public.lab_is_member(id) or public.lab_is_admin());
 create policy lab_brands_delete on public.lab_brands for delete using (
   exists (select 1 from public.lab_brand_members m where m.brand_id = id and m.user_id = auth.uid() and m.role = 'owner') or public.lab_is_admin()
