@@ -95,7 +95,7 @@ export interface SectionContent {
 }
 export type PageSections = Record<string, SectionContent>
 
-export const PAGE_SLUGS = ['home', 'global', 'work', 'case-studies', 'capabilities', 'studio', 'notes', 'trainings', 'reports', 'contact', 'privacy', 'cookies', '404'] as const
+export const PAGE_SLUGS = ['home', 'global', 'work', 'case-studies', 'capabilities', 'studio', 'notes', 'trainings', 'reports', 'contact', 'privacy', 'cookies', '404', 'lab', 'lab-how', 'lab-readiness', 'lab-app'] as const
 export type PageSlug = (typeof PAGE_SLUGS)[number]
 
 export interface NavItem {

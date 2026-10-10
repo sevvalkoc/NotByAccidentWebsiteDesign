@@ -62,6 +62,14 @@ export const sectionsEn: Record<PageSlug, PageSections> = {
       ctaUrl: '/notes',
       extra: { notes: [] },
     },
+    lab: {
+      eyebrow: 'The Lab',
+      title: 'Before you enter a market, *question* it.',
+      body: 'A new way to understand where your brand belongs, what stands in its way, and who could help it get there.',
+      ctaLabel: 'Explore The Lab ↗',
+      ctaUrl: '/lab',
+      extra: { cta2Label: 'Test your readiness ↗', cta2Url: '/lab/market-readiness' },
+    },
     contact: {
       eyebrow: 'New business',
       title: 'Tell us the company you want to *become*.',
@@ -85,6 +93,7 @@ export const sectionsEn: Record<PageSlug, PageSections> = {
         { title: 'Capabilities', body: '/capabilities' },
         { title: 'Studio', body: '/studio' },
         { title: 'Notes', body: '/notes' },
+        { title: 'The Lab', body: '/lab' },
       ],
     },
     footer_nav: {
@@ -97,6 +106,7 @@ export const sectionsEn: Record<PageSlug, PageSections> = {
         { title: 'Notes', body: '/notes' },
         { title: 'Trainings', body: '/trainings' },
         { title: 'Reports', body: '/reports' },
+        { title: 'The Lab', body: '/lab' },
         { title: 'Contact', body: '/contact' },
       ],
     },
@@ -245,6 +255,169 @@ export const sectionsEn: Record<PageSlug, PageSections> = {
     },
   },
 
+  lab: {
+    hero: {
+      eyebrow: 'The Lab · Market validation and matching',
+      title: 'Before you enter a market, *question* it.',
+      subtitle:
+        'The Lab tests whether your brand is ready for a new European market, compares the markets you’re weighing, and finds partners whose records fit yours. Then it keeps track of what happens next.',
+      ctaLabel: 'Create your account',
+      ctaUrl: '/lab/sign-up',
+      extra: { cta2Label: 'Test your readiness', cta2Url: '/lab/market-readiness' },
+    },
+    problem: {
+      eyebrow: 'The problem',
+      title: 'Expansion advice arrives in pieces.',
+      body: 'One firm sells you a market report. Another sells a database. A consultant explains the report, an agency does the outreach, and nobody joins the pieces up. The decision lands back on your desk with four invoices attached.',
+    },
+    capabilities: {
+      eyebrow: 'What it does',
+      title: 'Four steps, one place.',
+      items: [
+        { title: 'Validate', meta: '01', body: 'About twenty questions across six areas, from positioning to returns. A readiness score you can trace back, answer by answer.' },
+        { title: 'Understand', meta: '02', body: 'Up to three markets side by side. Where we hold verified information we show the source and the date it was checked. Where we don’t, we say so.' },
+        { title: 'Match', meta: '03', body: 'Partners scored on category, geography, price, customer, distribution and readiness, with the reasons written out and the gaps flagged.' },
+        { title: 'Act', meta: '04', body: 'Request introductions, follow their progress, and keep the conversations that matter in one short pipeline.' },
+      ],
+    },
+    example: {
+      eyebrow: 'Example output',
+      title: 'What a result looks like.',
+      body: 'Illustrative data for a fictional jewellery brand. Not a client, not a real result.',
+      extra: {
+        overall: 64,
+        band: 'Pilot-ready potential',
+        categories: [
+          { label: 'Brand foundation', score: 78 },
+          { label: 'Product–market fit', score: 58 },
+          { label: 'Commercial readiness', score: 70 },
+          { label: 'Operational readiness', score: 52 },
+          { label: 'Partnership readiness', score: 61 },
+          { label: 'Expansion strategy', score: 66 },
+        ],
+        match: {
+          name: 'A concept store (fictional)',
+          score: 81,
+          text: 'Strong category and geography alignment. Your price positioning also fits this concept store’s recorded range. Distribution requirements still need verification.',
+        },
+      },
+    },
+    method: {
+      eyebrow: 'How we match',
+      title: 'A score you can argue with.',
+      body: 'Every compatibility score is a weighted sum of six criteria, all visible. Missing information never counts in a partner’s favour. And a score describes fit, not interest: a high number doesn’t mean anyone is waiting for your call.',
+      ctaLabel: 'Read the methodology',
+      ctaUrl: '/lab/how-it-works',
+    },
+    steps: {
+      eyebrow: 'How it works',
+      title: 'From a question to a conversation.',
+      items: [
+        { title: 'Register', body: 'An email address and a password. Nothing else yet.' },
+        { title: 'Describe your brand', body: 'Three short steps, three to five minutes. Save and come back whenever you like.' },
+        { title: 'Take the assessment', body: 'Your score, area by area, with what lifted it and what held it back.' },
+        { title: 'Compare markets', body: 'Your readiness, market by market, next to what we know about each one.' },
+        { title: 'Review matches', body: 'Partners ranked by fit, each with its reasons and limitations.' },
+        { title: 'Request introductions', body: 'Our team reviews every request, then you follow it through here.' },
+      ],
+    },
+    studio: {
+      eyebrow: 'Built in a studio',
+      title: 'The Lab is where our studio work starts.',
+      body: 'It grew out of the questions we ask every brand before an expansion project. Use it on your own. When you want people in the room, the studio is one conversation away.',
+      ctaLabel: 'Work with the studio',
+      ctaUrl: '/contact',
+    },
+    faq: {
+      eyebrow: 'Questions',
+      title: 'Before you sign up.',
+      items: [
+        { title: 'Is the readiness score a prediction?', body: 'No. It summarises your own answers against a published method. A band such as “Pilot-ready potential” describes how prepared you are, not how likely you are to succeed.' },
+        { title: 'Where does the market information come from?', body: 'From profiles our team maintains, each with its sources and the date it was last checked. A profile that holds basic facts only is labelled that way.' },
+        { title: 'Are the partners expecting my introduction?', body: 'Not necessarily. Every partner carries a status, from research prospect to confirmed participating partner, and our team reviews each request before anyone is contacted.' },
+        { title: 'Who sees my data?', body: 'You, anyone you add to your brand, and our team when running introductions. Nothing goes to a partner unless you ask for an introduction. You can export or delete everything from Settings.' },
+        { title: 'Which markets are covered?', body: 'We start with the Netherlands, Germany, the United Kingdom, France, Belgium, Denmark, Sweden, Italy and Spain, and add others as we research them.' },
+      ],
+    },
+    cta: {
+      title: 'Start with the questions.',
+      body: 'An account takes a minute. The assessment takes about ten.',
+      ctaLabel: 'Create your account',
+      ctaUrl: '/lab/sign-up',
+    },
+  },
+
+  'lab-how': {
+    header: {
+      eyebrow: 'The Lab · Methodology',
+      title: 'How the Lab *scores*.',
+      subtitle: 'Three engines, all deterministic: the same answers and the same configuration always produce the same result. No sampling, no black box.',
+    },
+    readiness: {
+      title: 'Readiness',
+      body: 'Each question belongs to one of six areas and carries a weight. An answer earns 0 to 100 points. An area’s score is the weighted average of the questions that apply to you; questions that don’t apply, such as returns for a software company, leave the calculation instead of counting as zero. The overall score combines the areas with the weights below. Every result records the version of the questions and weights it used, so an old report never changes when the method does.',
+    },
+    bands: {
+      title: 'What the bands mean',
+      body: 'Bands are product-defined readiness categories. They describe preparation, not the chance of success.',
+    },
+    market: {
+      title: 'Market fit',
+      body: 'For each market we combine your overall readiness, any existing presence, language readiness, logistics capability (with a rule for crossing the EU customs border) and the partners in our database for your category. A market-fit score appears only when there is enough to go on, and markets are ranked only when the scores are at least five points apart. Every factor is labelled by where its evidence comes from: your answers, our verified profiles, our partner records or a product rule.',
+    },
+    matching: {
+      title: 'Matching',
+      body: 'Clearly incompatible partners are filtered out first: excluded categories, offerings they don’t take, markets they don’t cover, a price tier two steps away. The rest are scored on six weighted criteria. A criterion we can’t evaluate earns nothing, so missing information never lifts a score, and each match lists what still needs checking.',
+    },
+    limits: {
+      title: 'What the numbers don’t say',
+      items: [
+        { title: 'Readiness is self-reported', body: 'The score is only as accurate as the answers behind it.' },
+        { title: 'Fit is not interest', body: 'A compatibility score says the recorded attributes align. It says nothing about whether a partner is looking for new brands.' },
+        { title: 'Our data has edges', body: 'Market profiles and partner records are researched by our team and dated. Where we have little, we show little.' },
+      ],
+    },
+    cta: { title: 'See your own numbers.', ctaLabel: 'Create your account', ctaUrl: '/lab/sign-up' },
+  },
+
+  'lab-readiness': {
+    header: {
+      eyebrow: 'The Lab · Readiness preview',
+      title: 'How ready is your brand for a new *market*?',
+      subtitle: 'Six questions, two minutes, an indicative result. Nothing you answer here is stored.',
+    },
+    result: {
+      title: 'An indicative read',
+      body: 'Based on six of the twenty or so questions in the full assessment. The full version scores six areas, explains every number, compares markets and suggests what to do next.',
+      ctaLabel: 'Take the full assessment',
+      ctaUrl: '/lab/sign-up',
+    },
+  },
+
+  'lab-app': {
+    onboarding: { title: 'Tell us about your brand', body: 'Three short steps. Everything saves as you go, and you can change any of it later.' },
+    assessment_intro: {
+      title: 'The readiness assessment',
+      body: 'About twenty questions across six areas. Answer as things are, not as you hope they’ll be: the result is only useful if it’s true. Progress saves after every answer.',
+    },
+    results_note: {
+      body: 'Readiness bands are product-defined categories based on your answers. They describe how prepared you are, not how likely you are to succeed.',
+    },
+    markets_note: {
+      body: 'Market fit combines your answers with the facts recorded in our profiles. It describes your readiness for a market, not the size of the opportunity.',
+    },
+    matches_empty: {
+      title: 'We haven’t found a strong match in our current database.',
+      body: 'That doesn’t mean one doesn’t exist. Tell us what you’re looking for and our team will research it.',
+      ctaLabel: 'Request research',
+    },
+    intro_note: {
+      body: 'Requests go to our team first. We check fit and context before anyone is contacted, and a compatibility score doesn’t guarantee a partner’s interest.',
+    },
+    opportunities_empty: { title: 'No opportunities yet.', body: 'When an introduction happens it appears here. You can also add conversations you started yourself.' },
+    reports_empty: { title: 'No reports yet.', body: 'Generate one after your first assessment. It captures your readiness, markets, matches and next steps as they stand today.' },
+  },
+
   '404': {
     header: { eyebrow: 'Error 404', title: 'This page is an accident.', body: 'Everything else here was made on purpose. The link may be broken, or the page has moved.' },
   },
@@ -280,5 +453,18 @@ export const pageMetaEn: Record<PageSlug, PageMeta> = {
   contact: { title: 'Contact · Start a brand project', description: 'Start a brand, digital or growth project with Not by Accident in Amsterdam. Tell us the company you want to become. A person replies within one working day.' },
   privacy: { title: 'Privacy', description: 'How Not by Accident collects, uses and protects your personal data.' },
   cookies: { title: 'Cookies', description: 'How Not by Accident uses cookies and similar technologies on this website.' },
+  lab: {
+    title: 'The Lab · European market entry for independent brands',
+    description: 'Test your brand’s readiness for a new European market, compare markets on sourced information and find compatible retail and distribution partners. By Not by Accident, Amsterdam.',
+  },
+  'lab-how': {
+    title: 'How The Lab works · Readiness scoring and partner matching',
+    description: 'The methodology behind The Lab: how expansion readiness is scored, how markets are compared and how partner matches are calculated and explained.',
+  },
+  'lab-readiness': {
+    title: 'Expansion readiness test for consumer brands · The Lab',
+    description: 'Six questions, two minutes: an indicative read on how ready your brand is for a new European market. Free, and nothing you answer is stored.',
+  },
+  'lab-app': { title: 'The Lab', description: 'Your Lab workspace.' },
   '404': { title: 'Page not found', description: 'This page does not exist.' },
 }
