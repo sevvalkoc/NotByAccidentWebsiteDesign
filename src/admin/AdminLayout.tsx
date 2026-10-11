@@ -25,6 +25,7 @@ const NAV: { to: string; label: string }[] = [
   { to: '/admin/submissions', label: 'Submissions' },
   { to: '/admin/brand', label: 'Brand Settings' },
   { to: '/admin/site', label: 'Site Settings' },
+  { to: '/admin/lab', label: 'The Lab' },
   { to: '/admin/users', label: 'Users' },
   { to: '/admin/pages', label: 'Previous site: pages' },
 ]

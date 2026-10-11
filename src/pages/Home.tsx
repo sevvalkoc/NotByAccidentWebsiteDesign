@@ -1,6 +1,7 @@
 import Hero from './home/Hero'
 import SelectedWork from './home/SelectedWork'
 import Practice from './home/Practice'
+import LabFeature from './home/LabFeature'
 import Evidence from './home/Evidence'
 import StudioStatement from './home/StudioStatement'
 import NotesFeature from './home/NotesFeature'
@@ -11,7 +12,7 @@ import { useLocale } from '@/i18n/locale'
 import { website } from '@/seo/schema'
 import './home/home.css'
 
-/* What it is → the work → what it does → proof → the studio → how it
+/* What it is → the work → what it does → The Lab → proof → the studio → how it
    thinks → contact. Every section reads Admin → Homepage. */
 export default function Home() {
   const meta = usePageMeta('home')
@@ -22,6 +23,7 @@ export default function Home() {
       <Hero />
       <SelectedWork />
       <Practice />
+      <LabFeature />
       <Evidence />
       <StudioStatement />
       <NotesFeature />

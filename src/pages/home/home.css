@@ -482,3 +482,47 @@
     margin-top: var(--s-6);
   }
 }
+
+/* ── The Lab ──────────────────────────────────────────────────────────── */
+.lf {
+  padding-block: clamp(var(--s-8), 7vw, var(--s-9));
+}
+.lf__grid {
+  display: grid;
+  gap: var(--s-7) var(--gutter);
+  align-items: end;
+}
+.lf__title {
+  max-width: 18ch;
+  margin-top: var(--s-4);
+}
+.lf__body {
+  max-width: 46ch;
+  margin-top: var(--s-4);
+}
+.lf__actions {
+  margin-top: var(--s-6);
+}
+.lf__steps {
+  margin: 0;
+  border-top: 1px solid var(--rule);
+}
+.lf__steps li {
+  display: grid;
+  grid-template-columns: 3ch 1fr;
+  gap: var(--s-4);
+  align-items: baseline;
+  padding-block: var(--s-3);
+  border-bottom: 1px solid var(--rule);
+}
+@media (min-width: 1024px) {
+  .lf__grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+  .lf__text {
+    grid-column: 1 / span 7;
+  }
+  .lf__steps {
+    grid-column: 9 / span 4;
+  }
+}

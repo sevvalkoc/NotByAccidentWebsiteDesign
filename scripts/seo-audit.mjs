@@ -29,7 +29,10 @@ for (const f of files) {
   if (h1 !== 1) flag(u, `${h1} h1`)
   if (!robots.includes('noindex')) {
     if (canonical !== 'https://notbyaccident.com' + (u === '/' ? '' : u) && !(u === '/' && canonical === 'https://notbyaccident.com/')) flag(u, `canonical ${canonical}`)
-    if ((html.match(/hreflang=/g) || []).length < 4) flag(u, 'hreflang missing')
+    // single-language pages (The Lab) carry none; a partial set is a mistake
+    const hl = (html.match(/hreflang=/g) || []).length
+    if (hl > 0 && hl < 4) flag(u, 'hreflang incomplete')
+    if (hl === 0 && !u.startsWith('/lab')) flag(u, 'hreflang missing')
     titles.set(title, [...(titles.get(title) ?? []), u])
     descs.set(desc, [...(descs.get(desc) ?? []), u])
   }

@@ -2,7 +2,7 @@
    modifiable dans le CMS, comme sur le site précédent). Textes juridiques
    repris mot pour mot du site précédent. */
 import type { PageMeta, PageSections, PageSlug } from './types'
-import { sectionsEn } from './sections.en'
+import { sectionsEn, pageMetaEn } from './sections.en'
 
 const img = (page: PageSlug, key: string) => sectionsEn[page][key]?.image ?? null
 
@@ -209,6 +209,11 @@ export const sectionsFr: Record<PageSlug, PageSections> = {
     },
   },
   '404': { header: { eyebrow: 'Erreur 404', title: 'Cette page est un accident.', body: 'Tout le reste ici a été fait à dessein. Le lien est peut-être cassé, ou la page a déménagé.' } },
+  // The Lab is English-only in V1.
+  lab: sectionsEn.lab,
+  'lab-how': sectionsEn['lab-how'],
+  'lab-readiness': sectionsEn['lab-readiness'],
+  'lab-app': sectionsEn['lab-app'],
 }
 
 export const pageMetaFr: Record<PageSlug, PageMeta> = {
@@ -228,4 +233,8 @@ export const pageMetaFr: Record<PageSlug, PageMeta> = {
   privacy: { title: 'Confidentialité', description: 'Comment Not by Accident collecte, utilise et protège vos données personnelles.' },
   cookies: { title: 'Politique de cookies', description: 'Comment Not by Accident utilise les cookies et technologies similaires sur ce site.' },
   '404': { title: 'Page introuvable', description: "Cette page n'existe pas." },
+  lab: pageMetaEn.lab,
+  'lab-how': pageMetaEn['lab-how'],
+  'lab-readiness': pageMetaEn['lab-readiness'],
+  'lab-app': pageMetaEn['lab-app'],
 }

@@ -3,7 +3,25 @@
    The migration is idempotent and additive: it creates nothing that exists,
    overwrites no row, and never touches the previous site's pages. */
 import { writeFileSync } from 'node:fs'
-import { sectionsEn, pageMetaEn } from '../src/content/sections.en.ts'
+import { sectionsEn as allSections, pageMetaEn as allMeta } from '../src/content/sections.en.ts'
+
+// 0010 is applied in production and must not change. The Lab's pages, its
+// homepage section and its menu entries are seeded by 0014 instead
+// (scripts/generate-lab-content.ts), so they are filtered out here.
+const LAB = new Set(['lab', 'lab-how', 'lab-readiness', 'lab-app'])
+const sectionsEn = Object.fromEntries(
+  Object.entries(allSections)
+    .filter(([slug]) => !LAB.has(slug))
+    .map(([slug, page]) => [
+      slug,
+      Object.fromEntries(
+        Object.entries(page)
+          .filter(([key]) => !(slug === 'home' && key === 'lab'))
+          .map(([key, sec]) => [key, sec.items ? { ...sec, items: sec.items.filter(it => it.body !== '/lab') } : sec]),
+      ),
+    ]),
+) as typeof allSections
+const pageMetaEn = Object.fromEntries(Object.entries(allMeta).filter(([slug]) => !LAB.has(slug))) as typeof allMeta
 
 const q = (v: unknown) => (v === undefined || v === null || v === '' ? 'null' : `'${String(v).replace(/'/g, "''")}'`)
 const j = (v: unknown) => `'${JSON.stringify(v).replace(/'/g, "''")}'::jsonb`

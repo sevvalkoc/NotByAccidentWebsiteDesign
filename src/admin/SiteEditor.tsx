@@ -143,6 +143,15 @@ const SCHEMAS: Record<string, Record<string, Schema>> = {
         },
       ],
     },
+    lab: {
+      label: 'The Lab',
+      cols: ['eyebrow', 'title', 'body', 'cta'],
+      hints: { title: EMPH, body: 'One sentence under the heading.' },
+      extra: [
+        { key: 'cta2Label', label: 'Second link label', type: 'text' },
+        { key: 'cta2Url', label: 'Second link', type: 'text' },
+      ],
+    },
     contact: {
       label: 'Contact',
       cols: ['eyebrow', 'title', 'body', 'cta'],

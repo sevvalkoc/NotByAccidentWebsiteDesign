@@ -8,3 +8,4 @@ React 19 + React Router 7 + Vite 8, prerendered to static HTML (`scripts/prerend
 - Migrations in `supabase/migrations/` are additive and idempotent; never overwrite editor content in a migration.
 - Don't invent facts, clients, metrics or testimonials in copy.
 - Strings with apostrophes use double quotes or typographic ’.
+- The Lab (`/lab`, `src/lab`, `src/admin/lab`, migrations 0011–0014) is documented in `docs/lab/README.md`. All scoring, matching and permission logic lives in the database (RPCs + RLS); the frontend only calls it. Never put fabricated partners or market facts in migrations; `supabase/seed/lab_fixtures.sql` is staging-only. Lab checks: `scripts/lab-tests.mjs`, `lab-e2e.mjs`, `lab-admin-e2e.mjs`, `lab-a11y.mjs` (local Supabase only).

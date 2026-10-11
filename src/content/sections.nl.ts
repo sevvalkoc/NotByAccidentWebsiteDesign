@@ -2,7 +2,7 @@
    het CMS te bewerken, net als op de vorige site). Juridische teksten
    letterlijk van de vorige site. */
 import type { PageMeta, PageSections, PageSlug } from './types'
-import { sectionsEn } from './sections.en'
+import { sectionsEn, pageMetaEn } from './sections.en'
 
 const img = (page: PageSlug, key: string) => sectionsEn[page][key]?.image ?? null
 
@@ -209,6 +209,11 @@ export const sectionsNl: Record<PageSlug, PageSections> = {
     },
   },
   '404': { header: { eyebrow: 'Fout 404', title: 'Deze pagina is een ongeluk.', body: 'Al het andere hier is met opzet gemaakt. De link is misschien kapot, of de pagina is verhuisd.' } },
+  // The Lab is English-only in V1.
+  lab: sectionsEn.lab,
+  'lab-how': sectionsEn['lab-how'],
+  'lab-readiness': sectionsEn['lab-readiness'],
+  'lab-app': sectionsEn['lab-app'],
 }
 
 export const pageMetaNl: Record<PageSlug, PageMeta> = {
@@ -228,4 +233,8 @@ export const pageMetaNl: Record<PageSlug, PageMeta> = {
   privacy: { title: 'Privacyverklaring', description: 'Hoe Not by Accident je persoonsgegevens verzamelt, gebruikt en beschermt.' },
   cookies: { title: 'Cookiebeleid', description: 'Hoe Not by Accident cookies en vergelijkbare technieken op deze website gebruikt.' },
   '404': { title: 'Pagina niet gevonden', description: 'Deze pagina bestaat niet.' },
+  lab: pageMetaEn.lab,
+  'lab-how': pageMetaEn['lab-how'],
+  'lab-readiness': pageMetaEn['lab-readiness'],
+  'lab-app': pageMetaEn['lab-app'],
 }
