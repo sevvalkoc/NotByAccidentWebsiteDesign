@@ -33,6 +33,7 @@ import Submissions from '@/admin/Submissions'
 import BrandSettings from '@/admin/BrandSettings'
 import SiteSettings from '@/admin/SiteSettings'
 import Users from '@/admin/Users'
+import LabAdmin from '@/admin/lab/LabAdmin'
 
 /** Shown to a signed-in user whose profile isn't an approved admin/editor yet
  *  — either freshly signed up and waiting on an admin, or suspended. */
@@ -48,6 +49,24 @@ function AccountStatusScreen({ profile }: { profile: Profile | null }) {
             : `Your account (${profile?.email}) has been suspended. Contact an admin if you think this is a mistake.`}
         </p>
         <button onClick={() => signOut()} className="text-sm text-gray-500 hover:text-gray-800 underline">
+          Sign out
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/** A Lab account (no CMS profile) that opens /admin: this isn't for them. */
+function LabAccountScreen() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="max-w-sm w-full bg-white border border-gray-200 rounded-lg p-8 text-center">
+        <h1 className="text-lg font-semibold text-gray-900 mb-2">This is the site admin</h1>
+        <p className="text-sm text-gray-600 mb-6">Your account is a Lab account. Your brand, results and matches are in The Lab.</p>
+        <a href="/lab/dashboard" className="inline-block rounded-md bg-blue-600 text-white text-sm font-medium px-4 py-2 hover:bg-blue-700">
+          Go to The Lab
+        </a>
+        <button onClick={() => signOut()} className="block mx-auto mt-4 text-sm text-gray-500 hover:text-gray-800 underline">
           Sign out
         </button>
       </div>
@@ -93,6 +112,7 @@ function AdminShell({ profile }: { profile: Profile | null }) {
         <Route path="brand" element={<BrandSettings />} />
         <Route path="site" element={<SiteSettings />} />
         <Route path="users" element={<Users isAdmin={isAdmin(profile)} />} />
+        <Route path="lab/*" element={<LabAdmin />} />
         <Route path="*" element={<Navigate to="dashboard" replace />} />
       </Routes>
     </AdminLayout>
@@ -120,13 +140,16 @@ export default function AdminApp() {
 
   return (
     <Routes>
-      <Route path="login" element={approved ? <Navigate to="/admin/dashboard" replace /> : <Login />} />
+      <Route
+        path="login"
+        element={approved ? <Navigate to="/admin/dashboard" replace /> : session ? profile ? <AccountStatusScreen profile={profile} /> : <LabAccountScreen /> : <Login />}
+      />
       <Route path="signup" element={<SignUp />} />
       <Route path="forgot-password" element={<ForgotPassword />} />
       <Route path="reset-password" element={<ResetPassword />} />
       <Route
         path="*"
-        element={approved ? <AdminShell profile={profile} /> : session ? <AccountStatusScreen profile={profile} /> : <Login />}
+        element={approved ? <AdminShell profile={profile} /> : session ? (profile ? <AccountStatusScreen profile={profile} /> : <LabAccountScreen />) : <Login />}
       />
     </Routes>
   )
