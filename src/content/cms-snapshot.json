@@ -1,179 +1,691 @@
 {
  "brand": {},
- "team": [
+ "testimonials": [
   {
-   "id": "610435ab-e274-4840-9c20-a212d36b01d0",
-   "name": "Sara Okafor",
-   "role": "Founding Partner, Strategy",
-   "bio": "Sara spent a decade in strategy consulting before concluding that brand and commercial thinking should be one discipline, not two. She built Not by Accident on that premise.",
-   "img": "https://images.unsplash.com/photo-1675773051474-55c4b7d2cf53?w=600&h=750&fit=crop&auto=format"
+   "quote": "They found the sentence our whole company had been failing to say for six years. Everything after that was easier — the pricing, the hiring, the pitch.",
+   "name": "Amara Devlin",
+   "role": "Founder",
+   "company": "Lavanta"
   },
   {
-   "id": "933a37bb-10c5-4535-9195-2a5be662c7fe",
-   "name": "Tomás Reyes",
-   "role": "Founding Partner, Creative",
-   "bio": "Tomás ran creative for two decade-long stints at independent agencies in Amsterdam and São Paulo before deciding the work was better when the creative director also sat in on the strategy.",
-   "img": "https://images.unsplash.com/photo-1523908511403-7fc7b25592f4?w=600&h=750&fit=crop&auto=format"
+   "quote": "Most people arrive with a deck. They arrived with a question, and it turned out to be the only one that mattered. We are still using the answer.",
+   "name": "Henri Vasseur",
+   "role": "Managing Director",
+   "company": "Studio Marché"
+  },
+  {
+   "quote": "We had confused looking expensive with being wanted. They took the whole thing apart, kept the two things that were true, and built the rest around them.",
+   "name": "Ingrid Solberg",
+   "role": "Chief Executive",
+   "company": "Edde"
+  },
+  {
+   "quote": "The work was sharp, but the thing I did not expect was how commercial it was. Every decision came back to a number we could actually move.",
+   "name": "Marcus Bianchi",
+   "role": "Group Marketing Director",
+   "company": "Hinterland"
   }
  ],
- "projects": [
+ "capabilities": [
   {
-   "id": "185e4f89-3bdd-4dd3-a103-5009ea11a54b",
-   "num": "01",
-   "name": "Lavanta",
-   "discipline": "Brand Strategy · Creative Direction · SEO · Growth Strategy",
-   "year": "2024",
-   "location": "London",
-   "brief": "A jewellery brand that was being admired and not bought.",
-   "narrative": {
-    "problem": "Lavanta came to us three years into existence with a clear problem: strong product, strong following, soft sales.",
-    "insight": "The brand was being admired, not bought — priced like affordable luxury when it was already being worn like an heirloom. The gap was never the product. It was the story people had no permission to tell about owning it.",
-    "intervention": "We repositioned the brand around the idea of heirloom at a contemporary price point — not affordable luxury, but the last piece in a category of one — and rebuilt the identity, product and demand system around that single idea.",
-    "outcome": "+34% conversion in six months, and a waiting list for the new collection."
-   },
-   "services": [
-    "Brand Strategy",
-    "Creative Direction",
-    "SEO",
-    "Growth Strategy"
+   "slug": "brand-strategy",
+   "name": "Brand Strategy",
+   "category": "Brand & Identity",
+   "summary": "The commercial logic underneath the brand — what you sell, to whom, and why it wins.",
+   "lede": "Brand strategy is not a mood. It is the argument for why a company deserves to exist, priced correctly, in a market that already has enough. We build that argument first, because every downstream decision — identity, product, pricing, media — is cheaper and sharper once it exists.",
+   "includes": [
+    "Audience and demand mapping",
+    "Proposition and value articulation",
+    "Brand architecture",
+    "Competitive and category analysis"
    ],
-   "relatedCapabilities": [
-    "brand-strategy",
-    "creative-direction",
-    "seo",
-    "growth-strategy"
+   "question": "Why should anyone choose us, and pay what we are worth?",
+   "outcome": "A written, agreed strategy that makes the next hundred decisions faster.",
+   "queries": [
+    "what is brand strategy",
+    "brand strategy agency Amsterdam",
+    "how to position a brand",
+    "brand strategy vs marketing strategy"
    ],
-   "img": "https://images.unsplash.com/photo-1675773051474-55c4b7d2cf53?w=1200&h=800&fit=crop&auto=format",
-   "heroImg": "https://images.unsplash.com/photo-1675773051474-55c4b7d2cf53?w=1600&h=1000&fit=crop&auto=format",
-   "result": "+34% conversion in six months, and a waiting list.",
-   "slug": "lavanta",
-   "featured": true,
-   "gallery": [],
    "seo": {}
   },
   {
-   "id": "3cbe9d13-859a-4024-b77b-e0eb5e8e17b1",
-   "num": "02",
-   "name": "Studio Marché",
-   "discipline": "Brand Strategy · Brand Positioning · Creative Direction · Campaign Strategy",
-   "year": "2025",
-   "location": "Paris",
-   "brief": "A market that needed to feel like it belonged to its neighbourhood.",
-   "narrative": {
-    "problem": "Studio Marché had been running for four years without ever answering the question most successful markets never ask: what are we, exactly?",
-    "insight": "Not the vendors, not the footfall — the market itself was the brand, and nobody had named it as one thing. Every stall had its own identity. The market had none.",
-    "intervention": "We defined a position that made the market itself the brand, not the sum of what was sold there, then built the creative system and campaign that let every vendor sit inside it without losing their own voice.",
-    "outcome": "Footfall up 22%, and a market that finally reads as one place."
-   },
-   "services": [
-    "Brand Strategy",
-    "Brand Positioning",
-    "Creative Direction",
-    "Campaign Strategy"
+   "slug": "brand-positioning",
+   "name": "Brand Positioning",
+   "category": "Brand & Identity",
+   "summary": "The single space you own in a buyer’s mind — defended with evidence, not adjectives.",
+   "lede": "Most companies are positioned by accident: by whoever spoke loudest in the last workshop. We find the position that is both true and unoccupied, then make it defensible — so the market files you under a category of one.",
+   "includes": [
+    "Category and frame-of-reference definition",
+    "Point-of-difference and proof",
+    "Positioning statement and messaging house",
+    "Migration plan from where you are today"
    ],
-   "relatedCapabilities": [
-    "brand-strategy",
-    "brand-positioning",
-    "creative-direction",
-    "campaign-strategy"
+   "question": "What do we want to be the obvious choice for?",
+   "outcome": "A position competitors cannot copy without becoming you.",
+   "queries": [
+    "brand positioning",
+    "how to reposition a company",
+    "positioning statement examples",
+    "category of one strategy"
    ],
-   "img": "https://images.unsplash.com/photo-1759050486852-fdfe2fdc7bea?w=1200&h=800&fit=crop&auto=format",
-   "heroImg": "https://images.unsplash.com/photo-1759050486852-fdfe2fdc7bea?w=1600&h=1000&fit=crop&auto=format",
-   "result": "Footfall up 22%, and a market that finally reads as one place.",
-   "slug": "studio-marche",
-   "featured": false,
-   "gallery": [],
    "seo": {}
   },
   {
-   "id": "89b812db-70d3-4aa6-906e-adcb387913ef",
-   "num": "03",
-   "name": "Edde",
-   "discipline": "Visual Identity · Verbal Identity · Website Design & Development · UX/UI Design",
-   "year": "2025",
-   "location": "Berlin",
-   "brief": "A skincare brand built to age alongside its customers.",
-   "narrative": {
-    "problem": "Most skincare brands are afraid of ageing, and build their entire identity around reversing it. Edde's customers were not afraid of it, and the brand did not yet reflect that.",
-    "insight": "Visible time was not something to hide from this audience. It was a credential — evidence of a life the product was there to support, not correct.",
-    "intervention": "We built an identity and digital system that treated ageing as something to understand rather than reverse, from the language on the packaging to the words used on the product pages.",
-    "outcome": "Repeat purchase up 41% among customers over fifty."
-   },
-   "services": [
-    "Visual Identity",
-    "Verbal Identity",
-    "Website Design & Development",
-    "UX/UI Design"
+   "slug": "naming",
+   "name": "Naming",
+   "category": "Brand & Identity",
+   "summary": "Names for companies, products and ranges — decided, not voted on.",
+   "lede": "A name is a bet on a set of values that do not yet exist in the market. We do not hand over a list of four hundred and ask you to choose. We make a decision, defend it linguistically and legally, and give you the story that makes it stick.",
+   "includes": [
+    "Naming strategy and territories",
+    "Creation and shortlisting",
+    "Linguistic and trademark screening",
+    "Rationale and rollout language"
    ],
-   "relatedCapabilities": [
-    "brand-identity",
-    "verbal-identity",
-    "web-design-development",
-    "ux-ui-design"
+   "question": "What should this be called, and can we own it?",
+   "outcome": "A name you can register, defend and grow into.",
+   "queries": [
+    "brand naming agency",
+    "how to name a company",
+    "product naming process",
+    "is my brand name available"
    ],
-   "img": "https://images.unsplash.com/photo-1617050318658-a9a3175e34cb?w=1200&h=800&fit=crop&auto=format",
-   "heroImg": "https://images.unsplash.com/photo-1617050318658-a9a3175e34cb?w=1600&h=1000&fit=crop&auto=format",
-   "result": "Repeat purchase up 41% among customers over fifty.",
-   "slug": "edde",
-   "featured": false,
-   "gallery": [],
    "seo": {}
   },
   {
-   "id": "1ba8b12a-d18f-46d7-a61a-7fce87ee191f",
-   "num": "04",
-   "name": "Hinterland",
-   "discipline": "Brand Strategy · Brand Architecture · Creative Direction · Campaign Strategy",
-   "year": "2025",
-   "location": "Melbourne",
-   "brief": "A hospitality group that needed to mean something in three cities at once.",
-   "narrative": {
-    "problem": "Hinterland operated twelve venues across three cities. It was successful by most measures and unrecognisable as a single brand.",
-    "insight": "The problem was not inconsistency of taste — every venue looked considered on its own. It was the absence of a system that let them all be recognisably one company without being identical.",
-    "intervention": "We built a brand architecture and identity system that could flex across formats — restaurant, bar, event space — while remaining unmistakably the same company, then rolled it out across all twelve venues.",
-    "outcome": "One brand across twelve venues, three cities, no confusion."
-   },
-   "services": [
-    "Brand Strategy",
-    "Brand Architecture",
-    "Creative Direction",
-    "Campaign Strategy"
+   "slug": "brand-architecture",
+   "name": "Brand Architecture",
+   "category": "Brand & Identity",
+   "summary": "How a company organises its brands, sub-brands and products so growth adds clarity instead of confusion.",
+   "lede": "Every company eventually has more than one thing to name — a new range, a new market, a new venue. Brand architecture is the decision system that determines what gets its own name, what borrows the parent’s, and how the whole family stays legible as it grows.",
+   "includes": [
+    "Portfolio and structure audit",
+    "Master-brand vs sub-brand decisions",
+    "Naming and nomenclature rules",
+    "Roll-out governance"
    ],
-   "relatedCapabilities": [
-    "brand-strategy",
-    "brand-architecture",
-    "creative-direction",
-    "campaign-strategy"
+   "question": "When we launch the next thing, does it strengthen us or dilute us?",
+   "outcome": "A structure that scales without a rename every eighteen months.",
+   "queries": [
+    "brand architecture strategy",
+    "sub brand vs master brand",
+    "brand portfolio strategy",
+    "how to name a product line"
    ],
-   "img": "https://images.unsplash.com/photo-1771440047944-0b5d792213a9?w=1200&h=800&fit=crop&auto=format",
-   "heroImg": "https://images.unsplash.com/photo-1771440047944-0b5d792213a9?w=1600&h=1000&fit=crop&auto=format",
-   "result": "One brand across twelve venues, three cities, no confusion.",
-   "slug": "hinterland",
-   "featured": false,
-   "gallery": [],
    "seo": {}
   },
   {
-   "id": "539d8c62-d660-4efc-b1b3-fc99f22d43ac",
-   "num": "05",
-   "name": "Unnamed Project",
-   "discipline": "Brand Strategy",
-   "year": "2026",
-   "location": "Undisclosed",
-   "brief": "In progress. More when we can.",
-   "narrative": null,
-   "services": [
-    "Brand Strategy"
+   "slug": "brand-identity",
+   "name": "Visual Identity",
+   "category": "Brand & Identity",
+   "summary": "A complete visual system — logo, type, colour, layout — that survives without the logo.",
+   "lede": "Recognition does not come from a logo. It comes from a set of codes so consistent that the brand is legible even when the name is missing. We build that system and the guidelines that keep it alive.",
+   "includes": [
+    "Logo, symbol and lockups",
+    "Type, colour and layout systems",
+    "Art direction and iconography",
+    "Brand guidelines and asset libraries"
    ],
-   "relatedCapabilities": [
-    "brand-strategy"
+   "question": "What makes us unmistakable at a glance?",
+   "outcome": "A system your team can run without us in the room.",
+   "queries": [
+    "visual identity design",
+    "brand identity system",
+    "logo and brand guidelines",
+    "rebrand agency"
    ],
-   "img": "https://images.unsplash.com/photo-1771440048218-68069773fa81?w=1200&h=800&fit=crop&auto=format",
-   "heroImg": "https://images.unsplash.com/photo-1771440048218-68069773fa81?w=1600&h=1000&fit=crop&auto=format",
-   "result": "In progress. More when we can.",
-   "slug": "unnamed-2026",
-   "featured": false,
-   "gallery": [],
+   "seo": {}
+  },
+  {
+   "slug": "verbal-identity",
+   "name": "Verbal Identity",
+   "category": "Brand & Identity",
+   "summary": "The words that only your company would use — tone, vocabulary and the rules that keep them consistent.",
+   "lede": "A visual system tells you what a brand looks like. A verbal identity tells you what it sounds like — the vocabulary it reaches for, the jokes it does and does not make, the sentence length that feels like it. We write the rules, then write the first hundred examples so the team can hear the difference.",
+   "includes": [
+    "Tone of voice principles",
+    "Vocabulary and lexicon",
+    "Messaging house and headline library",
+    "Copy guidelines and training"
+   ],
+   "question": "Would someone recognise our writing with the logo removed?",
+   "outcome": "A voice specific enough to be worth protecting.",
+   "queries": [
+    "brand tone of voice",
+    "verbal identity guidelines",
+    "brand messaging framework",
+    "how to write brand voice guidelines"
+   ],
+   "seo": {}
+  },
+  {
+   "slug": "creative-direction",
+   "name": "Creative Direction",
+   "category": "Brand & Identity",
+   "summary": "The taste and judgement that hold a brand together across everything it makes.",
+   "lede": "Creative direction is editing at the level of the whole company: photography, tone, campaigns and the thousand small calls that decide whether a brand feels considered or assembled. We hold the line so the work stays coherent as it scales.",
+   "includes": [
+    "Art and photography direction",
+    "Campaign concepting",
+    "Tone and creative governance",
+    "Production oversight"
+   ],
+   "question": "Does everything we make feel like us?",
+   "outcome": "Work that is unmistakably one company, at any volume.",
+   "queries": [
+    "creative direction agency",
+    "art direction for brands",
+    "campaign creative direction",
+    "photography direction"
+   ],
+   "seo": {}
+  },
+  {
+   "slug": "packaging",
+   "name": "Packaging",
+   "category": "Brand & Identity",
+   "summary": "Structural and graphic packaging design that earns the price on the shelf, not just on the screen.",
+   "lede": "Packaging is the one piece of brand work a customer actually holds. We design structure and graphics together, so the object argues for the price before anyone reads a word — and works just as hard photographed for a feed as it does on a shelf.",
+   "includes": [
+    "Structural and dieline design",
+    "Materials and print production",
+    "Range and variant systems",
+    "Sustainability and cost engineering"
+   ],
+   "question": "Does holding this make the price feel correct?",
+   "outcome": "Packaging that reads as considered, not decorated.",
+   "queries": [
+    "packaging design agency",
+    "product packaging design",
+    "sustainable packaging design",
+    "FMCG packaging design"
+   ],
+   "seo": {}
+  },
+  {
+   "slug": "web-design-development",
+   "name": "Website Design & Development",
+   "category": "Digital & Product",
+   "summary": "Websites that load fast, read clearly to search and AI crawlers, and move people towards a decision.",
+   "lede": "A website is where most people decide whether to trust you. We design and build sites that load fast, read well to search engines and AI crawlers, and move visitors towards a decision — without ever looking like a template.",
+   "includes": [
+    "Design and art direction",
+    "Front-end build and CMS",
+    "Core Web Vitals and performance",
+    "Schema, semantics and accessibility"
+   ],
+   "question": "Does our website earn trust and enquiries?",
+   "outcome": "A site that ranks, converts and is easy to keep alive.",
+   "queries": [
+    "website design agency",
+    "high converting website design",
+    "SEO friendly web design",
+    "CMS website build"
+   ],
+   "seo": {}
+  },
+  {
+   "slug": "ux-ui-design",
+   "name": "UX/UI Design",
+   "category": "Digital & Product",
+   "summary": "Interfaces people understand instantly and enjoy using.",
+   "lede": "Good UX is invisible; bad UX is a leak in the funnel. We design flows, screens and systems that reduce friction, respect attention and hold up under real use — measured, not asserted.",
+   "includes": [
+    "User research and flows",
+    "Interface and interaction design",
+    "Design systems and components",
+    "Usability testing"
+   ],
+   "question": "Can people do what they came to do, easily?",
+   "outcome": "Fewer drop-offs, more completed actions.",
+   "queries": [
+    "UX UI design agency",
+    "product design services",
+    "usability testing",
+    "design system build"
+   ],
+   "seo": {}
+  },
+  {
+   "slug": "digital-product-design",
+   "name": "Digital Product Design",
+   "category": "Digital & Product",
+   "summary": "Apps, platforms and tools designed and engineered end to end.",
+   "lede": "Some brands need more than a website — they need a product. We take digital products from concept to shipped, joining design and engineering so the thing you launch is the thing you argued for.",
+   "includes": [
+    "Product strategy and scoping",
+    "Design and prototyping",
+    "Full-stack engineering",
+    "Iteration and roadmap"
+   ],
+   "question": "What should we build, and can you build it?",
+   "outcome": "A product in market, not a prototype in a drawer.",
+   "queries": [
+    "digital product design agency",
+    "app design and development",
+    "MVP build",
+    "product engineering studio"
+   ],
+   "seo": {}
+  },
+  {
+   "slug": "ecommerce",
+   "name": "E-commerce",
+   "category": "Digital & Product",
+   "summary": "Storefronts and checkout experiences built to convert, not just to display a catalogue.",
+   "lede": "An e-commerce site is a sales floor with the lighting, the queue and the assistant all designed at once. We build storefronts, product pages and checkout flows tuned for conversion and repeat purchase, on the platform that actually suits the business.",
+   "includes": [
+    "Platform selection and build",
+    "Product and category page design",
+    "Checkout and conversion optimisation",
+    "Merchandising and CRO testing"
+   ],
+   "question": "Is the path from interest to purchase as short as it should be?",
+   "outcome": "A storefront that turns browsing into buying.",
+   "queries": [
+    "ecommerce website design",
+    "Shopify agency",
+    "conversion rate optimisation ecommerce",
+    "ecommerce UX design"
+   ],
+   "seo": {}
+  },
+  {
+   "slug": "growth-strategy",
+   "name": "Growth Strategy",
+   "category": "Growth & Demand",
+   "summary": "The plan that connects brand, product and demand into one commercial engine.",
+   "lede": "Growth is not a department. It is what happens when the brand, the product and the demand generation agree on the same story and the same numbers. We build the plan that holds all three together, with the channels, sequencing and targets to prove it is working.",
+   "includes": [
+    "Growth model and channel mix",
+    "Funnel and conversion mapping",
+    "Prioritisation and testing roadmap",
+    "Reporting and commercial targets"
+   ],
+   "question": "What is actually going to move revenue, in what order?",
+   "outcome": "One growth plan the whole company can work from.",
+   "queries": [
+    "growth strategy agency",
+    "growth marketing strategy",
+    "how to build a growth plan",
+    "brand and demand alignment"
+   ],
+   "seo": {}
+  },
+  {
+   "slug": "performance-marketing",
+   "name": "Performance Marketing",
+   "category": "Growth & Demand",
+   "summary": "Paid acquisition that respects the brand and the P&L in equal measure.",
+   "lede": "Performance without brand burns cash; brand without performance starves. We run paid media as one system with your brand — creative that could only be you, targeting that is not lazy, and reporting you can actually act on.",
+   "includes": [
+    "Paid search, social and display",
+    "Creative testing frameworks",
+    "Measurement and attribution",
+    "Budget and bid strategy"
+   ],
+   "question": "Is every pound of media working as hard as it could?",
+   "outcome": "Acquisition economics that improve as you scale.",
+   "queries": [
+    "performance marketing agency",
+    "paid media management",
+    "PPC agency",
+    "growth marketing"
+   ],
+   "seo": {}
+  },
+  {
+   "slug": "seo",
+   "name": "SEO",
+   "category": "Growth & Demand",
+   "summary": "Technical, content and entity SEO built for Google and AI answer engines.",
+   "lede": "Search in 2026 is two games at once: ranking in Google and being the source an AI answer quotes. We do both — technical foundations, semantic content and entity authority — so you show up where the decision is actually being made.",
+   "includes": [
+    "Technical SEO and Core Web Vitals",
+    "Entity and topical authority",
+    "On-page and content optimisation",
+    "AI-search and answer-engine optimisation"
+   ],
+   "question": "Do we show up when it matters, in search and in AI answers?",
+   "outcome": "Qualified traffic that arrives ready to enquire.",
+   "queries": [
+    "SEO agency 2026",
+    "AI search optimisation",
+    "answer engine optimisation",
+    "entity SEO",
+    "how to rank in ChatGPT and Perplexity"
+   ],
+   "seo": {}
+  },
+  {
+   "slug": "content-strategy",
+   "name": "Content Strategy & Content Management",
+   "category": "Growth & Demand",
+   "summary": "What to say, where and why — plus the operating system that keeps it published on time.",
+   "lede": "Content is how a brand earns attention between purchases. We define the themes you can credibly own, the formats that suit each channel, the semantic structure that gets you cited by search and AI, and the calendar and workflow that make it sustainable rather than sporadic.",
+   "includes": [
+    "Editorial strategy and pillars",
+    "Topic and entity mapping for SEO",
+    "Content operations and calendar",
+    "Measurement and iteration"
+   ],
+   "question": "What should we publish, and can we actually keep it up?",
+   "outcome": "A content engine that compounds instead of resets.",
+   "queries": [
+    "content strategy agency",
+    "SEO content strategy",
+    "editorial strategy for brands",
+    "content management for AI search"
+   ],
+   "seo": {}
+  },
+  {
+   "slug": "social-media",
+   "name": "Social Media Strategy & Management",
+   "category": "Growth & Demand",
+   "summary": "A social presence with a point of view, run with the discipline of a publication.",
+   "lede": "Most brand social is a content calendar wearing a strategy costume. We start with what the brand actually has to say, choose the platforms worth the effort, and run the account like an editor would — consistent voice, considered pace, real engagement.",
+   "includes": [
+    "Platform and format strategy",
+    "Content planning and production",
+    "Community management",
+    "Analytics and iteration"
+   ],
+   "question": "Does our social output sound like anyone in particular?",
+   "outcome": "A following that behaves like an audience, not a number.",
+   "queries": [
+    "social media strategy agency",
+    "social media management agency",
+    "brand social media strategy",
+    "organic social growth"
+   ],
+   "seo": {}
+  },
+  {
+   "slug": "influencer-marketing",
+   "name": "Influencer / Creator Marketing",
+   "category": "Growth & Demand",
+   "summary": "Creator partnerships chosen for fit and trust, not follower counts.",
+   "lede": "The best creator partnerships feel like a recommendation, not an advert. We find the voices your audience already trusts, brief them properly, and build relationships that pay back beyond a single post.",
+   "includes": [
+    "Creator strategy and sourcing",
+    "Briefing and relationship management",
+    "Content rights and usage",
+    "Performance and measurement"
+   ],
+   "question": "Who does our audience believe, and how do we work with them well?",
+   "outcome": "Partnerships that read as trust, not spend.",
+   "queries": [
+    "influencer marketing agency",
+    "creator partnerships",
+    "UGC strategy",
+    "how to run influencer campaigns"
+   ],
+   "seo": {}
+  },
+  {
+   "slug": "email-marketing",
+   "name": "Email Marketing",
+   "category": "Growth & Demand",
+   "summary": "Lifecycle and CRM programmes that turn a list into revenue.",
+   "lede": "Email is the one channel you own. We design lifecycle programmes — welcome, nurture, retention, win-back — that sound like your brand and move numbers you can see in the dashboard by Friday.",
+   "includes": [
+    "Lifecycle and automation design",
+    "Segmentation and CRM strategy",
+    "Copy, design and templates",
+    "Testing and deliverability"
+   ],
+   "question": "Is our owned audience actually earning?",
+   "outcome": "Revenue from people who already know you.",
+   "queries": [
+    "email marketing agency",
+    "CRM lifecycle marketing",
+    "klaviyo agency",
+    "retention marketing"
+   ],
+   "seo": {}
+  },
+  {
+   "slug": "campaign-strategy",
+   "name": "Campaign Strategy",
+   "category": "Growth & Demand",
+   "summary": "The big idea and the media plan that gets it in front of the right people, on time.",
+   "lede": "A campaign is not a creative treatment looking for a channel plan. It is one idea, expressed correctly for each place it appears, with a media plan built around when and how your audience actually pays attention. We design both halves together.",
+   "includes": [
+    "Campaign idea and concept",
+    "Channel and media planning",
+    "Cross-format asset development",
+    "Flighting and measurement"
+   ],
+   "question": "What is the one idea, and where does it need to show up?",
+   "outcome": "A campaign that feels planned, not scattered.",
+   "queries": [
+    "campaign strategy agency",
+    "integrated campaign planning",
+    "creative campaign development",
+    "media planning for brand campaigns"
+   ],
+   "seo": {}
+  },
+  {
+   "slug": "market-research",
+   "name": "Market Research",
+   "category": "Market & Expansion",
+   "summary": "Evidence about buyers, categories and pricing — before the expensive decisions.",
+   "lede": "We research to decide, not to reassure. Qualitative depth where nuance matters, quantitative scale where confidence does, and a synthesis that actually changes what you build next.",
+   "includes": [
+    "Qualitative interviews and ethnography",
+    "Quantitative surveys and segmentation",
+    "Pricing and willingness-to-pay studies",
+    "Category and trend analysis"
+   ],
+   "question": "What do our buyers actually believe, and pay for?",
+   "outcome": "Decisions grounded in evidence instead of the loudest opinion.",
+   "queries": [
+    "brand market research",
+    "customer segmentation study",
+    "pricing research",
+    "willingness to pay analysis"
+   ],
+   "seo": {}
+  },
+  {
+   "slug": "go-to-market-strategy",
+   "name": "Go-to-Market Strategy",
+   "category": "Market & Expansion",
+   "summary": "The sequenced plan for launching or scaling — channels, message, motion and economics.",
+   "lede": "A great product with a vague go-to-market is a slow, expensive failure. We plan the launch as a commercial system: who hears first, what they hear, where the money goes, and how you know it is working within weeks rather than quarters.",
+   "includes": [
+    "Launch sequencing and phasing",
+    "Channel and message planning",
+    "Sales and marketing alignment",
+    "Metrics, targets and readiness"
+   ],
+   "question": "How do we launch this so it lands and pays back?",
+   "outcome": "A launch plan with owners, dates and numbers attached.",
+   "queries": [
+    "go to market strategy",
+    "product launch plan",
+    "GTM strategy for startups",
+    "how to launch a brand"
+   ],
+   "seo": {}
+  },
+  {
+   "slug": "b2b-partnerships",
+   "name": "B2B Partnerships & Potential Client Meetings",
+   "category": "Market & Expansion",
+   "summary": "Distribution through other companies — targeting, outreach and the meetings themselves.",
+   "lede": "Sometimes the fastest route to demand is someone else’s audience. We design and broker partnerships — co-marketing, channel, bundling — and, where useful, get in the room ourselves: identifying, approaching and meeting the businesses worth partnering with.",
+   "includes": [
+    "Partnership strategy and targeting",
+    "Outreach and deal shaping",
+    "Co-marketing programmes",
+    "Meeting preparation and facilitation"
+   ],
+   "question": "Whose audience should we borrow, and on what terms?",
+   "outcome": "A distribution channel that is not more ad spend.",
+   "queries": [
+    "B2B partnership strategy",
+    "co-marketing agency",
+    "channel partnerships",
+    "strategic alliances"
+   ],
+   "seo": {}
+  },
+  {
+   "slug": "market-entry",
+   "name": "Market Entry",
+   "category": "Market & Expansion",
+   "summary": "The research, positioning and plan for taking a brand into a new country or category.",
+   "lede": "A brand that works in one market does not automatically work in the next one. We assess demand, competition, regulation and cultural fit before recommending how — or whether — to enter, then build the localised positioning and plan to do it properly.",
+   "includes": [
+    "Market viability assessment",
+    "Competitive and regulatory landscape",
+    "Localised positioning and messaging",
+    "Entry sequencing and partners"
+   ],
+   "question": "Should we enter this market, and if so, how?",
+   "outcome": "A market-entry plan grounded in evidence, not enthusiasm.",
+   "queries": [
+    "international market entry strategy",
+    "market expansion strategy",
+    "how to launch a brand in a new country",
+    "market entry consultancy"
+   ],
+   "seo": {}
+  },
+  {
+   "slug": "investor-readiness",
+   "name": "Investor Readiness & Investor Meetings",
+   "category": "Market & Expansion",
+   "summary": "The narrative, deck and evidence that make a company fundable — and the meetings themselves.",
+   "lede": "Investors buy a story about the future, backed by proof from the present. We shape the equity story, sharpen the deck and pressure-test the numbers so the room leans in for the right reasons — and where it helps, we join the meetings themselves.",
+   "includes": [
+    "Equity story and narrative",
+    "Pitch deck design and copy",
+    "Data-room narrative support",
+    "Rehearsal, Q&A prep and investor meetings"
+   ],
+   "question": "Why is this the company to back, now?",
+   "outcome": "A raise narrative that survives due diligence.",
+   "queries": [
+    "investor pitch deck agency",
+    "how to make a fundable pitch",
+    "equity story",
+    "seed round narrative"
+   ],
+   "seo": {}
+  },
+  {
+   "slug": "growth-process-consultancy",
+   "name": "Growth Process Consultancy",
+   "category": "Market & Expansion",
+   "summary": "How the team actually plans, ships and measures growth work — not just what it should do next.",
+   "lede": "Sometimes the plan is right and the process around it is broken: nobody owns the roadmap, testing has no rhythm, and every quarter starts from a blank page. We audit how growth actually gets decided and shipped inside your company, then install a process your team keeps using after we leave.",
+   "includes": [
+    "Growth operating rhythm audit",
+    "Roadmap, ownership and reporting structure",
+    "Testing and prioritisation frameworks",
+    "Team training and handover"
+   ],
+   "question": "Is the bottleneck the strategy, or how we work?",
+   "outcome": "A growth process the team runs without us.",
+   "queries": [
+    "growth process consulting",
+    "marketing operations consultancy",
+    "growth team operating model",
+    "how to build a growth roadmap"
+   ],
+   "seo": {}
+  },
+  {
+   "slug": "events",
+   "name": "Events",
+   "category": "Experiences",
+   "summary": "Gatherings designed to build the brand in the room, not just fill a calendar.",
+   "lede": "Some brand-building only happens in person. We concept, design and produce events worth attending — launches, dinners, studio evenings — treating the room itself as a piece of creative work with a beginning, middle and end.",
+   "includes": [
+    "Event concept and identity",
+    "Guest experience design",
+    "Production and on-the-day delivery",
+    "Follow-up and measurement"
+   ],
+   "question": "What is worth gathering people for, and will they remember it?",
+   "outcome": "A room that remembers you.",
+   "queries": [
+    "brand events agency",
+    "experiential marketing agency",
+    "launch event production",
+    "corporate event design"
+   ],
+   "seo": {}
+  },
+  {
+   "slug": "exhibitions",
+   "name": "Exhibitions",
+   "category": "Experiences",
+   "summary": "Physical and pop-up spaces that let people encounter the brand as an object, not a screen.",
+   "lede": "An exhibition asks more of a brand than a stand ever does — it has to survive being walked around. We design exhibitions, installations and pop-ups that hold up in three dimensions, from spatial concept through to fabrication and install.",
+   "includes": [
+    "Spatial and exhibition concept",
+    "Graphic and environmental design",
+    "Fabrication and production management",
+    "Install and de-rig"
+   ],
+   "question": "Does the brand still feel like itself in a physical space?",
+   "outcome": "A space people photograph without being asked to.",
+   "queries": [
+    "exhibition design agency",
+    "pop-up store design",
+    "brand installation design",
+    "trade show stand design"
+   ],
+   "seo": {}
+  },
+  {
+   "slug": "workshops",
+   "name": "Workshops",
+   "category": "Experiences",
+   "summary": "Practical, small-group sessions that leave a team able to do more of the work themselves.",
+   "lede": "We run working sessions, not lectures — on positioning, naming, creative direction and the brief itself — built around your actual project, not a generic deck. Teams leave with a decision made, not just a framework explained.",
+   "includes": [
+    "Workshop design and facilitation",
+    "Pre-work and materials",
+    "Live decision-making sessions",
+    "Written outputs and next steps"
+   ],
+   "question": "What could this team decide for itself, with the right structure in the room?",
+   "outcome": "A decision made, not just a framework explained.",
+   "queries": [
+    "brand strategy workshop",
+    "creative direction workshop",
+    "positioning workshop facilitation",
+    "in-house brand training"
+   ],
+   "seo": {}
+  },
+  {
+   "slug": "trainings",
+   "name": "Trainings",
+   "category": "Experiences",
+   "summary": "Longer-form, in-person training in brand strategy and creative direction — opening 2027.",
+   "lede": "Everything we have learned about brand strategy and creative direction, taught directly, over two days, to a small group. Not a webinar series. Not a certificate. The same thinking we charge clients for, taught in person.",
+   "includes": [
+    "Two-day in-person format",
+    "Maximum twelve participants",
+    "Brand Strategy and Creative Direction tracks",
+    "Amsterdam, plus one further city per year"
+   ],
+   "question": "Can the thinking behind the work be taught, not just delivered?",
+   "outcome": "A room of people who can now do more of this themselves.",
+   "queries": [
+    "brand strategy training course",
+    "creative direction training",
+    "in person branding workshop 2027",
+    "Not by Accident trainings"
+   ],
    "seo": {}
   }
  ],
@@ -594,32 +1106,6 @@
    "seo": {}
   }
  ],
- "testimonials": [
-  {
-   "quote": "They found the sentence our whole company had been failing to say for six years. Everything after that was easier — the pricing, the hiring, the pitch.",
-   "name": "Amara Devlin",
-   "role": "Founder",
-   "company": "Lavanta"
-  },
-  {
-   "quote": "Most people arrive with a deck. They arrived with a question, and it turned out to be the only one that mattered. We are still using the answer.",
-   "name": "Henri Vasseur",
-   "role": "Managing Director",
-   "company": "Studio Marché"
-  },
-  {
-   "quote": "We had confused looking expensive with being wanted. They took the whole thing apart, kept the two things that were true, and built the rest around them.",
-   "name": "Ingrid Solberg",
-   "role": "Chief Executive",
-   "company": "Edde"
-  },
-  {
-   "quote": "The work was sharp, but the thing I did not expect was how commercial it was. Every decision came back to a number we could actually move.",
-   "name": "Marcus Bianchi",
-   "role": "Group Marketing Director",
-   "company": "Hinterland"
-  }
- ],
  "company": {
   "name": "Not by Accident",
   "legalName": "Not by Accident",
@@ -676,6 +1162,183 @@
  "seoDefaults": {
   "title": "Independent creative company, Amsterdam"
  },
+ "team": [
+  {
+   "id": "610435ab-e274-4840-9c20-a212d36b01d0",
+   "name": "Sara Okafor",
+   "role": "Founding Partner, Strategy",
+   "bio": "Sara spent a decade in strategy consulting before concluding that brand and commercial thinking should be one discipline, not two. She built Not by Accident on that premise.",
+   "img": "https://images.unsplash.com/photo-1675773051474-55c4b7d2cf53?w=600&h=750&fit=crop&auto=format"
+  },
+  {
+   "id": "933a37bb-10c5-4535-9195-2a5be662c7fe",
+   "name": "Tomás Reyes",
+   "role": "Founding Partner, Creative",
+   "bio": "Tomás ran creative for two decade-long stints at independent agencies in Amsterdam and São Paulo before deciding the work was better when the creative director also sat in on the strategy.",
+   "img": "https://images.unsplash.com/photo-1523908511403-7fc7b25592f4?w=600&h=750&fit=crop&auto=format"
+  }
+ ],
+ "projects": [
+  {
+   "id": "185e4f89-3bdd-4dd3-a103-5009ea11a54b",
+   "num": "01",
+   "name": "Lavanta",
+   "discipline": "Brand Strategy · Creative Direction · SEO · Growth Strategy",
+   "year": "2024",
+   "location": "London",
+   "brief": "A jewellery brand that was being admired and not bought.",
+   "narrative": {
+    "problem": "Lavanta came to us three years into existence with a clear problem: strong product, strong following, soft sales.",
+    "insight": "The brand was being admired, not bought — priced like affordable luxury when it was already being worn like an heirloom. The gap was never the product. It was the story people had no permission to tell about owning it.",
+    "intervention": "We repositioned the brand around the idea of heirloom at a contemporary price point — not affordable luxury, but the last piece in a category of one — and rebuilt the identity, product and demand system around that single idea.",
+    "outcome": "+34% conversion in six months, and a waiting list for the new collection."
+   },
+   "services": [
+    "Brand Strategy",
+    "Creative Direction",
+    "SEO",
+    "Growth Strategy"
+   ],
+   "relatedCapabilities": [
+    "brand-strategy",
+    "creative-direction",
+    "seo",
+    "growth-strategy"
+   ],
+   "img": "https://images.unsplash.com/photo-1675773051474-55c4b7d2cf53?w=1200&h=800&fit=crop&auto=format",
+   "heroImg": "https://images.unsplash.com/photo-1675773051474-55c4b7d2cf53?w=1600&h=1000&fit=crop&auto=format",
+   "result": "+34% conversion in six months, and a waiting list.",
+   "slug": "lavanta",
+   "featured": true,
+   "gallery": [],
+   "seo": {}
+  },
+  {
+   "id": "3cbe9d13-859a-4024-b77b-e0eb5e8e17b1",
+   "num": "02",
+   "name": "Studio Marché",
+   "discipline": "Brand Strategy · Brand Positioning · Creative Direction · Campaign Strategy",
+   "year": "2025",
+   "location": "Paris",
+   "brief": "A market that needed to feel like it belonged to its neighbourhood.",
+   "narrative": {
+    "problem": "Studio Marché had been running for four years without ever answering the question most successful markets never ask: what are we, exactly?",
+    "insight": "Not the vendors, not the footfall — the market itself was the brand, and nobody had named it as one thing. Every stall had its own identity. The market had none.",
+    "intervention": "We defined a position that made the market itself the brand, not the sum of what was sold there, then built the creative system and campaign that let every vendor sit inside it without losing their own voice.",
+    "outcome": "Footfall up 22%, and a market that finally reads as one place."
+   },
+   "services": [
+    "Brand Strategy",
+    "Brand Positioning",
+    "Creative Direction",
+    "Campaign Strategy"
+   ],
+   "relatedCapabilities": [
+    "brand-strategy",
+    "brand-positioning",
+    "creative-direction",
+    "campaign-strategy"
+   ],
+   "img": "https://images.unsplash.com/photo-1759050486852-fdfe2fdc7bea?w=1200&h=800&fit=crop&auto=format",
+   "heroImg": "https://images.unsplash.com/photo-1759050486852-fdfe2fdc7bea?w=1600&h=1000&fit=crop&auto=format",
+   "result": "Footfall up 22%, and a market that finally reads as one place.",
+   "slug": "studio-marche",
+   "featured": false,
+   "gallery": [],
+   "seo": {}
+  },
+  {
+   "id": "89b812db-70d3-4aa6-906e-adcb387913ef",
+   "num": "03",
+   "name": "Edde",
+   "discipline": "Visual Identity · Verbal Identity · Website Design & Development · UX/UI Design",
+   "year": "2025",
+   "location": "Berlin",
+   "brief": "A skincare brand built to age alongside its customers.",
+   "narrative": {
+    "problem": "Most skincare brands are afraid of ageing, and build their entire identity around reversing it. Edde's customers were not afraid of it, and the brand did not yet reflect that.",
+    "insight": "Visible time was not something to hide from this audience. It was a credential — evidence of a life the product was there to support, not correct.",
+    "intervention": "We built an identity and digital system that treated ageing as something to understand rather than reverse, from the language on the packaging to the words used on the product pages.",
+    "outcome": "Repeat purchase up 41% among customers over fifty."
+   },
+   "services": [
+    "Visual Identity",
+    "Verbal Identity",
+    "Website Design & Development",
+    "UX/UI Design"
+   ],
+   "relatedCapabilities": [
+    "brand-identity",
+    "verbal-identity",
+    "web-design-development",
+    "ux-ui-design"
+   ],
+   "img": "https://images.unsplash.com/photo-1617050318658-a9a3175e34cb?w=1200&h=800&fit=crop&auto=format",
+   "heroImg": "https://images.unsplash.com/photo-1617050318658-a9a3175e34cb?w=1600&h=1000&fit=crop&auto=format",
+   "result": "Repeat purchase up 41% among customers over fifty.",
+   "slug": "edde",
+   "featured": false,
+   "gallery": [],
+   "seo": {}
+  },
+  {
+   "id": "1ba8b12a-d18f-46d7-a61a-7fce87ee191f",
+   "num": "04",
+   "name": "Hinterland",
+   "discipline": "Brand Strategy · Brand Architecture · Creative Direction · Campaign Strategy",
+   "year": "2025",
+   "location": "Melbourne",
+   "brief": "A hospitality group that needed to mean something in three cities at once.",
+   "narrative": {
+    "problem": "Hinterland operated twelve venues across three cities. It was successful by most measures and unrecognisable as a single brand.",
+    "insight": "The problem was not inconsistency of taste — every venue looked considered on its own. It was the absence of a system that let them all be recognisably one company without being identical.",
+    "intervention": "We built a brand architecture and identity system that could flex across formats — restaurant, bar, event space — while remaining unmistakably the same company, then rolled it out across all twelve venues.",
+    "outcome": "One brand across twelve venues, three cities, no confusion."
+   },
+   "services": [
+    "Brand Strategy",
+    "Brand Architecture",
+    "Creative Direction",
+    "Campaign Strategy"
+   ],
+   "relatedCapabilities": [
+    "brand-strategy",
+    "brand-architecture",
+    "creative-direction",
+    "campaign-strategy"
+   ],
+   "img": "https://images.unsplash.com/photo-1771440047944-0b5d792213a9?w=1200&h=800&fit=crop&auto=format",
+   "heroImg": "https://images.unsplash.com/photo-1771440047944-0b5d792213a9?w=1600&h=1000&fit=crop&auto=format",
+   "result": "One brand across twelve venues, three cities, no confusion.",
+   "slug": "hinterland",
+   "featured": false,
+   "gallery": [],
+   "seo": {}
+  },
+  {
+   "id": "539d8c62-d660-4efc-b1b3-fc99f22d43ac",
+   "num": "05",
+   "name": "Unnamed Project",
+   "discipline": "Brand Strategy",
+   "year": "2026",
+   "location": "Undisclosed",
+   "brief": "In progress. More when we can.",
+   "narrative": null,
+   "services": [
+    "Brand Strategy"
+   ],
+   "relatedCapabilities": [
+    "brand-strategy"
+   ],
+   "img": "https://images.unsplash.com/photo-1771440048218-68069773fa81?w=1200&h=800&fit=crop&auto=format",
+   "heroImg": "https://images.unsplash.com/photo-1771440048218-68069773fa81?w=1600&h=1000&fit=crop&auto=format",
+   "result": "In progress. More when we can.",
+   "slug": "unnamed-2026",
+   "featured": false,
+   "gallery": [],
+   "seo": {}
+  }
+ ],
  "pages": {
   "404": {
    "header": {
@@ -1614,668 +2277,5 @@
    "description": "Your Lab workspace.",
    "noindex": true
   }
- },
- "capabilities": [
-  {
-   "slug": "brand-strategy",
-   "name": "Brand Strategy",
-   "category": "Brand & Identity",
-   "summary": "The commercial logic underneath the brand — what you sell, to whom, and why it wins.",
-   "lede": "Brand strategy is not a mood. It is the argument for why a company deserves to exist, priced correctly, in a market that already has enough. We build that argument first, because every downstream decision — identity, product, pricing, media — is cheaper and sharper once it exists.",
-   "includes": [
-    "Audience and demand mapping",
-    "Proposition and value articulation",
-    "Brand architecture",
-    "Competitive and category analysis"
-   ],
-   "question": "Why should anyone choose us, and pay what we are worth?",
-   "outcome": "A written, agreed strategy that makes the next hundred decisions faster.",
-   "queries": [
-    "what is brand strategy",
-    "brand strategy agency Amsterdam",
-    "how to position a brand",
-    "brand strategy vs marketing strategy"
-   ],
-   "seo": {}
-  },
-  {
-   "slug": "brand-positioning",
-   "name": "Brand Positioning",
-   "category": "Brand & Identity",
-   "summary": "The single space you own in a buyer’s mind — defended with evidence, not adjectives.",
-   "lede": "Most companies are positioned by accident: by whoever spoke loudest in the last workshop. We find the position that is both true and unoccupied, then make it defensible — so the market files you under a category of one.",
-   "includes": [
-    "Category and frame-of-reference definition",
-    "Point-of-difference and proof",
-    "Positioning statement and messaging house",
-    "Migration plan from where you are today"
-   ],
-   "question": "What do we want to be the obvious choice for?",
-   "outcome": "A position competitors cannot copy without becoming you.",
-   "queries": [
-    "brand positioning",
-    "how to reposition a company",
-    "positioning statement examples",
-    "category of one strategy"
-   ],
-   "seo": {}
-  },
-  {
-   "slug": "naming",
-   "name": "Naming",
-   "category": "Brand & Identity",
-   "summary": "Names for companies, products and ranges — decided, not voted on.",
-   "lede": "A name is a bet on a set of values that do not yet exist in the market. We do not hand over a list of four hundred and ask you to choose. We make a decision, defend it linguistically and legally, and give you the story that makes it stick.",
-   "includes": [
-    "Naming strategy and territories",
-    "Creation and shortlisting",
-    "Linguistic and trademark screening",
-    "Rationale and rollout language"
-   ],
-   "question": "What should this be called, and can we own it?",
-   "outcome": "A name you can register, defend and grow into.",
-   "queries": [
-    "brand naming agency",
-    "how to name a company",
-    "product naming process",
-    "is my brand name available"
-   ],
-   "seo": {}
-  },
-  {
-   "slug": "brand-architecture",
-   "name": "Brand Architecture",
-   "category": "Brand & Identity",
-   "summary": "How a company organises its brands, sub-brands and products so growth adds clarity instead of confusion.",
-   "lede": "Every company eventually has more than one thing to name — a new range, a new market, a new venue. Brand architecture is the decision system that determines what gets its own name, what borrows the parent’s, and how the whole family stays legible as it grows.",
-   "includes": [
-    "Portfolio and structure audit",
-    "Master-brand vs sub-brand decisions",
-    "Naming and nomenclature rules",
-    "Roll-out governance"
-   ],
-   "question": "When we launch the next thing, does it strengthen us or dilute us?",
-   "outcome": "A structure that scales without a rename every eighteen months.",
-   "queries": [
-    "brand architecture strategy",
-    "sub brand vs master brand",
-    "brand portfolio strategy",
-    "how to name a product line"
-   ],
-   "seo": {}
-  },
-  {
-   "slug": "brand-identity",
-   "name": "Visual Identity",
-   "category": "Brand & Identity",
-   "summary": "A complete visual system — logo, type, colour, layout — that survives without the logo.",
-   "lede": "Recognition does not come from a logo. It comes from a set of codes so consistent that the brand is legible even when the name is missing. We build that system and the guidelines that keep it alive.",
-   "includes": [
-    "Logo, symbol and lockups",
-    "Type, colour and layout systems",
-    "Art direction and iconography",
-    "Brand guidelines and asset libraries"
-   ],
-   "question": "What makes us unmistakable at a glance?",
-   "outcome": "A system your team can run without us in the room.",
-   "queries": [
-    "visual identity design",
-    "brand identity system",
-    "logo and brand guidelines",
-    "rebrand agency"
-   ],
-   "seo": {}
-  },
-  {
-   "slug": "verbal-identity",
-   "name": "Verbal Identity",
-   "category": "Brand & Identity",
-   "summary": "The words that only your company would use — tone, vocabulary and the rules that keep them consistent.",
-   "lede": "A visual system tells you what a brand looks like. A verbal identity tells you what it sounds like — the vocabulary it reaches for, the jokes it does and does not make, the sentence length that feels like it. We write the rules, then write the first hundred examples so the team can hear the difference.",
-   "includes": [
-    "Tone of voice principles",
-    "Vocabulary and lexicon",
-    "Messaging house and headline library",
-    "Copy guidelines and training"
-   ],
-   "question": "Would someone recognise our writing with the logo removed?",
-   "outcome": "A voice specific enough to be worth protecting.",
-   "queries": [
-    "brand tone of voice",
-    "verbal identity guidelines",
-    "brand messaging framework",
-    "how to write brand voice guidelines"
-   ],
-   "seo": {}
-  },
-  {
-   "slug": "creative-direction",
-   "name": "Creative Direction",
-   "category": "Brand & Identity",
-   "summary": "The taste and judgement that hold a brand together across everything it makes.",
-   "lede": "Creative direction is editing at the level of the whole company: photography, tone, campaigns and the thousand small calls that decide whether a brand feels considered or assembled. We hold the line so the work stays coherent as it scales.",
-   "includes": [
-    "Art and photography direction",
-    "Campaign concepting",
-    "Tone and creative governance",
-    "Production oversight"
-   ],
-   "question": "Does everything we make feel like us?",
-   "outcome": "Work that is unmistakably one company, at any volume.",
-   "queries": [
-    "creative direction agency",
-    "art direction for brands",
-    "campaign creative direction",
-    "photography direction"
-   ],
-   "seo": {}
-  },
-  {
-   "slug": "packaging",
-   "name": "Packaging",
-   "category": "Brand & Identity",
-   "summary": "Structural and graphic packaging design that earns the price on the shelf, not just on the screen.",
-   "lede": "Packaging is the one piece of brand work a customer actually holds. We design structure and graphics together, so the object argues for the price before anyone reads a word — and works just as hard photographed for a feed as it does on a shelf.",
-   "includes": [
-    "Structural and dieline design",
-    "Materials and print production",
-    "Range and variant systems",
-    "Sustainability and cost engineering"
-   ],
-   "question": "Does holding this make the price feel correct?",
-   "outcome": "Packaging that reads as considered, not decorated.",
-   "queries": [
-    "packaging design agency",
-    "product packaging design",
-    "sustainable packaging design",
-    "FMCG packaging design"
-   ],
-   "seo": {}
-  },
-  {
-   "slug": "web-design-development",
-   "name": "Website Design & Development",
-   "category": "Digital & Product",
-   "summary": "Websites that load fast, read clearly to search and AI crawlers, and move people towards a decision.",
-   "lede": "A website is where most people decide whether to trust you. We design and build sites that load fast, read well to search engines and AI crawlers, and move visitors towards a decision — without ever looking like a template.",
-   "includes": [
-    "Design and art direction",
-    "Front-end build and CMS",
-    "Core Web Vitals and performance",
-    "Schema, semantics and accessibility"
-   ],
-   "question": "Does our website earn trust and enquiries?",
-   "outcome": "A site that ranks, converts and is easy to keep alive.",
-   "queries": [
-    "website design agency",
-    "high converting website design",
-    "SEO friendly web design",
-    "CMS website build"
-   ],
-   "seo": {}
-  },
-  {
-   "slug": "ux-ui-design",
-   "name": "UX/UI Design",
-   "category": "Digital & Product",
-   "summary": "Interfaces people understand instantly and enjoy using.",
-   "lede": "Good UX is invisible; bad UX is a leak in the funnel. We design flows, screens and systems that reduce friction, respect attention and hold up under real use — measured, not asserted.",
-   "includes": [
-    "User research and flows",
-    "Interface and interaction design",
-    "Design systems and components",
-    "Usability testing"
-   ],
-   "question": "Can people do what they came to do, easily?",
-   "outcome": "Fewer drop-offs, more completed actions.",
-   "queries": [
-    "UX UI design agency",
-    "product design services",
-    "usability testing",
-    "design system build"
-   ],
-   "seo": {}
-  },
-  {
-   "slug": "digital-product-design",
-   "name": "Digital Product Design",
-   "category": "Digital & Product",
-   "summary": "Apps, platforms and tools designed and engineered end to end.",
-   "lede": "Some brands need more than a website — they need a product. We take digital products from concept to shipped, joining design and engineering so the thing you launch is the thing you argued for.",
-   "includes": [
-    "Product strategy and scoping",
-    "Design and prototyping",
-    "Full-stack engineering",
-    "Iteration and roadmap"
-   ],
-   "question": "What should we build, and can you build it?",
-   "outcome": "A product in market, not a prototype in a drawer.",
-   "queries": [
-    "digital product design agency",
-    "app design and development",
-    "MVP build",
-    "product engineering studio"
-   ],
-   "seo": {}
-  },
-  {
-   "slug": "ecommerce",
-   "name": "E-commerce",
-   "category": "Digital & Product",
-   "summary": "Storefronts and checkout experiences built to convert, not just to display a catalogue.",
-   "lede": "An e-commerce site is a sales floor with the lighting, the queue and the assistant all designed at once. We build storefronts, product pages and checkout flows tuned for conversion and repeat purchase, on the platform that actually suits the business.",
-   "includes": [
-    "Platform selection and build",
-    "Product and category page design",
-    "Checkout and conversion optimisation",
-    "Merchandising and CRO testing"
-   ],
-   "question": "Is the path from interest to purchase as short as it should be?",
-   "outcome": "A storefront that turns browsing into buying.",
-   "queries": [
-    "ecommerce website design",
-    "Shopify agency",
-    "conversion rate optimisation ecommerce",
-    "ecommerce UX design"
-   ],
-   "seo": {}
-  },
-  {
-   "slug": "growth-strategy",
-   "name": "Growth Strategy",
-   "category": "Growth & Demand",
-   "summary": "The plan that connects brand, product and demand into one commercial engine.",
-   "lede": "Growth is not a department. It is what happens when the brand, the product and the demand generation agree on the same story and the same numbers. We build the plan that holds all three together, with the channels, sequencing and targets to prove it is working.",
-   "includes": [
-    "Growth model and channel mix",
-    "Funnel and conversion mapping",
-    "Prioritisation and testing roadmap",
-    "Reporting and commercial targets"
-   ],
-   "question": "What is actually going to move revenue, in what order?",
-   "outcome": "One growth plan the whole company can work from.",
-   "queries": [
-    "growth strategy agency",
-    "growth marketing strategy",
-    "how to build a growth plan",
-    "brand and demand alignment"
-   ],
-   "seo": {}
-  },
-  {
-   "slug": "performance-marketing",
-   "name": "Performance Marketing",
-   "category": "Growth & Demand",
-   "summary": "Paid acquisition that respects the brand and the P&L in equal measure.",
-   "lede": "Performance without brand burns cash; brand without performance starves. We run paid media as one system with your brand — creative that could only be you, targeting that is not lazy, and reporting you can actually act on.",
-   "includes": [
-    "Paid search, social and display",
-    "Creative testing frameworks",
-    "Measurement and attribution",
-    "Budget and bid strategy"
-   ],
-   "question": "Is every pound of media working as hard as it could?",
-   "outcome": "Acquisition economics that improve as you scale.",
-   "queries": [
-    "performance marketing agency",
-    "paid media management",
-    "PPC agency",
-    "growth marketing"
-   ],
-   "seo": {}
-  },
-  {
-   "slug": "seo",
-   "name": "SEO",
-   "category": "Growth & Demand",
-   "summary": "Technical, content and entity SEO built for Google and AI answer engines.",
-   "lede": "Search in 2026 is two games at once: ranking in Google and being the source an AI answer quotes. We do both — technical foundations, semantic content and entity authority — so you show up where the decision is actually being made.",
-   "includes": [
-    "Technical SEO and Core Web Vitals",
-    "Entity and topical authority",
-    "On-page and content optimisation",
-    "AI-search and answer-engine optimisation"
-   ],
-   "question": "Do we show up when it matters, in search and in AI answers?",
-   "outcome": "Qualified traffic that arrives ready to enquire.",
-   "queries": [
-    "SEO agency 2026",
-    "AI search optimisation",
-    "answer engine optimisation",
-    "entity SEO",
-    "how to rank in ChatGPT and Perplexity"
-   ],
-   "seo": {}
-  },
-  {
-   "slug": "content-strategy",
-   "name": "Content Strategy & Content Management",
-   "category": "Growth & Demand",
-   "summary": "What to say, where and why — plus the operating system that keeps it published on time.",
-   "lede": "Content is how a brand earns attention between purchases. We define the themes you can credibly own, the formats that suit each channel, the semantic structure that gets you cited by search and AI, and the calendar and workflow that make it sustainable rather than sporadic.",
-   "includes": [
-    "Editorial strategy and pillars",
-    "Topic and entity mapping for SEO",
-    "Content operations and calendar",
-    "Measurement and iteration"
-   ],
-   "question": "What should we publish, and can we actually keep it up?",
-   "outcome": "A content engine that compounds instead of resets.",
-   "queries": [
-    "content strategy agency",
-    "SEO content strategy",
-    "editorial strategy for brands",
-    "content management for AI search"
-   ],
-   "seo": {}
-  },
-  {
-   "slug": "social-media",
-   "name": "Social Media Strategy & Management",
-   "category": "Growth & Demand",
-   "summary": "A social presence with a point of view, run with the discipline of a publication.",
-   "lede": "Most brand social is a content calendar wearing a strategy costume. We start with what the brand actually has to say, choose the platforms worth the effort, and run the account like an editor would — consistent voice, considered pace, real engagement.",
-   "includes": [
-    "Platform and format strategy",
-    "Content planning and production",
-    "Community management",
-    "Analytics and iteration"
-   ],
-   "question": "Does our social output sound like anyone in particular?",
-   "outcome": "A following that behaves like an audience, not a number.",
-   "queries": [
-    "social media strategy agency",
-    "social media management agency",
-    "brand social media strategy",
-    "organic social growth"
-   ],
-   "seo": {}
-  },
-  {
-   "slug": "influencer-marketing",
-   "name": "Influencer / Creator Marketing",
-   "category": "Growth & Demand",
-   "summary": "Creator partnerships chosen for fit and trust, not follower counts.",
-   "lede": "The best creator partnerships feel like a recommendation, not an advert. We find the voices your audience already trusts, brief them properly, and build relationships that pay back beyond a single post.",
-   "includes": [
-    "Creator strategy and sourcing",
-    "Briefing and relationship management",
-    "Content rights and usage",
-    "Performance and measurement"
-   ],
-   "question": "Who does our audience believe, and how do we work with them well?",
-   "outcome": "Partnerships that read as trust, not spend.",
-   "queries": [
-    "influencer marketing agency",
-    "creator partnerships",
-    "UGC strategy",
-    "how to run influencer campaigns"
-   ],
-   "seo": {}
-  },
-  {
-   "slug": "email-marketing",
-   "name": "Email Marketing",
-   "category": "Growth & Demand",
-   "summary": "Lifecycle and CRM programmes that turn a list into revenue.",
-   "lede": "Email is the one channel you own. We design lifecycle programmes — welcome, nurture, retention, win-back — that sound like your brand and move numbers you can see in the dashboard by Friday.",
-   "includes": [
-    "Lifecycle and automation design",
-    "Segmentation and CRM strategy",
-    "Copy, design and templates",
-    "Testing and deliverability"
-   ],
-   "question": "Is our owned audience actually earning?",
-   "outcome": "Revenue from people who already know you.",
-   "queries": [
-    "email marketing agency",
-    "CRM lifecycle marketing",
-    "klaviyo agency",
-    "retention marketing"
-   ],
-   "seo": {}
-  },
-  {
-   "slug": "campaign-strategy",
-   "name": "Campaign Strategy",
-   "category": "Growth & Demand",
-   "summary": "The big idea and the media plan that gets it in front of the right people, on time.",
-   "lede": "A campaign is not a creative treatment looking for a channel plan. It is one idea, expressed correctly for each place it appears, with a media plan built around when and how your audience actually pays attention. We design both halves together.",
-   "includes": [
-    "Campaign idea and concept",
-    "Channel and media planning",
-    "Cross-format asset development",
-    "Flighting and measurement"
-   ],
-   "question": "What is the one idea, and where does it need to show up?",
-   "outcome": "A campaign that feels planned, not scattered.",
-   "queries": [
-    "campaign strategy agency",
-    "integrated campaign planning",
-    "creative campaign development",
-    "media planning for brand campaigns"
-   ],
-   "seo": {}
-  },
-  {
-   "slug": "market-research",
-   "name": "Market Research",
-   "category": "Market & Expansion",
-   "summary": "Evidence about buyers, categories and pricing — before the expensive decisions.",
-   "lede": "We research to decide, not to reassure. Qualitative depth where nuance matters, quantitative scale where confidence does, and a synthesis that actually changes what you build next.",
-   "includes": [
-    "Qualitative interviews and ethnography",
-    "Quantitative surveys and segmentation",
-    "Pricing and willingness-to-pay studies",
-    "Category and trend analysis"
-   ],
-   "question": "What do our buyers actually believe, and pay for?",
-   "outcome": "Decisions grounded in evidence instead of the loudest opinion.",
-   "queries": [
-    "brand market research",
-    "customer segmentation study",
-    "pricing research",
-    "willingness to pay analysis"
-   ],
-   "seo": {}
-  },
-  {
-   "slug": "go-to-market-strategy",
-   "name": "Go-to-Market Strategy",
-   "category": "Market & Expansion",
-   "summary": "The sequenced plan for launching or scaling — channels, message, motion and economics.",
-   "lede": "A great product with a vague go-to-market is a slow, expensive failure. We plan the launch as a commercial system: who hears first, what they hear, where the money goes, and how you know it is working within weeks rather than quarters.",
-   "includes": [
-    "Launch sequencing and phasing",
-    "Channel and message planning",
-    "Sales and marketing alignment",
-    "Metrics, targets and readiness"
-   ],
-   "question": "How do we launch this so it lands and pays back?",
-   "outcome": "A launch plan with owners, dates and numbers attached.",
-   "queries": [
-    "go to market strategy",
-    "product launch plan",
-    "GTM strategy for startups",
-    "how to launch a brand"
-   ],
-   "seo": {}
-  },
-  {
-   "slug": "b2b-partnerships",
-   "name": "B2B Partnerships & Potential Client Meetings",
-   "category": "Market & Expansion",
-   "summary": "Distribution through other companies — targeting, outreach and the meetings themselves.",
-   "lede": "Sometimes the fastest route to demand is someone else’s audience. We design and broker partnerships — co-marketing, channel, bundling — and, where useful, get in the room ourselves: identifying, approaching and meeting the businesses worth partnering with.",
-   "includes": [
-    "Partnership strategy and targeting",
-    "Outreach and deal shaping",
-    "Co-marketing programmes",
-    "Meeting preparation and facilitation"
-   ],
-   "question": "Whose audience should we borrow, and on what terms?",
-   "outcome": "A distribution channel that is not more ad spend.",
-   "queries": [
-    "B2B partnership strategy",
-    "co-marketing agency",
-    "channel partnerships",
-    "strategic alliances"
-   ],
-   "seo": {}
-  },
-  {
-   "slug": "market-entry",
-   "name": "Market Entry",
-   "category": "Market & Expansion",
-   "summary": "The research, positioning and plan for taking a brand into a new country or category.",
-   "lede": "A brand that works in one market does not automatically work in the next one. We assess demand, competition, regulation and cultural fit before recommending how — or whether — to enter, then build the localised positioning and plan to do it properly.",
-   "includes": [
-    "Market viability assessment",
-    "Competitive and regulatory landscape",
-    "Localised positioning and messaging",
-    "Entry sequencing and partners"
-   ],
-   "question": "Should we enter this market, and if so, how?",
-   "outcome": "A market-entry plan grounded in evidence, not enthusiasm.",
-   "queries": [
-    "international market entry strategy",
-    "market expansion strategy",
-    "how to launch a brand in a new country",
-    "market entry consultancy"
-   ],
-   "seo": {}
-  },
-  {
-   "slug": "investor-readiness",
-   "name": "Investor Readiness & Investor Meetings",
-   "category": "Market & Expansion",
-   "summary": "The narrative, deck and evidence that make a company fundable — and the meetings themselves.",
-   "lede": "Investors buy a story about the future, backed by proof from the present. We shape the equity story, sharpen the deck and pressure-test the numbers so the room leans in for the right reasons — and where it helps, we join the meetings themselves.",
-   "includes": [
-    "Equity story and narrative",
-    "Pitch deck design and copy",
-    "Data-room narrative support",
-    "Rehearsal, Q&A prep and investor meetings"
-   ],
-   "question": "Why is this the company to back, now?",
-   "outcome": "A raise narrative that survives due diligence.",
-   "queries": [
-    "investor pitch deck agency",
-    "how to make a fundable pitch",
-    "equity story",
-    "seed round narrative"
-   ],
-   "seo": {}
-  },
-  {
-   "slug": "growth-process-consultancy",
-   "name": "Growth Process Consultancy",
-   "category": "Market & Expansion",
-   "summary": "How the team actually plans, ships and measures growth work — not just what it should do next.",
-   "lede": "Sometimes the plan is right and the process around it is broken: nobody owns the roadmap, testing has no rhythm, and every quarter starts from a blank page. We audit how growth actually gets decided and shipped inside your company, then install a process your team keeps using after we leave.",
-   "includes": [
-    "Growth operating rhythm audit",
-    "Roadmap, ownership and reporting structure",
-    "Testing and prioritisation frameworks",
-    "Team training and handover"
-   ],
-   "question": "Is the bottleneck the strategy, or how we work?",
-   "outcome": "A growth process the team runs without us.",
-   "queries": [
-    "growth process consulting",
-    "marketing operations consultancy",
-    "growth team operating model",
-    "how to build a growth roadmap"
-   ],
-   "seo": {}
-  },
-  {
-   "slug": "events",
-   "name": "Events",
-   "category": "Experiences",
-   "summary": "Gatherings designed to build the brand in the room, not just fill a calendar.",
-   "lede": "Some brand-building only happens in person. We concept, design and produce events worth attending — launches, dinners, studio evenings — treating the room itself as a piece of creative work with a beginning, middle and end.",
-   "includes": [
-    "Event concept and identity",
-    "Guest experience design",
-    "Production and on-the-day delivery",
-    "Follow-up and measurement"
-   ],
-   "question": "What is worth gathering people for, and will they remember it?",
-   "outcome": "A room that remembers you.",
-   "queries": [
-    "brand events agency",
-    "experiential marketing agency",
-    "launch event production",
-    "corporate event design"
-   ],
-   "seo": {}
-  },
-  {
-   "slug": "exhibitions",
-   "name": "Exhibitions",
-   "category": "Experiences",
-   "summary": "Physical and pop-up spaces that let people encounter the brand as an object, not a screen.",
-   "lede": "An exhibition asks more of a brand than a stand ever does — it has to survive being walked around. We design exhibitions, installations and pop-ups that hold up in three dimensions, from spatial concept through to fabrication and install.",
-   "includes": [
-    "Spatial and exhibition concept",
-    "Graphic and environmental design",
-    "Fabrication and production management",
-    "Install and de-rig"
-   ],
-   "question": "Does the brand still feel like itself in a physical space?",
-   "outcome": "A space people photograph without being asked to.",
-   "queries": [
-    "exhibition design agency",
-    "pop-up store design",
-    "brand installation design",
-    "trade show stand design"
-   ],
-   "seo": {}
-  },
-  {
-   "slug": "workshops",
-   "name": "Workshops",
-   "category": "Experiences",
-   "summary": "Practical, small-group sessions that leave a team able to do more of the work themselves.",
-   "lede": "We run working sessions, not lectures — on positioning, naming, creative direction and the brief itself — built around your actual project, not a generic deck. Teams leave with a decision made, not just a framework explained.",
-   "includes": [
-    "Workshop design and facilitation",
-    "Pre-work and materials",
-    "Live decision-making sessions",
-    "Written outputs and next steps"
-   ],
-   "question": "What could this team decide for itself, with the right structure in the room?",
-   "outcome": "A decision made, not just a framework explained.",
-   "queries": [
-    "brand strategy workshop",
-    "creative direction workshop",
-    "positioning workshop facilitation",
-    "in-house brand training"
-   ],
-   "seo": {}
-  },
-  {
-   "slug": "trainings",
-   "name": "Trainings",
-   "category": "Experiences",
-   "summary": "Longer-form, in-person training in brand strategy and creative direction — opening 2027.",
-   "lede": "Everything we have learned about brand strategy and creative direction, taught directly, over two days, to a small group. Not a webinar series. Not a certificate. The same thinking we charge clients for, taught in person.",
-   "includes": [
-    "Two-day in-person format",
-    "Maximum twelve participants",
-    "Brand Strategy and Creative Direction tracks",
-    "Amsterdam, plus one further city per year"
-   ],
-   "question": "Can the thinking behind the work be taught, not just delivered?",
-   "outcome": "A room of people who can now do more of this themselves.",
-   "queries": [
-    "brand strategy training course",
-    "creative direction training",
-    "in person branding workshop 2027",
-    "Not by Accident trainings"
-   ],
-   "seo": {}
-  }
- ]
+ }
 }

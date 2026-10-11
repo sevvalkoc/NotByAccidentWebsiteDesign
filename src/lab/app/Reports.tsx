@@ -105,7 +105,7 @@ function ReportView({ r, onBack }: { r: Report; onBack: () => void }) {
                         <span className="t-small">{f.label}</span>
                         <EvidenceTag kind={f.evidence} />
                       </span>
-                      <Meter value={f.value} compact />
+                      <Meter value={f.value} label={f.label} compact />
                     </li>
                   ))}
                 </ul>

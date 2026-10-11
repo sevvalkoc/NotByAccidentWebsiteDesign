@@ -49,7 +49,7 @@ function LabAppShell() {
   const hydrated = useSyncExternalStore(noop, () => true, () => false)
   const fallback = (
     <main id="main" tabIndex={-1} className="lab lab-app" data-zone="frost">
-      <p className="wrap lab-boot t-caption">Opening The Lab…</p>
+      <h1 className="wrap lab-boot t-caption">Opening The Lab…</h1>
     </main>
   )
   if (!hydrated) return fallback

@@ -75,7 +75,10 @@ export function Loading({ label = 'Loading' }: { label?: string }) {
 export function Meter({ value, label, compact }: { value: number | null | undefined; label?: string; compact?: boolean }) {
   const v = value == null ? null : Math.max(0, Math.min(100, value))
   return (
-    <span className={`lab-meter${compact ? ' lab-meter--compact' : ''}${v == null ? ' lab-meter--empty' : ''}`} role="img" aria-label={label ? `${label}: ${v == null ? 'not scored' : `${fmtScore(value)} of 100`}` : undefined}>
+    <span
+      className={`lab-meter${compact ? ' lab-meter--compact' : ''}${v == null ? ' lab-meter--empty' : ''}`}
+      {...(label ? { role: 'img', 'aria-label': `${label}: ${v == null ? 'not scored' : `${fmtScore(value)} of 100`}` } : { 'aria-hidden': true })}
+    >
       <span className="lab-meter__fill" style={{ inlineSize: `${v ?? 0}%` }} />
     </span>
   )

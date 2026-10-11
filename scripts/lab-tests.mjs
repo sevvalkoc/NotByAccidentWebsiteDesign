@@ -426,6 +426,16 @@ await test('Admin review: public note reaches the user, internal note never does
   const dash = ok(await A.c.rpc('lab_dashboard', { p_brand: brandA.id }), 'dashboard')
   assert(!JSON.stringify(dash).includes('INTERNAL'), 'internal note leaked in dashboard')
 })
+await test('Brand lists its requests (public history only), replies, and others cannot', async () => {
+  const reqs = ok(await A.c.rpc('lab_my_requests', { p_brand: brandA.id }), 'my requests')
+  const mine = reqs.find(r => r.id === introId)
+  assert(mine && mine.partner?.name, 'request with partner name missing')
+  assert(!JSON.stringify(reqs).includes('INTERNAL'), 'internal note in my_requests')
+  fails(await B.c.rpc('lab_my_requests', { p_brand: brandA.id }), 'B lists A’s requests')
+  fails(await B.c.rpc('lab_reply_introduction', { p_id: introId, p_note: 'hijack' }), 'B replies on A’s request')
+  ok(await A.c.rpc('lab_reply_introduction', { p_id: introId, p_note: 'Price list sent.' }), 'reply')
+  eq(ok(await A.c.from('lab_introductions').select('status').eq('id', introId).single(), 'status').status, 'under_review', 'status after reply')
+})
 await test('“Introduction sent” creates an opportunity on the brand’s timeline', async () => {
   ok(await admin.rpc('lab_admin_update_introduction', { p_id: introId, p_status: 'introduction_sent', p_note: 'Introduced by email.' }), 'sent')
   const opp = ok(await A.c.from('lab_opportunities').select('id, status').eq('introduction_id', introId), 'opportunity')
@@ -436,6 +446,11 @@ await test('Empty state: a research request without a partner', async () => {
   const r = ok(await A.c.from('lab_introductions').select('partner_id, market_codes').eq('id', researchId).single(), 'read')
   eq(r.partner_id, null, 'partner on research request')
   eq(r.market_codes[0], 'DK', 'market recorded')
+})
+
+await test('A brand can withdraw an open request', async () => {
+  ok(await A.c.rpc('lab_withdraw_introduction', { p_id: researchId }), 'withdraw')
+  eq(ok(await A.c.from('lab_introductions').select('status').eq('id', researchId).single(), 'status').status, 'closed', 'status after withdrawal')
 })
 
 group('Opportunities')

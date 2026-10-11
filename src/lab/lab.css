@@ -1158,3 +1158,31 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* Grid children may shrink below their content's min width (long inputs,
+   file pickers) so nothing pushes the page wider than the screen. */
+.lab-form,
+.lab .form__row {
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 768px) {
+  .lab .form__row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+.lab-form > *,
+.lab .form__row > *,
+.lab-screen,
+.lab-stepper {
+  min-width: 0;
+}
+.lab-logo {
+  flex-wrap: wrap;
+}
+.lab-logo input[type='file'] {
+  max-width: 100%;
+  min-width: 0;
+}
+.lab .field {
+  grid-template-columns: minmax(0, 1fr);
+}

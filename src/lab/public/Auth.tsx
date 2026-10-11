@@ -13,6 +13,10 @@ const MIN_PASSWORD = 8
 /** Only same-site paths inside the Lab are accepted as a return address. */
 const safeNext = (n: string | null) => (n && /^\/lab\/[a-z-]+(\?[\w=&%-]*)?$/.test(n) ? n : '/lab/dashboard')
 
+const DESCRIPTIONS: Record<string, string> = {
+  '/lab/sign-up': 'Create a free account for The Lab by Not by Accident: test your brand’s readiness for a European market, compare markets and find compatible partners.',
+  '/lab/login': 'Sign in to The Lab by Not by Accident to continue your readiness assessment, market comparison, partner matches and introductions.',
+}
 function AuthFrame({ title, path, lede, noindex, children, aside }: { title: string; path: string; lede?: ReactNode; noindex?: boolean; children: ReactNode; aside?: ReactNode }) {
   const crumbs = [
     { name: 'The Lab', path: '/lab' },
@@ -20,7 +24,7 @@ function AuthFrame({ title, path, lede, noindex, children, aside }: { title: str
   ]
   usePage({
     title: `${title} · The Lab`,
-    description: 'The Lab by Not by Accident: test your brand’s readiness for a new European market, compare markets and find compatible partners.',
+    description: DESCRIPTIONS[path] ?? 'The Lab by Not by Accident: test your brand’s readiness for a new European market, compare markets and find compatible partners.',
     path,
     alternates: false,
     noindex,
@@ -31,7 +35,7 @@ function AuthFrame({ title, path, lede, noindex, children, aside }: { title: str
       <PageHead title={title} env="frost" crumbs={crumbs} sub={lede} />
       <Zone env="frost" className="wrap band lab-auth">
         <div className="lab-auth__form">{children}</div>
-        {aside ? <aside className="lab-auth__aside t-small dim">{aside}</aside> : null}
+        {aside ? <div className="lab-auth__aside t-small dim">{aside}</div> : null}
       </Zone>
     </main>
   )

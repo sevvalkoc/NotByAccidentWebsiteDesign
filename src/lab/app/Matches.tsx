@@ -54,9 +54,9 @@ function MatchCard({ m, onSave, onIntro, onProfile }: { m: Match; onSave: () => 
       <header className="lab-match__head">
         <span className="t-num dimmer lab-match__rank">{String(m.rank).padStart(2, '0')}</span>
         <div>
-          <h3 id={`p-${p.id}`} className="t-title">
+          <h2 id={`p-${p.id}`} className="t-title">
             {p.name}
-          </h3>
+          </h2>
           <PartnerLine p={p} />
           <div className="lab-tags">
             <Verification status={p.verification_status} />
