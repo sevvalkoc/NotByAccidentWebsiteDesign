@@ -894,7 +894,12 @@ begin
     'is_admin', public.lab_is_admin(),
     'brands', (select coalesce(jsonb_agg(jsonb_build_object('id', b.id, 'name', b.name, 'role', m.role) order by b.created_at), '[]'::jsonb)
                from public.lab_brand_members m join public.lab_brands b on b.id = m.brand_id where m.user_id = auth.uid()),
-    'unread', (select count(*) from public.lab_notifications where user_id = auth.uid() and read_at is null)
+    'unread', (select count(*) from public.lab_notifications where user_id = auth.uid() and read_at is null),
+    -- latest decision per consent kind; an account created outside the Lab
+    -- sign-up (e.g. CMS staff) has none and is asked before using the Lab
+    'consents', (select coalesce(jsonb_object_agg(kind, jsonb_build_object('granted', granted, 'version', version, 'at', created_at)), '{}'::jsonb)
+                 from (select distinct on (kind) kind, granted, version, created_at from public.lab_consents
+                       where user_id = auth.uid() order by kind, created_at desc) c)
   );
 end $$;
 
@@ -1256,6 +1261,59 @@ do $$ declare t text; begin
 end $$;
 
 -- ═════════════════════════════════════════════════════════════════════════
+-- A brand's own requests: partner shown by its public name only, the public
+-- status history, never the staff-only notes
+-- ═════════════════════════════════════════════════════════════════════════
+create or replace function public.lab_my_requests(p_brand uuid)
+returns jsonb language plpgsql stable security definer set search_path = public as $$
+begin
+  perform public.lab_require_member(p_brand);
+  return (select coalesce(jsonb_agg(jsonb_build_object(
+      'id', i.id, 'status', i.status, 'purpose', i.purpose, 'message', i.message,
+      'market_codes', to_jsonb(i.market_codes), 'partner_types', to_jsonb(i.partner_types),
+      'created_at', i.created_at, 'updated_at', i.updated_at,
+      'partner', case when p.id is null then null else jsonb_build_object('id', p.id, 'name', p.name, 'type_label', t.label, 'country_code', p.country_code, 'city', p.city) end,
+      'events', (select coalesce(jsonb_agg(jsonb_build_object('status', e.status, 'note', e.note, 'by', e.actor_role, 'created_at', e.created_at) order by e.created_at), '[]'::jsonb)
+                 from public.lab_introduction_events e where e.introduction_id = i.id),
+      'opportunity_id', (select o.id from public.lab_opportunities o where o.introduction_id = i.id limit 1)
+    ) order by i.created_at desc), '[]'::jsonb)
+    from public.lab_introductions i
+    left join public.lab_partners p on p.id = i.partner_id
+    left join public.lab_partner_types t on t.key = p.type_key
+    where i.brand_id = p_brand);
+end $$;
+
+-- The brand answers a "more information needed" (or adds context to an open
+-- request); the request goes back to review and the staff inbox hears of it.
+create or replace function public.lab_reply_introduction(p_id uuid, p_note text)
+returns void language plpgsql security definer set search_path = public as $$
+declare i public.lab_introductions; v_status text;
+begin
+  select * into i from public.lab_introductions where id = p_id for update;
+  if i.id is null then raise exception 'request not found' using errcode = '22023'; end if;
+  perform public.lab_require_member(i.brand_id);
+  if i.status in ('declined', 'completed', 'closed') then raise exception 'this request is closed' using errcode = '22023'; end if;
+  if char_length(btrim(coalesce(p_note, ''))) not between 1 and 1500 then raise exception 'write a reply of up to 1500 characters' using errcode = '22023'; end if;
+  v_status := case when i.status = 'more_info_needed' then 'under_review' else i.status end;
+  update public.lab_introductions set status = v_status where id = i.id;
+  insert into public.lab_introduction_events (introduction_id, status, note, actor_id, actor_role) values (i.id, v_status, btrim(p_note), auth.uid(), 'user');
+  perform public.lab_notify(null, i.brand_id, 'intro_reply', 'Reply on a request from ' || (select name from public.lab_brands where id = i.brand_id), left(btrim(p_note), 300), '/admin/lab/introductions?id=' || i.id);
+end $$;
+
+create or replace function public.lab_withdraw_introduction(p_id uuid)
+returns void language plpgsql security definer set search_path = public as $$
+declare i public.lab_introductions;
+begin
+  select * into i from public.lab_introductions where id = p_id for update;
+  if i.id is null then raise exception 'request not found' using errcode = '22023'; end if;
+  perform public.lab_require_member(i.brand_id);
+  if i.status in ('declined', 'completed', 'closed') then return; end if;
+  update public.lab_introductions set status = 'closed' where id = i.id;
+  insert into public.lab_introduction_events (introduction_id, status, note, actor_id, actor_role) values (i.id, 'closed', 'Withdrawn by the brand.', auth.uid(), 'user');
+  perform public.lab_notify(null, i.brand_id, 'intro_withdrawn', 'Request withdrawn by ' || (select name from public.lab_brands where id = i.brand_id), null, '/admin/lab/introductions?id=' || i.id);
+end $$;
+
+-- ═════════════════════════════════════════════════════════════════════════
 -- Execution rights: nothing is callable by default
 -- ═════════════════════════════════════════════════════════════════════════
 do $$ declare f record; begin
@@ -1273,7 +1331,8 @@ grant execute on function
   public.lab_market_fit(uuid, text[]),
   public.lab_run_matching(uuid, jsonb), public.lab_match_results(uuid), public.lab_latest_matches(uuid), public.lab_partner_profile(uuid, uuid), public.lab_saved_list(uuid),
   public.lab_request_introduction(uuid, uuid, text, text), public.lab_request_research(uuid, text[], text[], text),
-  public.lab_generate_report(uuid), public.lab_export_my_data(), public.lab_delete_my_account()
+  public.lab_generate_report(uuid), public.lab_export_my_data(), public.lab_delete_my_account(),
+  public.lab_my_requests(uuid), public.lab_reply_introduction(uuid, text), public.lab_withdraw_introduction(uuid)
 to authenticated;
 grant execute on function public.lab_track(text, jsonb) to anon, authenticated;
 -- administration (each checks lab_is_admin() itself)

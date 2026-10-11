@@ -1,5 +1,5 @@
 /* Local preview of the built site with the same rules as vercel.json:
-   clean URLs, /admin SPA shell, per-language 404s with a real 404 status,
+   clean URLs, /admin and /lab app shells, per-language 404s with a real 404 status,
    and Brotli/gzip for text files as Vercel serves them, so the footer's
    carbon tracker reads the same weight here as in production. */
 import { createServer } from 'node:http'
@@ -29,6 +29,7 @@ createServer((req, res) => {
   let status = 200
   if (!existsSync(file)) {
     if (url.startsWith('/admin')) file = join(dir, 'admin/index.html')
+    else if (url.startsWith('/lab/')) file = join(dir, 'lab/app/index.html')
     else {
       status = 404
       file = join(dir, url.startsWith('/nl/') ? 'nl/404.html' : url.startsWith('/fr/') ? 'fr/404.html' : '404.html')

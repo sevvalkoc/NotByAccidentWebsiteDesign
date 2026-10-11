@@ -15,7 +15,8 @@ const LocaleContext = createContext<Locale>(DEFAULT_LOCALE)
 export const LocaleProvider = LocaleContext.Provider
 export const useLocale = () => useContext(LocaleContext)
 
-const external = (p: string) => /^[a-z][a-z0-9+.-]*:/i.test(p) || p.startsWith('//') || p.startsWith('#') || p.startsWith('/admin')
+/* /admin and The Lab (/lab, English only) are never language-prefixed. */
+const external = (p: string) => /^[a-z][a-z0-9+.-]*:/i.test(p) || p.startsWith('//') || p.startsWith('#') || p.startsWith('/admin') || p === '/lab' || p.startsWith('/lab/') || p.startsWith('/lab?')
 
 export function localizePath(path: string, locale: Locale): string {
   if (locale === DEFAULT_LOCALE || external(path)) return path

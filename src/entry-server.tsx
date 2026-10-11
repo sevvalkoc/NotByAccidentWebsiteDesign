@@ -45,10 +45,19 @@ export function paths(): { path: string; priority: string; changefreq: string; a
     ...site.projects.map(p => [`/case-studies/${p.slug}`, '0.7', 'monthly'] as [string, string, string]),
     ...site.notes.map(n => [`/notes/${n.slug}`, '0.6', 'yearly'] as [string, string, string]),
   ]
-  return all.flatMap(([p, priority, changefreq]) =>
+  const localized = all.flatMap(([p, priority, changefreq]) =>
     LOCALES.map(l => ({ path: localizePath(p, l), priority, changefreq, alternates: LOCALES.map(x => localizePath(p, x)) })),
   )
+  // The Lab's public pages exist in English only.
+  const lab: [string, string, string][] = [
+    ['/lab', '0.9', 'monthly'],
+    ['/lab/how-it-works', '0.7', 'monthly'],
+    ['/lab/market-readiness', '0.8', 'monthly'],
+    ['/lab/sign-up', '0.5', 'yearly'],
+    ['/lab/login', '0.3', 'yearly'],
+  ]
+  return [...localized, ...lab.map(([path, priority, changefreq]) => ({ path, priority, changefreq, alternates: [path] }))]
 }
 
 /** Not indexable, but prerendered so they load instantly. */
-export const extraPaths = ['/search', '/nl/search', '/fr/search']
+export const extraPaths = ['/search', '/nl/search', '/fr/search', '/lab/forgot-password', '/lab/reset-password', '/lab/app']

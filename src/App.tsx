@@ -28,10 +28,33 @@ import Search from '@/pages/Search'
 import Privacy from '@/pages/Privacy'
 import Cookies from '@/pages/Cookies'
 import NotFound from '@/pages/NotFound'
+import LabLanding from '@/lab/public/Landing'
+import LabHow from '@/lab/public/HowItWorks'
+import LabReadiness from '@/lab/public/Readiness'
+import { LabForgot, LabLogin, LabReset, LabSignUp } from '@/lab/public/Auth'
+import { usePage } from '@/hooks/usePage'
 
 /* The CMS operating tool. Separate app, separate chunk, separate CSS:
    public visitors never download it. */
 const AdminApp = lazy(() => import('@/admin/AdminApp'))
+
+/* The signed-in Lab: its own chunk, never prerendered beyond this shell
+   (served for every /lab/… URL that isn't a public page, see vercel.json). */
+const LabApp = lazy(() => import('@/lab/app/LabApp'))
+function LabAppShell() {
+  usePage({ title: 'The Lab', description: 'Your workspace in The Lab by Not by Accident.', path: '/lab/app', noindex: true, alternates: false })
+  return (
+    <Suspense
+      fallback={
+        <main id="main" tabIndex={-1} className="lab lab-app" data-zone="frost">
+          <p className="wrap lab-boot t-caption">Opening The Lab…</p>
+        </main>
+      }
+    >
+      <LabApp />
+    </Suspense>
+  )
+}
 
 function Shell({ locale }: { locale: Locale }) {
   const { pathname } = useLocation()
@@ -57,6 +80,18 @@ function Shell({ locale }: { locale: Locale }) {
         <Route path="/search" element={<Search />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/cookies" element={<Cookies />} />
+        {locale === 'en' ? (
+          <>
+            <Route path="/lab" element={<LabLanding />} />
+            <Route path="/lab/how-it-works" element={<LabHow />} />
+            <Route path="/lab/market-readiness" element={<LabReadiness />} />
+            <Route path="/lab/sign-up" element={<LabSignUp />} />
+            <Route path="/lab/login" element={<LabLogin />} />
+            <Route path="/lab/forgot-password" element={<LabForgot />} />
+            <Route path="/lab/reset-password" element={<LabReset />} />
+            <Route path="/lab/*" element={<LabAppShell />} />
+          </>
+        ) : null}
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />

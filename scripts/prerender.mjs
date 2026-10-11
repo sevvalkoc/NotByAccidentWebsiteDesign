@@ -83,7 +83,7 @@ writeFileSync(
 writeFileSync(join(client, 'robots.txt'), `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /search\n\nSitemap: ${SITE}/sitemap.xml\n`)
 
 // Netlify-style fallbacks (the previous repo shipped a _redirects file too).
-writeFileSync(join(client, '_redirects'), ['/admin/*  /admin/index.html  200', '/nl/*  /nl/404.html  404', '/fr/*  /fr/404.html  404', '/*  /404.html  404', ''].join('\n'))
+writeFileSync(join(client, '_redirects'), ['/admin/*  /admin/index.html  200', '/lab/*  /lab/app/index.html  200', '/nl/*  /nl/404.html  404', '/fr/*  /fr/404.html  404', '/*  /404.html  404', ''].join('\n'))
 
 console.log(`prerender: ${n} pages, sitemap with ${listed.length} URLs${noindex.size ? ` (${noindex.size} noindex left out)` : ''}, fonts preloaded: ${fonts.length}`)
 if (!existsSync(join(client, 'og-default.jpg'))) console.warn('prerender: og-default.jpg missing')

@@ -796,7 +796,8 @@ create policy lab_partner_markets_staff on public.lab_partner_markets for all us
 create policy lab_partner_contacts_staff on public.lab_partner_contacts for all using (public.lab_is_admin()) with check (public.lab_is_admin());
 
 -- matching
-create policy lab_matching_configs_read on public.lab_matching_configs for select to authenticated using (true);
+-- the active weights are public: the methodology page shows them
+create policy lab_matching_configs_read on public.lab_matching_configs for select using (active or public.lab_is_admin());
 create policy lab_matching_configs_staff on public.lab_matching_configs for all using (public.lab_is_admin()) with check (public.lab_is_admin());
 create policy lab_match_runs_read on public.lab_match_runs for select using (public.lab_is_member(brand_id) or public.lab_is_admin());
 create policy lab_matches_read on public.lab_matches for select using (public.lab_is_member(brand_id) or public.lab_is_admin());
