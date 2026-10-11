@@ -16,7 +16,11 @@ node scripts/seo-audit.mjs     # titles, descriptions, H1s, canonicals, JSON-LD,
 node scripts/qa.mjs --full     # screenshots + runtime/overflow checks at 375–1728px (needs preview running)
 node scripts/a11y.mjs          # axe-core over representative pages (needs preview running)
 node scripts/cms-acceptance.mjs  # the 18-step CMS test against a real database (see docs/05-v2.md)
+node scripts/lab-tests.mjs       # The Lab: API & security tests (local Supabase; see docs/lab)
+node scripts/lab-e2e.mjs         # The Lab: the whole user journey in a browser
 ```
+
+**The Lab** (`/lab`, market validation & matching) is documented in [docs/lab](docs/lab/README.md): architecture, deployment, admin guide, test report.
 
 Environment: copy `.env.example` → `.env` and set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`, the same as the current site. Without them the site builds from the static seed and forms say they aren't connected.
 
@@ -44,7 +48,7 @@ src/
   styles/                  tokens.css (brand system), base.css, motion.css, page.css
   admin/                   the CMS: Homepage, Pages and Global editors (SiteEditor) plus the carried-over collections
 scripts/                   cms-snapshot, prerender, serve, qa, a11y, seo-audit, cms-acceptance, generate-next-seed
-docs/                      01 audit · 02 direction · 03 v1 changes · 04 v2 audit · 05 v2 · CMS guide
+docs/                      01 audit · 02 direction · 03 v1 changes · 04 v2 audit · 05 v2 · CMS guide · lab/ (The Lab)
 ```
 
 ## Design system, in one screen
