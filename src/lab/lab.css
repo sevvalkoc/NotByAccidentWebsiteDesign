@@ -546,6 +546,9 @@
 .lab-list {
   display: grid;
   gap: var(--s-2);
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 .lab-list li {
   position: relative;
@@ -1136,4 +1139,22 @@
   .lab-report__sec {
     break-inside: avoid;
   }
+}
+
+/* Buttons that read as links. */
+.lab button.link-q,
+.lab button.link,
+.lab-dialog button.link-q,
+.lab-dialog button.link {
+  border: 0;
+  background-color: transparent;
+  padding: 0 0 1px;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+.lab button.link-q:disabled,
+.lab-dialog button.link-q:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

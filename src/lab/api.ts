@@ -26,6 +26,7 @@ function human(msg: string): string {
   if (/fetch|network|Failed to/i.test(msg)) return 'We couldn’t reach the server. Check your connection and try again.'
   if (/JWT|not authenticated|sign in first/i.test(msg)) return 'Your session has ended. Sign in again.'
   if (/row-level security|permission denied/i.test(msg)) return 'You don’t have access to that.'
+  if (/Error sending .*email|rate limit.*email/i.test(msg)) return 'We couldn’t send the email just now. Try again in a few minutes; if it keeps happening, write to hello@notbyaccident.com.'
   return msg.replace(/^ERROR:\s*/, '')
 }
 

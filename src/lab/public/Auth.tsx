@@ -135,7 +135,7 @@ export function LabSignUp() {
           <label className="lab-check">
             <input type="checkbox" checked={agree} onChange={e => setAgree(e.target.checked)} required />
             <span>
-              I’ve read how The Lab uses my data (opposite) and the{' '}
+              I’ve read how The Lab uses my data and the{' '}
               <Link to="/privacy" className="link">
                 privacy policy
               </Link>
