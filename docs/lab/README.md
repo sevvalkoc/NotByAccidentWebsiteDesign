@@ -136,6 +136,20 @@ node scripts/lab-a11y.mjs         # axe on signed-in screens (WIDTH=375 for mobi
 
 ## 5. Deployment (production: Vercel + Supabase `nfpvygufottgzdbthgwt`)
 
+**Status (11 Oct 2026):** 0011–0015 are applied to production and verified (every Lab function body and RLS policy
+identical to the tested local database; 33 tables, all with RLS; questionnaire v1 published; 9 markets with basic facts;
+0 partners; fixtures off). One step of 0014 is held back on purpose: the **"The Lab" menu link**, so the live site
+doesn't link to `/lab` before the new frontend is deployed. Run it right after the deploy:
+
+```sql
+update public.page_sections ps
+set extra = jsonb_set(coalesce(ps.extra, '{}'::jsonb), '{items}', coalesce(ps.extra->'items', '[]'::jsonb) || '[{"title":"The Lab","body":"/lab"}]'::jsonb)
+from public.pages p
+where p.id = ps.page_id and p.slug = 'next/global' and ps.section_key in ('header_nav', 'footer_nav')
+  and not exists (select 1 from jsonb_array_elements(coalesce(ps.extra->'items', '[]'::jsonb)) it where it->>'body' = '/lab');
+```
+
+
 1. **Database.** Apply `0011`–`0014` in order (SQL editor or `supabase db push`). All four are additive and idempotent;
    they don't touch existing tables except replacing `handle_new_user()` (same behaviour for CMS sign-ups, plus the Lab
    branch). **Never** run `supabase/seed/lab_fixtures.sql` in production.
@@ -146,7 +160,8 @@ node scripts/lab-a11y.mjs         # axe on signed-in screens (WIDTH=375 for mobi
    without it real users never receive the confirmation or reset email. Optionally brand the templates.
 4. **Deploy the site.** Merge to `main`; Vercel builds (`pnpm build`) and picks up the new `vercel.json` rewrite for
    `/lab/*`. No new environment variables.
-5. **Check.** `/lab` loads; sign up with a real address; confirm; onboarding → assessment → results; Admin → The Lab shows
+5. **Auth → Password security.** Turn on leaked-password protection (Supabase security advisor).
+6. **Check.** `/lab` loads; sign up with a real address; confirm; onboarding → assessment → results; Admin → The Lab shows
    the user. Matches will show the empty state until partners are added.
 
 ## 6. Blockers and what's needed from you
